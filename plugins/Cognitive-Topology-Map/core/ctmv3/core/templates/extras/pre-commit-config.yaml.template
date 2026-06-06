@@ -1,0 +1,44 @@
+# .pre-commit-config.yaml — CTMv3 Local Topology Enforcement
+# Scaffolded by CTMv3. Install: pip install pre-commit && pre-commit install
+# Enforces structural invariants, not style.
+
+repos:
+  - repo: local
+    hooks:
+      - id: ctmv3-wrapper-size
+        name: CTMv3 Wrapper Size Gate (<200 LOC per CONSTITUTION.md)
+        entry: |
+          bash -c '
+            set -euo pipefail
+            FAILED=0
+            for f in "$@"; do
+              case "$f" in
+                */wrappers/*.py)
+                  lines=$(wc -l < "$f")
+                  if [ "$lines" -gt 200 ]; then
+                    echo "FAIL: $f exceeds 200 lines ($lines). Three Strikes violation."
+                    FAILED=1
+                  fi
+                  ;;
+              esac
+            done
+            exit $FAILED
+          ' --
+        language: system
+        types: [python]
+        pass_filenames: true
+
+      - id: ctmv3-fingerprint-update
+        name: CTMv3 Topology Fingerprint Update
+        entry: bash -c 'python3 -m ctmv3 fingerprint 2>/dev/null || true'
+        language: system
+        files: '^(TOPOLOGY|ARCHITECTURE_MAP)\.md$'
+        pass_filenames: false
+
+      - id: ctmv3-provenance-reminder
+        name: CTMv3 PROVENANCE.md Session Log Reminder
+        entry: bash -c 'echo "Reminder: log this session in PROVENANCE.md if it touched architecture, modules, or entry points."'
+        language: system
+        always_run: true
+        pass_filenames: false
+        stages: [pre-commit]

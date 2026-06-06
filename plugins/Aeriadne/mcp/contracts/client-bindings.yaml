@@ -1,0 +1,13 @@
+clients:
+  codex:
+    package_exposure: plugin-skill
+    mcp_binding: external-runtime-config
+    notes: Codex sees plugin skills and separately configured MCP tools.
+  claude_code:
+    package_exposure: plugin-or-skill-projection
+    mcp_binding: external-runtime-config
+    notes: Claude Code projection should not copy Codex-only assumptions.
+  opencode:
+    package_exposure: schema-probe-needed
+    mcp_binding: schema-probe-needed
+    notes: Verify current OpenCode conventions before install projection.

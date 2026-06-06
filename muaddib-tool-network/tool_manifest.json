@@ -1,0 +1,2755 @@
+{
+  "schema_version": "v1",
+  "name_for_human": "Sovereign MCP Tools",
+  "name_for_model": "sovereign_mcp_tools",
+  "description_for_human": "Somnus-MCP: 24/7 neural-symbolic cognition server with BB7 compiled surfaces, memory/session continuity substrate, Lisan routing, and Muad'Dib neural backbone.",
+  "description_for_model": "Use bb7_* capability surfaces through the single shared Somnus-MCP runtime. Memory, interconnect, and session endpoints are persistent cognition substrate, not stateless utilities. File surfaces include advanced copy/move/delete/info/history operations plus compatibility aliases.",
+  "auth": {
+    "type": "none"
+  },
+  "api": {
+    "type": "mcp_api"
+  },
+  "tools": [
+    {
+      "name": "bb7_adaptive_learning",
+      "description": "Adapt recommendations to user behavior patterns.",
+      "input_schema": {
+        "type": "object",
+        "properties": {
+          "learning_scope": {
+            "type": "string",
+            "description": "Scope of adaptive learning."
+          },
+          "adaptation_speed": {
+            "type": "string",
+            "description": "Adaptation speed (slow, moderate, fast)."
+          }
+        },
+        "required": []
+      }
+    },
+    {
+      "name": "bb7_agent_call",
+      "description": "Call another agent (non-blocking)",
+      "input_schema": {
+        "type": "object",
+        "properties": {
+          "agent_type": {
+            "type": "string",
+            "description": "Agent to call"
+          },
+          "task": {
+            "type": "string",
+            "description": "Task description"
+          },
+          "context": {
+            "type": "string",
+            "description": "Optional context"
+          }
+        },
+        "required": [
+          "agent_type",
+          "task"
+        ]
+      }
+    },
+    {
+      "name": "bb7_agent_capabilities",
+      "description": "Get agent capabilities and tools",
+      "input_schema": {
+        "type": "object",
+        "properties": {
+          "agent_type": {
+            "type": "string",
+            "description": "planner, debugger, analyzer, or doc"
+          }
+        },
+        "required": [
+          "agent_type"
+        ]
+      }
+    },
+    {
+      "name": "bb7_agent_handoff",
+      "description": "Hand off to another agent with shared context",
+      "input_schema": {
+        "type": "object",
+        "properties": {
+          "to_agent": {
+            "type": "string",
+            "description": "Target agent type"
+          },
+          "context": {
+            "type": "string",
+            "description": "Context to pass"
+          },
+          "task": {
+            "type": "string",
+            "description": "Task for target agent"
+          }
+        },
+        "required": [
+          "to_agent",
+          "context",
+          "task"
+        ]
+      }
+    },
+    {
+      "name": "bb7_agent_health",
+      "description": "Return agent health with canon data dir info",
+      "input_schema": {
+        "type": "object",
+        "properties": {},
+        "required": []
+      }
+    },
+    {
+      "name": "bb7_agent_list",
+      "description": "List all available agents",
+      "input_schema": {
+        "type": "object",
+        "properties": {},
+        "required": []
+      }
+    },
+    {
+      "name": "bb7_agent_messages",
+      "description": "Get messages from cognitive plane",
+      "input_schema": {
+        "type": "object",
+        "properties": {
+          "channel": {
+            "type": "string",
+            "description": "Message channel"
+          },
+          "since": {
+            "type": "number",
+            "description": "Timestamp filter"
+          }
+        },
+        "required": []
+      }
+    },
+    {
+      "name": "bb7_agent_nodes",
+      "description": "List all active agent nodes in cognitive plane",
+      "input_schema": {
+        "type": "object",
+        "properties": {},
+        "required": []
+      }
+    },
+    {
+      "name": "bb7_agent_run",
+      "description": "Run agent with ACTUAL tool execution in distributed plane",
+      "input_schema": {
+        "type": "object",
+        "properties": {
+          "agent_type": {
+            "type": "string",
+            "description": "planner, debugger, analyzer, or doc"
+          },
+          "task": {
+            "type": "string",
+            "description": "Task to execute"
+          },
+          "context": {
+            "type": "string",
+            "description": "Additional context"
+          },
+          "model": {
+            "type": "string",
+            "description": "Model override"
+          },
+          "temperature": {
+            "type": "number",
+            "description": "0.0-1.0"
+          },
+          "max_iterations": {
+            "type": "number",
+            "description": "Max iterations"
+          },
+          "execute_tools": {
+            "type": "boolean",
+            "description": "Actually execute MCP tools"
+          }
+        },
+        "required": [
+          "agent_type",
+          "task"
+        ]
+      }
+    },
+    {
+      "name": "bb7_agent_status",
+      "description": "Get active agent nodes status",
+      "input_schema": {
+        "type": "object",
+        "properties": {},
+        "required": []
+      }
+    },
+    {
+      "name": "bb7_analyze_code_complete",
+      "description": "Complete code analysis with AST parsing, metrics, and security analysis",
+      "input_schema": {
+        "type": "object",
+        "properties": {
+          "file_path": {
+            "type": "string",
+            "description": "Path to the Python file to analyze"
+          },
+          "include_all": {
+            "type": "boolean",
+            "description": "Include all analysis features"
+          }
+        },
+        "required": [
+          "file_path"
+        ]
+      }
+    },
+    {
+      "name": "bb7_analyze_project_structure",
+      "description": "Analyze and summarize project structure in a format optimized for LLM understanding.",
+      "input_schema": {
+        "type": "object",
+        "properties": {
+          "max_depth": {
+            "type": "number",
+            "description": "Maximum directory depth to analyze."
+          },
+          "include_hidden": {
+            "type": "boolean",
+            "description": "Whether to include hidden files/directories."
+          }
+        },
+        "required": []
+      }
+    },
+    {
+      "name": "bb7_analyze_workflow_patterns",
+      "description": "Analyze workflow patterns and identify optimization opportunities.",
+      "input_schema": {
+        "type": "object",
+        "properties": {
+          "analysis_depth": {
+            "type": "string",
+            "description": "Depth of pattern analysis."
+          },
+          "time_range_days": {
+            "type": "number",
+            "description": "How many recent days to include in analysis."
+          }
+        },
+        "required": []
+      }
+    },
+    {
+      "name": "bb7_append_file",
+      "description": "Append content to a file while preserving the historical append surface.",
+      "input_schema": {
+        "type": "object",
+        "properties": {
+          "path": {
+            "type": "string",
+            "description": "File path to append to"
+          },
+          "content": {
+            "type": "string",
+            "description": "Content to append"
+          },
+          "encoding": {
+            "type": "string",
+            "description": "Text encoding",
+            "default": "utf-8"
+          },
+          "create_backup": {
+            "type": "boolean",
+            "description": "Create backup before append",
+            "default": false
+          }
+        },
+        "required": [
+          "path",
+          "content"
+        ]
+      },
+      "required": [
+        "path",
+        "content"
+      ]
+    },
+    {
+      "name": "bb7_auto_memory_stats",
+      "description": "Get the statistics of auto-captured memories for the current session.",
+      "input_schema": {
+        "type": "object",
+        "properties": {},
+        "required": []
+      }
+    },
+    {
+      "name": "bb7_auto_session_resume",
+      "description": "Recommend whether to resume existing sessions or start a new one.",
+      "input_schema": {
+        "type": "object",
+        "properties": {
+          "workspace_path": {
+            "type": "string",
+            "description": "Optional workspace path to analyze."
+          },
+          "user_intent": {
+            "type": "string",
+            "description": "Optional user intent to improve recommendation quality."
+          }
+        },
+        "required": []
+      }
+    },
+    {
+      "name": "bb7_capture_insight",
+      "description": "Enhanced insight capture with auto-memory and relationship tracking.",
+      "input_schema": {
+        "type": "object",
+        "properties": {
+          "insight": {
+            "type": "string",
+            "description": "The insight to capture."
+          },
+          "concept": {
+            "type": "string",
+            "description": "The concept the insight is related to."
+          },
+          "relationships": {
+            "type": "array",
+            "description": "A list of related concepts.",
+            "items": {
+              "type": "string"
+            }
+          }
+        },
+        "required": [
+          "insight",
+          "concept"
+        ]
+      }
+    },
+    {
+      "name": "bb7_check_url_status",
+      "description": "Check if a URL is accessible and get basic info.",
+      "input_schema": {
+        "type": "object",
+        "properties": {
+          "url": {
+            "type": "string",
+            "description": "The URL to check."
+          }
+        },
+        "required": [
+          "url"
+        ]
+      }
+    },
+    {
+      "name": "bb7_click_element",
+      "description": "🖱️ Click on visual elements with intelligent targeting, multiple click types, and precise positioning. Perfect for UI automation, testing workflows, and interactive debugging. Supports various click types with smart element detection and coordinate validation.",
+      "input_schema": {
+        "type": "object",
+        "properties": {
+          "element": {
+            "type": "string",
+            "description": "Element to click (coordinates \"x,y\" or description)"
+          },
+          "click_type": {
+            "type": "string",
+            "description": "Type of click to perform",
+            "enum": [
+              "left",
+              "right",
+              "double",
+              "middle"
+            ],
+            "default": "left"
+          },
+          "offset": {
+            "type": "string",
+            "description": "Click offset from element center (format: \"x,y\")"
+          }
+        },
+        "required": [
+          "element"
+        ]
+      }
+    },
+    {
+      "name": "bb7_code_consciousness",
+      "description": "Registry-bound architectural consciousness: compiles code analysis, project context, memory substrate, and Lisan recall without instantiating sibling tools.",
+      "input_schema": {
+        "type": "object",
+        "properties": {
+          "operation": {
+            "type": "string",
+            "enum": [
+              "understand_intent"
+            ],
+            "default": "understand_intent"
+          },
+          "file_path": {
+            "type": "string",
+            "default": "."
+          },
+          "query": {
+            "type": "string"
+          },
+          "max_depth": {
+            "type": "integer",
+            "default": 3
+          },
+          "max_memories": {
+            "type": "integer",
+            "default": 5
+          },
+          "include_hidden": {
+            "type": "boolean",
+            "default": false
+          }
+        },
+        "required": []
+      },
+      "required": []
+    },
+    {
+      "name": "bb7_cognitive_optimization",
+      "description": "Suggest cognitive strategies to improve focus and decision quality.",
+      "input_schema": {
+        "type": "object",
+        "properties": {
+          "focus_area": {
+            "type": "string",
+            "description": "Optional focus area such as creativity or debugging."
+          },
+          "personalization_level": {
+            "type": "string",
+            "description": "Personalization level for recommendations."
+          }
+        },
+        "required": []
+      }
+    },
+    {
+      "name": "bb7_context_weaver",
+      "description": "Registry-bound context synthesis across workspace, memory, session continuity, recent changes, and Lisan context resurrection.",
+      "input_schema": {
+        "type": "object",
+        "properties": {
+          "operation": {
+            "type": "string",
+            "enum": [
+              "synthesize_context"
+            ],
+            "default": "synthesize_context"
+          },
+          "context": {
+            "type": "string"
+          },
+          "task": {
+            "type": "string"
+          },
+          "workspace_path": {
+            "type": "string"
+          },
+          "max_memories": {
+            "type": "integer",
+            "default": 7
+          },
+          "days": {
+            "type": "integer",
+            "default": 7
+          }
+        },
+        "required": []
+      },
+      "required": []
+    },
+    {
+      "name": "bb7_copy_file",
+      "description": "Copy files or directories with metadata preservation and overwrite control.",
+      "input_schema": {
+        "type": "object",
+        "properties": {
+          "source": {
+            "type": "string",
+            "description": "Source path"
+          },
+          "destination": {
+            "type": "string",
+            "description": "Destination path"
+          },
+          "overwrite": {
+            "type": "boolean",
+            "description": "Overwrite if destination exists",
+            "default": false
+          },
+          "preserve_metadata": {
+            "type": "boolean",
+            "description": "Preserve timestamps and permissions",
+            "default": true
+          }
+        },
+        "required": [
+          "source",
+          "destination"
+        ]
+      },
+      "required": [
+        "source",
+        "destination"
+      ]
+    },
+    {
+      "name": "bb7_creative_problem_solver",
+      "description": "Registry-bound problem decomposition that uses Lisan intent and memory context when available, then emits bounded execution-ready subproblems.",
+      "input_schema": {
+        "type": "object",
+        "properties": {
+          "operation": {
+            "type": "string",
+            "enum": [
+              "decompose_challenge"
+            ],
+            "default": "decompose_challenge"
+          },
+          "problem": {
+            "type": "string"
+          },
+          "challenge": {
+            "type": "string"
+          },
+          "prompt": {
+            "type": "string"
+          },
+          "constraints": {
+            "oneOf": [
+              {
+                "type": "array",
+                "items": {
+                  "type": "string"
+                }
+              },
+              {
+                "type": "string"
+              }
+            ]
+          },
+          "goals": {
+            "oneOf": [
+              {
+                "type": "array",
+                "items": {
+                  "type": "string"
+                }
+              },
+              {
+                "type": "string"
+              }
+            ]
+          },
+          "max_memories": {
+            "type": "integer",
+            "default": 5
+          }
+        },
+        "required": [
+          "problem"
+        ]
+      },
+      "required": [
+        "problem"
+      ]
+    },
+    {
+      "name": "bb7_cross_session_analysis",
+      "description": "Analyze patterns across multiple sessions.",
+      "input_schema": {
+        "type": "object",
+        "properties": {
+          "days_back": {
+            "type": "number",
+            "description": "The number of days back to analyze."
+          }
+        },
+        "required": []
+      }
+    },
+    {
+      "name": "bb7_muadib_mentat_bridge",
+      "description": "Read-only one-plane bridge snapshot across Muad'Dib checkpoint state, exoskeleton health, gateway runtime identity, and Mentat conductor artifacts. Uses the live registry and bounded Mentat file reads; treats mcp_server.py as gateway into Muad'Dib/tools, not intelligence owner, and does not instantiate sibling tools or mutate weights, Q-table state, server lifecycle, or output adapters.",
+      "input_schema": {
+        "type": "object",
+        "properties": {
+          "operation": {
+            "type": "string",
+            "enum": [
+              "snapshot"
+            ],
+            "default": "snapshot"
+          },
+          "workspace_path": {
+            "type": "string"
+          },
+          "mentat_root": {
+            "type": "string"
+          },
+          "mentat_session_id": {
+            "type": "string",
+            "default": "default",
+            "description": "Mentat session id to inspect, or 'latest'."
+          },
+          "max_insights": {
+            "type": "integer",
+            "default": 8
+          },
+          "max_handoff_chars": {
+            "type": "integer",
+            "default": 5000
+          },
+          "include_handoff": {
+            "type": "boolean",
+            "default": true
+          },
+          "include_insights": {
+            "type": "boolean",
+            "default": true
+          },
+          "include_scope": {
+            "type": "boolean",
+            "default": true
+          },
+          "include_live_calls": {
+            "type": "boolean",
+            "default": true
+          },
+          "exo_limit": {
+            "type": "integer",
+            "default": 5
+          },
+          "candidates": {
+            "oneOf": [
+              {
+                "type": "array",
+                "items": {
+                  "type": "string"
+                }
+              },
+              {
+                "type": "string"
+              }
+            ]
+          }
+        },
+        "required": []
+      },
+      "required": []
+    },
+    {
+      "name": "bb7_delete_file",
+      "description": "Delete files or directories with optional backup. Directories and no-backup deletes require force=true.",
+      "input_schema": {
+        "type": "object",
+        "properties": {
+          "path": {
+            "type": "string",
+            "description": "Path to delete"
+          },
+          "force": {
+            "type": "boolean",
+            "description": "Required for directory deletion or no-backup destructive deletion",
+            "default": false
+          },
+          "create_backup": {
+            "type": "boolean",
+            "description": "Create backup before deletion",
+            "default": true
+          }
+        },
+        "required": [
+          "path"
+        ]
+      },
+      "required": [
+        "path"
+      ]
+    },
+    {
+      "name": "bb7_download_file",
+      "description": "Download a file from URL to local filesystem.",
+      "input_schema": {
+        "type": "object",
+        "properties": {
+          "url": {
+            "type": "string",
+            "description": "The URL to download the file from."
+          },
+          "filename": {
+            "type": "string",
+            "description": "The name to save the file as."
+          },
+          "headers": {
+            "type": "object",
+            "description": "A dictionary of headers to send with the request."
+          }
+        },
+        "required": [
+          "url",
+          "filename"
+        ]
+      }
+    },
+    {
+      "name": "bb7_dt_advanced_features",
+      "description": "Query Muad'Dib advanced modality features for candidate tools. Returns per-tool provenance-tagged scores (trained_q from Q-table, trained_cooccur from observation buffer, untrained_embed from embed table). Requires MUADIB_ADVANCED_MODE=1 to return real signals; returns {ok: false, reason: bridge_disabled} otherwise. Use for routing signal inspection and integration validation.",
+      "input_schema": {
+        "type": "object",
+        "properties": {
+          "candidates": {
+            "type": "array",
+            "description": "List of tool names to evaluate."
+          },
+          "category": {
+            "type": "string",
+            "description": "Tool category context (default: misc)."
+          },
+          "session_id": {
+            "type": "string",
+            "description": "Session identifier (defaults to active session)."
+          },
+          "recent_tools": {
+            "type": "array",
+            "description": "Recent tool names for co-occurrence signal (defaults to session history)."
+          }
+        },
+        "required": [
+          "candidates"
+        ]
+      }
+    },
+    {
+      "name": "bb7_dt_checkpoint_status",
+      "description": "Inspect Muad'Dib tokenizer and self-play checkpoint state, including active safetensors pointers, promotion-lock state, and legacy .pt migration fallback files.",
+      "input_schema": {
+        "type": "object",
+        "properties": {},
+        "required": []
+      }
+    },
+    {
+      "name": "bb7_dt_self_play",
+      "description": "Run bounded Muad'Dib self-play against the live tool catalog. Trains an isolated candidate policy/value head, saves real tensor weights as safetensors, and promotes only when explicitly requested after a complete atomic checkpoint write. JSON is metadata/ledger only.",
+      "input_schema": {
+        "type": "object",
+        "properties": {
+          "episodes": {
+            "type": "integer",
+            "description": "Number of bounded self-play episodes (default: 32, max: 512)."
+          },
+          "max_steps": {
+            "type": "integer",
+            "description": "Tools per simulated episode (default: 4, max bounded by self-play config)."
+          },
+          "learning_rate": {
+            "type": "number",
+            "description": "Optional AdamW learning rate override."
+          },
+          "promote": {
+            "type": "boolean",
+            "description": "Request promotion of the complete candidate safetensors checkpoint to active head (default false / archive-only). Ignored when the active promotion lock is set."
+          },
+          "update_qtable": {
+            "type": "boolean",
+            "description": "Whether synthetic self-play should also update the real Q-table (default false)."
+          },
+          "session_id": {
+            "type": "string",
+            "description": "Session identifier for optional synthetic Q-table observations."
+          }
+        },
+        "required": []
+      }
+    },
+    {
+      "name": "bb7_dt_self_play_lock",
+      "description": "Lock or unlock Muad'Dib self-play active-head promotion. Continuous self-play may still train/archive candidate safetensors checkpoints while the active/champion head is locked.",
+      "input_schema": {
+        "type": "object",
+        "properties": {
+          "locked": {
+            "type": "boolean",
+            "description": "True to pin active/champion weights; false to allow promotion again."
+          },
+          "reason": {
+            "type": "string",
+            "description": "Optional operator-readable reason persisted to checkpoint metadata."
+          },
+          "operator": {
+            "type": "string",
+            "description": "Optional actor/source label for the lock mutation."
+          }
+        },
+        "required": []
+      }
+    },
+    {
+      "name": "bb7_exo_bootstrap",
+      "description": "Bootstrap capability-aware context for the exoskeleton control loop.",
+      "input_schema": {
+        "type": "object",
+        "properties": {
+          "include_recent_outcomes": {
+            "type": "boolean",
+            "description": "Include recent reflection outcomes."
+          },
+          "include_healthcheck": {
+            "type": "boolean",
+            "description": "Include critical tool health summary."
+          }
+        },
+        "required": []
+      }
+    },
+    {
+      "name": "bb7_exo_briefing",
+      "description": "Generate a natural-language capability narrative with proven workflows, recommendations, and health warnings for the given intent.",
+      "input_schema": {
+        "type": "object",
+        "properties": {
+          "intent": {
+            "type": "string",
+            "description": "The user-facing goal or task description."
+          },
+          "max_recommendations": {
+            "type": "number",
+            "description": "Maximum recommended tools to surface (default 5)."
+          }
+        },
+        "required": [
+          "intent"
+        ]
+      }
+    },
+    {
+      "name": "bb7_exo_category_specific_tools",
+      "description": "List tools in a category with reliability priors.",
+      "input_schema": {
+        "type": "object",
+        "properties": {
+          "category": {
+            "type": "string",
+            "description": "Category to inspect."
+          },
+          "limit": {
+            "type": "number",
+            "description": "Maximum rows to return."
+          }
+        },
+        "required": [
+          "category"
+        ]
+      }
+    },
+    {
+      "name": "bb7_exo_execute_step",
+      "description": "Record a step execution in a checkpointed plan. Call AFTER running the tool to log the outcome. Checkpoints persist across crashes.",
+      "input_schema": {
+        "type": "object",
+        "properties": {
+          "plan_id": {
+            "type": "string",
+            "description": "Plan identifier from bb7_exo_plan."
+          },
+          "step_index": {
+            "type": "number",
+            "description": "0-based step index in the chain."
+          },
+          "tool_name": {
+            "type": "string",
+            "description": "Tool that was executed (auto-resolved from chain if omitted)."
+          },
+          "result_summary": {
+            "type": "string",
+            "description": "Brief summary of the step outcome."
+          },
+          "success": {
+            "type": "boolean",
+            "description": "Whether the step succeeded."
+          },
+          "dry_run": {
+            "type": "boolean",
+            "description": "Preview checkpoint mutation without persisting."
+          }
+        },
+        "required": [
+          "plan_id",
+          "step_index"
+        ]
+      }
+    },
+    {
+      "name": "bb7_exo_get_recent_activity",
+      "description": "Get recent activity from all AI instances - call at session start to sync context with other AIs.",
+      "input_schema": {
+        "type": "object",
+        "properties": {
+          "limit": {
+            "type": "number",
+            "description": "Number of recent events to return (default 10)."
+          }
+        },
+        "required": []
+      }
+    },
+    {
+      "name": "bb7_exo_kpi_report",
+      "description": "Generate a KPI report for one or all active plans. Shows completion rate, success rate, throughput, health assessment, and aggregate stats.",
+      "input_schema": {
+        "type": "object",
+        "properties": {
+          "plan_id": {
+            "type": "string",
+            "description": "Specific plan to report on (omit for all)."
+          }
+        },
+        "required": []
+      }
+    },
+    {
+      "name": "bb7_exo_list_tool_categories",
+      "description": "List canonical capability categories and counts.",
+      "input_schema": {
+        "type": "object",
+        "properties": {},
+        "required": []
+      }
+    },
+    {
+      "name": "bb7_exo_plan",
+      "description": "Generate candidate tool chains with confidence and fallback.",
+      "input_schema": {
+        "type": "object",
+        "properties": {
+          "intent": {
+            "type": "string",
+            "description": "Intent to plan for."
+          },
+          "context": {
+            "type": "string",
+            "description": "Optional context."
+          },
+          "beam_width": {
+            "type": "number",
+            "description": "Number of candidate plans."
+          },
+          "max_chain_length": {
+            "type": "number",
+            "description": "Maximum chain length."
+          }
+        },
+        "required": [
+          "intent"
+        ]
+      }
+    },
+    {
+      "name": "bb7_exo_preemptive_recovery",
+      "description": "Analyse a planned workflow for failure risks before execution and suggest alternatives for weak links.",
+      "input_schema": {
+        "type": "object",
+        "properties": {
+          "intent": {
+            "type": "string",
+            "description": "The task intent to plan for."
+          },
+          "risk_tolerance": {
+            "type": "string",
+            "description": "Risk tolerance: conservative, moderate, or aggressive."
+          }
+        },
+        "required": [
+          "intent"
+        ]
+      }
+    },
+    {
+      "name": "bb7_exo_reflect",
+      "description": "Reflect outcomes and update tool/chain priors.",
+      "input_schema": {
+        "type": "object",
+        "properties": {
+          "plan_id": {
+            "type": "string",
+            "description": "Plan identifier."
+          },
+          "tools_used": {
+            "type": "array",
+            "description": "Executed tools as a list or comma-separated string.",
+            "items": {
+              "type": "string"
+            }
+          },
+          "success": {
+            "type": "boolean",
+            "description": "Execution success value."
+          },
+          "error": {
+            "type": "string",
+            "description": "Optional error details."
+          },
+          "intent": {
+            "type": "string",
+            "description": "Optional intent for mapping reinforcement."
+          },
+          "recovery_strategy": {
+            "type": "string",
+            "description": "Optional explicit recovery strategy."
+          }
+        },
+        "required": [
+          "plan_id",
+          "tools_used",
+          "success"
+        ]
+      }
+    },
+    {
+      "name": "bb7_exo_resume_plan",
+      "description": "Resume a checkpointed plan from where it left off. Returns next tool to execute and full progress state. Call at session start to continue interrupted workflows. Omit plan_id to list all plans.",
+      "input_schema": {
+        "type": "object",
+        "properties": {
+          "plan_id": {
+            "type": "string",
+            "description": "Plan identifier to resume (omit to list all)."
+          }
+        },
+        "required": []
+      }
+    },
+    {
+      "name": "bb7_exo_route",
+      "description": "Intent-conditioned retrieval with semantic and graph scoring.",
+      "input_schema": {
+        "type": "object",
+        "properties": {
+          "intent": {
+            "type": "string",
+            "description": "Intent to route."
+          },
+          "max_candidates": {
+            "type": "number",
+            "description": "Maximum candidate tools."
+          },
+          "include_neighbors": {
+            "type": "boolean",
+            "description": "Expand via category graph."
+          },
+          "neighbor_distance": {
+            "type": "number",
+            "description": "Neighbor hop distance."
+          }
+        },
+        "required": [
+          "intent"
+        ]
+      }
+    },
+    {
+      "name": "bb7_exo_route_focused",
+      "description": "Progressive-disclosure routing: top-N tools with one-liner descriptions and expansion hint.",
+      "input_schema": {
+        "type": "object",
+        "properties": {
+          "intent": {
+            "type": "string",
+            "description": "The task intent."
+          },
+          "top_n": {
+            "type": "number",
+            "description": "Number of tools to surface (default 5)."
+          }
+        },
+        "required": [
+          "intent"
+        ]
+      }
+    },
+    {
+      "name": "bb7_exo_state",
+      "description": "Inspect exoskeleton state, priors, and discovered macros.",
+      "input_schema": {
+        "type": "object",
+        "properties": {
+          "limit": {
+            "type": "number",
+            "description": "Maximum rows per section."
+          }
+        },
+        "required": []
+      }
+    },
+    {
+      "name": "bb7_exo_suggest_next",
+      "description": "Orchestration prediction: suggest next tools/actions given current context. Key for chaining memory→analysis→execution workflows.",
+      "input_schema": {
+        "type": "object",
+        "properties": {
+          "current_tool": {
+            "type": "string",
+            "description": "Tool that was just executed (for momentum prediction)."
+          },
+          "current_category": {
+            "type": "string",
+            "description": "Category of current work (alternative to current_tool)."
+          },
+          "intent": {
+            "type": "string",
+            "description": "Optional intent to find next steps for."
+          }
+        },
+        "required": []
+      }
+    },
+    {
+      "name": "bb7_extract_links",
+      "description": "Extract all links from a webpage.",
+      "input_schema": {
+        "type": "object",
+        "properties": {
+          "url": {
+            "type": "string",
+            "description": "The URL to extract links from."
+          }
+        },
+        "required": [
+          "url"
+        ]
+      }
+    },
+    {
+      "name": "bb7_fetch_url",
+      "description": "Fetch content from a URL.",
+      "input_schema": {
+        "type": "object",
+        "properties": {
+          "url": {
+            "type": "string",
+            "description": "The URL to fetch content from."
+          },
+          "headers": {
+            "type": "object",
+            "description": "A dictionary of headers to send with the request."
+          },
+          "timeout": {
+            "type": "number",
+            "description": "The timeout for the request in seconds."
+          }
+        },
+        "required": [
+          "url"
+        ]
+      }
+    },
+    {
+      "name": "bb7_file_cache_stats",
+      "description": "Compatibility shim for the removed legacy file content cache; reports operation-history state.",
+      "input_schema": {
+        "type": "object",
+        "properties": {},
+        "required": []
+      },
+      "required": []
+    },
+    {
+      "name": "bb7_file_info",
+      "description": "Get comprehensive information about a file or directory.",
+      "input_schema": {
+        "type": "object",
+        "properties": {
+          "path": {
+            "type": "string",
+            "description": "Path to analyze"
+          }
+        },
+        "required": [
+          "path"
+        ]
+      },
+      "required": [
+        "path"
+      ]
+    },
+    {
+      "name": "bb7_find_on_screen",
+      "description": "🔍 Find visual elements on screen using intelligent pattern matching, color detection, and coordinate identification. Perfect for UI automation, testing, and visual debugging. Provides precise element location with confidence scoring and multiple matching strategies.",
+      "input_schema": {
+        "type": "object",
+        "properties": {
+          "target": {
+            "type": "string",
+            "description": "What to find (text, color, or description of visual element)"
+          },
+          "confidence": {
+            "type": "number",
+            "description": "Match confidence threshold (0.0 to 1.0)",
+            "default": 0.8
+          },
+          "search_region": {
+            "type": "string",
+            "description": "Region to search in (format: \"x,y,width,height\")"
+          }
+        },
+        "required": [
+          "target"
+        ]
+      }
+    },
+    {
+      "name": "bb7_get_code_metrics",
+      "description": "Generate code metrics and statistics in LLM-friendly format.",
+      "input_schema": {
+        "type": "object",
+        "properties": {},
+        "required": []
+      }
+    },
+    {
+      "name": "bb7_get_command_history",
+      "description": " View command execution history with performance analysis, success rates, and usage patterns. Perfect for reviewing recent development activities, analyzing command performance, and identifying frequently used commands for automation opportunities. Provides insights into command efficiency and suggests optimizations.",
+      "input_schema": {
+        "type": "object",
+        "properties": {
+          "limit": {
+            "type": "integer",
+            "description": "Maximum number of commands to show",
+            "default": 20
+          },
+          "filter": {
+            "type": "string",
+            "description": "Filter commands by pattern"
+          },
+          "show_successful_only": {
+            "type": "boolean",
+            "description": "Show only successful commands",
+            "default": false
+          }
+        },
+        "required": []
+      }
+    },
+    {
+      "name": "bb7_get_execution_audit",
+      "description": "Get Python execution audit log with security events",
+      "input_schema": {
+        "type": "object",
+        "properties": {
+          "limit": {
+            "type": "number",
+            "description": "Maximum number of audit entries to return"
+          }
+        },
+        "required": []
+      }
+    },
+    {
+      "name": "bb7_get_file_info",
+      "description": "Compatibility alias for bb7_file_info.",
+      "input_schema": {
+        "type": "object",
+        "properties": {
+          "path": {
+            "type": "string",
+            "description": "Path to analyze"
+          }
+        },
+        "required": [
+          "path"
+        ]
+      },
+      "required": [
+        "path"
+      ]
+    },
+    {
+      "name": "bb7_get_project_dependencies",
+      "description": "Extract and summarize project dependencies in LLM-friendly format.",
+      "input_schema": {
+        "type": "object",
+        "properties": {},
+        "required": []
+      }
+    },
+    {
+      "name": "bb7_get_recent_changes",
+      "description": "Get recent Git changes in LLM-friendly format.",
+      "input_schema": {
+        "type": "object",
+        "properties": {
+          "days": {
+            "type": "number",
+            "description": "Number of days to look back for changes."
+          }
+        },
+        "required": []
+      }
+    },
+    {
+      "name": "bb7_get_session_insights",
+      "description": "Get comprehensive insights about a session.",
+      "input_schema": {
+        "type": "object",
+        "properties": {
+          "session_id": {
+            "type": "string",
+            "description": "The ID of the session to get insights for."
+          }
+        },
+        "required": []
+      }
+    },
+    {
+      "name": "bb7_get_session_summary",
+      "description": "Get a detailed summary of a specific session.",
+      "input_schema": {
+        "type": "object",
+        "properties": {
+          "session_id": {
+            "type": "string",
+            "description": "The ID of the session to get the summary for."
+          }
+        },
+        "required": [
+          "session_id"
+        ]
+      }
+    },
+    {
+      "name": "bb7_get_system_info",
+      "description": " Get comprehensive system information including hardware specs, OS details, running processes, disk usage, memory utilization, and network status. Perfect for troubleshooting, performance monitoring, and understanding your development environment. Provides actionable insights for system optimization and resource management.",
+      "input_schema": {
+        "type": "object",
+        "properties": {
+          "include_processes": {
+            "type": "boolean",
+            "description": "Include running processes information",
+            "default": false
+          },
+          "include_network": {
+            "type": "boolean",
+            "description": "Include network interface information",
+            "default": false
+          },
+          "include_disk_usage": {
+            "type": "boolean",
+            "description": "Include disk usage information",
+            "default": true
+          }
+        },
+        "required": []
+      }
+    },
+    {
+      "name": "bb7_intelligent_automation",
+      "description": "Identify automation opportunities and suggest workflows.",
+      "input_schema": {
+        "type": "object",
+        "properties": {
+          "automation_scope": {
+            "type": "string",
+            "description": "Scope of automation analysis."
+          },
+          "learning_mode": {
+            "type": "boolean",
+            "description": "Enable adaptive learning while recommending automations."
+          }
+        },
+        "required": []
+      }
+    },
+    {
+      "name": "bb7_intelligent_tool_guide",
+      "description": "Map user intent to a recommended set of tools and workflow steps.",
+      "input_schema": {
+        "type": "object",
+        "properties": {
+          "user_query": {
+            "type": "string",
+            "description": "User request to analyze."
+          },
+          "context": {
+            "type": "string",
+            "description": "Optional additional context for routing."
+          }
+        },
+        "required": [
+          "user_query"
+        ]
+      }
+    },
+    {
+      "name": "bb7_learned_patterns",
+      "description": "Get the learned patterns from sessions.",
+      "input_schema": {
+        "type": "object",
+        "properties": {},
+        "required": []
+      }
+    },
+    {
+      "name": "bb7_link_memory_to_session",
+      "description": "Link a memory key to the current session.",
+      "input_schema": {
+        "type": "object",
+        "properties": {
+          "memory_key": {
+            "type": "string",
+            "description": "The key of the memory to link."
+          }
+        },
+        "required": [
+          "memory_key"
+        ]
+      }
+    },
+    {
+      "name": "bb7_lisan_distill",
+      "description": "Explicit distillation: log a complete LLM trajectory (role/content/tool_calls list) to the RFT training dataset. Call after bb7_agent_run completes a task. Trajectory format: [{role: user/assistant/tool, content: str, tool_calls: [...]}].",
+      "input_schema": {
+        "type": "object",
+        "properties": {
+          "trajectory": {
+            "type": "array",
+            "description": "List of message dicts (role/content/tool_calls).",
+            "items": {
+              "type": "string"
+            }
+          },
+          "source_plane": {
+            "type": "string",
+            "description": "Origin identifier (default: bb7_agent_harness)."
+          },
+          "session_id": {
+            "type": "string",
+            "description": "Session identifier (auto-detected if omitted)."
+          },
+          "total_tokens": {
+            "type": "number",
+            "description": "Total tokens consumed by the trajectory."
+          },
+          "latency_seconds": {
+            "type": "number",
+            "description": "Total wall-clock seconds."
+          },
+          "tool_error_count": {
+            "type": "number",
+            "description": "Number of tool errors encountered."
+          }
+        },
+        "required": [
+          "trajectory"
+        ]
+      }
+    },
+    {
+      "name": "bb7_lisan_intend",
+      "description": "Expose spectral intent analysis as a direct tool. Given a user message, returns: decomposed intents with confidence scores, recommended tool categories, momentum bonus, and golden path match. Makes lisan's routing reasoning VISIBLE. Use to verify the system's intent interpretation before routing with bb7_exo_route.",
+      "input_schema": {
+        "type": "object",
+        "properties": {
+          "user_message": {
+            "type": "string",
+            "description": "The user's natural language message or task description."
+          },
+          "verbosity": {
+            "type": "string",
+            "description": "Output verbosity: minimal | normal | detailed (default: normal)."
+          }
+        },
+        "required": [
+          "user_message"
+        ]
+      }
+    },
+    {
+      "name": "bb7_lisan_recall",
+      "description": "Context Resurrection: single-call long-horizon session recovery. Combines relevant memories (BM25), active plan checkpoints, cross-AI activity, session momentum, and prior decisions into one LLM-ready context blob. Call at session start instead of bb7_memory_surface_context + bb7_exo_get_recent_activity separately.",
+      "input_schema": {
+        "type": "object",
+        "properties": {
+          "context": {
+            "type": "string",
+            "description": "Current task description or session context text."
+          },
+          "max_memories": {
+            "type": "number",
+            "description": "Max memories to surface (default 5)."
+          },
+          "include_plans": {
+            "type": "boolean",
+            "description": "Include active plan checkpoints (default true)."
+          },
+          "include_activity": {
+            "type": "boolean",
+            "description": "Include cross-AI activity (default true)."
+          },
+          "include_decisions": {
+            "type": "boolean",
+            "description": "Include prior decisions from cognitive journal (default true)."
+          }
+        },
+        "required": [
+          "context"
+        ]
+      }
+    },
+    {
+      "name": "bb7_list_directory",
+      "description": "List directory contents with detailed metadata, sorting, and file-type insight.",
+      "input_schema": {
+        "type": "object",
+        "properties": {
+          "path": {
+            "type": "string",
+            "description": "Directory path",
+            "default": "."
+          },
+          "show_hidden": {
+            "type": "boolean",
+            "description": "Show hidden files",
+            "default": true
+          },
+          "sort_by": {
+            "type": "string",
+            "description": "Sort order",
+            "enum": [
+              "name",
+              "size",
+              "modified",
+              "type"
+            ],
+            "default": "name"
+          },
+          "max_items": {
+            "type": "integer",
+            "description": "Maximum items to show",
+            "default": 200
+          },
+          "show_details": {
+            "type": "boolean",
+            "description": "Show detailed information",
+            "default": true
+          }
+        },
+        "required": []
+      },
+      "required": []
+    },
+    {
+      "name": "bb7_list_processes",
+      "description": " List and analyze running processes with intelligent filtering, resource usage analysis, and performance insights. Perfect for troubleshooting resource issues, monitoring system performance, and identifying processes that may be affecting development work. Provides actionable recommendations for process management and optimization.",
+      "input_schema": {
+        "type": "object",
+        "properties": {
+          "filter": {
+            "type": "string",
+            "description": "Filter processes by name pattern"
+          },
+          "sort_by": {
+            "type": "string",
+            "description": "Sort processes by specified criteria",
+            "enum": [
+              "cpu",
+              "memory",
+              "name",
+              "pid",
+              "age"
+            ],
+            "default": "cpu"
+          },
+          "limit": {
+            "type": "integer",
+            "description": "Maximum number of processes to show",
+            "default": 20
+          },
+          "show_system_processes": {
+            "type": "boolean",
+            "description": "Include system processes in results",
+            "default": false
+          }
+        },
+        "required": []
+      }
+    },
+    {
+      "name": "bb7_list_sessions",
+      "description": "List all sessions with optional status filter.",
+      "input_schema": {
+        "type": "object",
+        "properties": {
+          "status": {
+            "type": "string",
+            "description": "The status to filter sessions by."
+          },
+          "limit": {
+            "type": "number",
+            "description": "The maximum number of sessions to return."
+          }
+        },
+        "required": []
+      }
+    },
+    {
+      "name": "bb7_log_event",
+      "description": "Enhanced event logging with auto-memory formation.",
+      "input_schema": {
+        "type": "object",
+        "properties": {
+          "event_type": {
+            "type": "string",
+            "description": "The type of event to log."
+          },
+          "description": {
+            "type": "string",
+            "description": "A description of the event."
+          },
+          "details": {
+            "type": "object",
+            "description": "A dictionary of additional details about the event."
+          }
+        },
+        "required": [
+          "event_type",
+          "description"
+        ]
+      }
+    },
+    {
+      "name": "bb7_memory_analyze_entry",
+      "description": "Index a memory entry using BM25, extract concepts, and map relationships to existing memories.",
+      "input_schema": {
+        "type": "object",
+        "properties": {
+          "key": {
+            "type": "string",
+            "description": "Memory key identifier."
+          },
+          "value": {
+            "type": "string",
+            "description": "Memory content to index."
+          },
+          "source": {
+            "type": "string",
+            "description": "Source namespace (default: 'memory')."
+          }
+        },
+        "required": [
+          "key",
+          "value"
+        ]
+      }
+    },
+    {
+      "name": "bb7_memory_bulk_store",
+      "description": "Atomically store multiple memory entries in a single disk write. entries_json must be a JSON array of {key, value, category, importance, tags} objects.",
+      "input_schema": {
+        "type": "object",
+        "properties": {
+          "entries_json": {
+            "type": "string",
+            "description": "JSON array of memory entry objects."
+          }
+        },
+        "required": [
+          "entries_json"
+        ]
+      }
+    },
+    {
+      "name": "bb7_memory_categories",
+      "description": "List available memory categories with descriptions.",
+      "input_schema": {
+        "type": "object",
+        "properties": {},
+        "required": []
+      }
+    },
+    {
+      "name": "bb7_memory_cluster",
+      "description": "Group indexed memories into BM25 semantic clusters.",
+      "input_schema": {
+        "type": "object",
+        "properties": {
+          "n_clusters": {
+            "type": "number",
+            "description": "Target number of clusters (default: 5)."
+          }
+        },
+        "required": []
+      }
+    },
+    {
+      "name": "bb7_memory_concept_network",
+      "description": "Get the network of memories and related concepts for a given concept.",
+      "input_schema": {
+        "type": "object",
+        "properties": {
+          "concept": {
+            "type": "string",
+            "description": "Concept to explore."
+          }
+        },
+        "required": [
+          "concept"
+        ]
+      }
+    },
+    {
+      "name": "bb7_memory_consolidate",
+      "description": "Archive old low-importance memories, prune BM25 index. Memories with importance >= 0.7 or access_count >= 5 are always retained.",
+      "input_schema": {
+        "type": "object",
+        "properties": {
+          "days_old": {
+            "type": "number",
+            "description": "Age threshold in days (default 30)."
+          }
+        },
+        "required": []
+      }
+    },
+    {
+      "name": "bb7_memory_consolidate_index",
+      "description": "Archive low-importance old memories and prune all indices. Fixes orphaned concept refs from the original implementation.",
+      "input_schema": {
+        "type": "object",
+        "properties": {
+          "age_threshold_days": {
+            "type": "number",
+            "description": "Age threshold in days for archival (default: 30)."
+          },
+          "explicit_ids": {
+            "type": "array",
+            "description": "Optional list of specific memory IDs to archive.",
+            "items": {
+              "type": "string"
+            }
+          }
+        },
+        "required": []
+      }
+    },
+    {
+      "name": "bb7_memory_delete",
+      "description": "Delete a memory entry by key.",
+      "input_schema": {
+        "type": "object",
+        "properties": {
+          "key": {
+            "type": "string",
+            "description": "Key to delete."
+          }
+        },
+        "required": [
+          "key"
+        ]
+      }
+    },
+    {
+      "name": "bb7_memory_export",
+      "description": "Export all memories as Markdown (default) or JSON.",
+      "input_schema": {
+        "type": "object",
+        "properties": {
+          "format": {
+            "type": "string",
+            "description": "Export format: 'markdown' or 'json' (default 'markdown')."
+          }
+        },
+        "required": []
+      }
+    },
+    {
+      "name": "bb7_memory_extract_concepts",
+      "description": "Extract key BM25 tokens/concepts from text.",
+      "input_schema": {
+        "type": "object",
+        "properties": {
+          "text": {
+            "type": "string",
+            "description": "Text to analyse."
+          }
+        },
+        "required": [
+          "text"
+        ]
+      }
+    },
+    {
+      "name": "bb7_memory_find_gaps",
+      "description": "Find concepts referenced in multiple memories but lacking a dedicated entry.",
+      "input_schema": {
+        "type": "object",
+        "properties": {
+          "min_frequency": {
+            "type": "number",
+            "description": "Minimum reference count to flag as a gap (default: 3)."
+          }
+        },
+        "required": []
+      }
+    },
+    {
+      "name": "bb7_memory_get_insights",
+      "description": "Formatted insights report about the memory network: density, top concepts, important memories.",
+      "input_schema": {
+        "type": "object",
+        "properties": {},
+        "required": []
+      }
+    },
+    {
+      "name": "bb7_memory_get_related",
+      "description": "Fetch semantically related memories for a given key using BM25.",
+      "input_schema": {
+        "type": "object",
+        "properties": {
+          "key": {
+            "type": "string",
+            "description": "Memory key to find relations for."
+          },
+          "max_results": {
+            "type": "number",
+            "description": "Max related memories to return (default 5)."
+          }
+        },
+        "required": [
+          "key"
+        ]
+      }
+    },
+    {
+      "name": "bb7_memory_graph",
+      "description": "Export memory relationship graph in Graphviz DOT format for visualisation.",
+      "input_schema": {
+        "type": "object",
+        "properties": {
+          "min_similarity": {
+            "type": "number",
+            "description": "Minimum BM25 similarity to draw an edge (default: 0.3)."
+          }
+        },
+        "required": []
+      }
+    },
+    {
+      "name": "bb7_memory_insights",
+      "description": "Narrative insights combining local stats and BM25 network analysis.",
+      "input_schema": {
+        "type": "object",
+        "properties": {},
+        "required": []
+      }
+    },
+    {
+      "name": "bb7_memory_intelligent_search",
+      "description": "BM25-ranked semantic search across all indexed memories. Significantly more accurate than keyword search.",
+      "input_schema": {
+        "type": "object",
+        "properties": {
+          "query": {
+            "type": "string",
+            "description": "Search query."
+          },
+          "max_results": {
+            "type": "number",
+            "description": "Maximum results to return (default: 10)."
+          }
+        },
+        "required": [
+          "query"
+        ]
+      }
+    },
+    {
+      "name": "bb7_memory_list",
+      "description": "List memory keys with filtering (prefix, category, min_importance) and sorting (timestamp|importance|access|alphabetical|decay).",
+      "input_schema": {
+        "type": "object",
+        "properties": {
+          "prefix": {
+            "type": "string",
+            "description": "Key prefix filter."
+          },
+          "category": {
+            "type": "string",
+            "description": "Category filter."
+          },
+          "min_importance": {
+            "type": "number",
+            "description": "Minimum importance filter."
+          },
+          "sort_by": {
+            "type": "string",
+            "description": "Sort field: timestamp|importance|access|alphabetical|decay"
+          }
+        },
+        "required": []
+      }
+    },
+    {
+      "name": "bb7_memory_retrieve",
+      "description": "Retrieve a memory by key. Updates Ebbinghaus stability (reinforces retention). Use include_related=true for full metadata.",
+      "input_schema": {
+        "type": "object",
+        "properties": {
+          "key": {
+            "type": "string",
+            "description": "Memory key to retrieve."
+          },
+          "include_related": {
+            "type": "boolean",
+            "description": "Include metadata and related keys (default false)."
+          }
+        },
+        "required": [
+          "key"
+        ]
+      }
+    },
+    {
+      "name": "bb7_memory_search",
+      "description": "BM25-powered semantic search with Ebbinghaus decay reranking.",
+      "input_schema": {
+        "type": "object",
+        "properties": {
+          "query": {
+            "type": "string",
+            "description": "Search query."
+          },
+          "max_results": {
+            "type": "number",
+            "description": "Max results (default 5)."
+          }
+        },
+        "required": [
+          "query"
+        ]
+      }
+    },
+    {
+      "name": "bb7_memory_stats",
+      "description": "Comprehensive memory statistics including decay, access patterns, and category breakdown.",
+      "input_schema": {
+        "type": "object",
+        "properties": {},
+        "required": []
+      }
+    },
+    {
+      "name": "bb7_memory_store",
+      "description": "Store a key-value memory with category, importance (0-1), tags, and automatic BM25 indexing + Ebbinghaus decay initialisation.",
+      "input_schema": {
+        "type": "object",
+        "properties": {
+          "key": {
+            "type": "string",
+            "description": "Unique memory key."
+          },
+          "value": {
+            "type": "string",
+            "description": "Memory content."
+          },
+          "category": {
+            "type": "string",
+            "description": "Category: insights|decisions|patterns|context|solutions|references|goals|technical"
+          },
+          "importance": {
+            "type": "number",
+            "description": "Importance score 0.0-1.0 (default 0.5)."
+          },
+          "tags": {
+            "type": "array",
+            "description": "Optional string tags.",
+            "items": {
+              "type": "string"
+            }
+          }
+        },
+        "required": [
+          "key",
+          "value"
+        ]
+      }
+    },
+    {
+      "name": "bb7_memory_surface_context",
+      "description": "Proactively surface the most relevant memories for a given context blob using BM25 + Ebbinghaus decay weighting. Call at session start to recover relevant prior knowledge.",
+      "input_schema": {
+        "type": "object",
+        "properties": {
+          "context_text": {
+            "type": "string",
+            "description": "Current context or task description."
+          },
+          "max_results": {
+            "type": "number",
+            "description": "Max memories to surface (default 5)."
+          }
+        },
+        "required": [
+          "context_text"
+        ]
+      }
+    },
+    {
+      "name": "bb7_memory_timeline",
+      "description": "Chronological view of memories created or updated recently. Shows Ebbinghaus retention score for each entry.",
+      "input_schema": {
+        "type": "object",
+        "properties": {
+          "days": {
+            "type": "number",
+            "description": "Look-back window in days (default 7)."
+          },
+          "limit": {
+            "type": "number",
+            "description": "Max entries to show (default 20)."
+          }
+        },
+        "required": []
+      }
+    },
+    {
+      "name": "bb7_move_file",
+      "description": "Move or rename files and directories.",
+      "input_schema": {
+        "type": "object",
+        "properties": {
+          "source": {
+            "type": "string",
+            "description": "Source path"
+          },
+          "destination": {
+            "type": "string",
+            "description": "Destination path"
+          }
+        },
+        "required": [
+          "source",
+          "destination"
+        ]
+      },
+      "required": [
+        "source",
+        "destination"
+      ]
+    },
+    {
+      "name": "bb7_operation_history",
+      "description": "View file operation history, statistics, and patterns for workflow optimization.",
+      "input_schema": {
+        "type": "object",
+        "properties": {
+          "limit": {
+            "type": "integer",
+            "description": "Number of recent operations to show",
+            "default": 20
+          },
+          "operation_type": {
+            "type": "string",
+            "description": "Filter by operation type"
+          }
+        },
+        "required": []
+      },
+      "required": []
+    },
+    {
+      "name": "bb7_optimization_results",
+      "description": "Retrieve optimization outcomes and recommended next steps.",
+      "input_schema": {
+        "type": "object",
+        "properties": {
+          "experiment_id": {
+            "type": "string",
+            "description": "Optional experiment ID to inspect."
+          },
+          "include_recommendations": {
+            "type": "boolean",
+            "description": "Include actionable recommendations in the output."
+          }
+        },
+        "required": []
+      }
+    },
+    {
+      "name": "bb7_pause_session",
+      "description": "Pause the current session.",
+      "input_schema": {
+        "type": "object",
+        "properties": {
+          "reason": {
+            "type": "string",
+            "description": "The reason for pausing the session."
+          }
+        },
+        "required": []
+      }
+    },
+    {
+      "name": "bb7_performance_optimization",
+      "description": "Run performance optimization analysis and strategy generation.",
+      "input_schema": {
+        "type": "object",
+        "properties": {
+          "optimization_type": {
+            "type": "string",
+            "description": "Optimization mode, e.g. comprehensive or performance."
+          },
+          "target_metrics": {
+            "type": "array",
+            "description": "Optional list of target metrics.",
+            "items": {
+              "type": "string"
+            }
+          }
+        },
+        "required": []
+      }
+    },
+    {
+      "name": "bb7_planner_health",
+      "description": "Return OpenRouter planner configuration and persistence health.",
+      "input_schema": {
+        "type": "object",
+        "properties": {},
+        "required": []
+      }
+    },
+    {
+      "name": "bb7_planner_plan",
+      "description": "Generate a structured execution plan using OpenRouter.",
+      "input_schema": {
+        "type": "object",
+        "properties": {
+          "intent": {
+            "type": "string",
+            "description": "What should be planned."
+          },
+          "context": {
+            "type": "string",
+            "description": "Additional planning context."
+          },
+          "constraints": {
+            "type": "string",
+            "description": "Optional constraints for the plan."
+          },
+          "max_steps": {
+            "type": "number",
+            "description": "Maximum steps allowed in returned plan."
+          },
+          "model": {
+            "type": "string",
+            "description": "Optional OpenRouter model override."
+          },
+          "temperature": {
+            "type": "number",
+            "description": "Model temperature between 0 and 1."
+          },
+          "retries": {
+            "type": "number",
+            "description": "Retry count for transient request failures."
+          },
+          "timeout": {
+            "type": "number",
+            "description": "Request timeout in seconds."
+          },
+          "dry_run": {
+            "type": "boolean",
+            "description": "If true, do not call API and return payload preview only."
+          }
+        },
+        "required": [
+          "intent"
+        ]
+      }
+    },
+    {
+      "name": "bb7_planner_template",
+      "description": "Generate a planner prompt template for a target intent.",
+      "input_schema": {
+        "type": "object",
+        "properties": {
+          "intent": {
+            "type": "string",
+            "description": "Target intent to plan for."
+          },
+          "context": {
+            "type": "string",
+            "description": "Optional context to include in the template."
+          },
+          "max_steps": {
+            "type": "number",
+            "description": "Maximum number of plan steps."
+          }
+        },
+        "required": [
+          "intent"
+        ]
+      }
+    },
+    {
+      "name": "bb7_python_execute_secure",
+      "description": "Secure Python code execution with sandboxing and audit logging",
+      "input_schema": {
+        "type": "object",
+        "properties": {
+          "code": {
+            "type": "string",
+            "description": "Python code to execute"
+          },
+          "input_data": {
+            "type": "string",
+            "description": "Optional input data for the code"
+          },
+          "stateless": {
+            "type": "boolean",
+            "description": "Whether to run in stateless mode"
+          },
+          "dry_run": {
+            "type": "boolean",
+            "description": "Whether to perform a dry run without execution"
+          }
+        },
+        "required": [
+          "code"
+        ]
+      }
+    },
+    {
+      "name": "bb7_read_file",
+      "description": "Read any file from the system. Text files return raw content by default; analysis mode is available with show_analysis=true or format=analysis.",
+      "input_schema": {
+        "type": "object",
+        "properties": {
+          "path": {
+            "type": "string",
+            "description": "Absolute or relative file path"
+          },
+          "max_size": {
+            "type": "integer",
+            "description": "Maximum file size to read in bytes",
+            "default": 10485760
+          },
+          "force_text": {
+            "type": "boolean",
+            "description": "Force reading binary files as text",
+            "default": false
+          },
+          "show_analysis": {
+            "type": "boolean",
+            "description": "Return decorated markdown with analysis instead of raw text",
+            "default": false
+          },
+          "format": {
+            "type": "string",
+            "description": "raw or analysis/decorated output",
+            "default": "raw"
+          }
+        },
+        "required": [
+          "path"
+        ]
+      },
+      "required": [
+        "path"
+      ]
+    },
+    {
+      "name": "bb7_record_workflow",
+      "description": "Record a procedural workflow or pattern.",
+      "input_schema": {
+        "type": "object",
+        "properties": {
+          "workflow_name": {
+            "type": "string",
+            "description": "The name of the workflow."
+          },
+          "steps": {
+            "type": "array",
+            "description": "A list of steps in the workflow.",
+            "items": {
+              "type": "string"
+            }
+          },
+          "context": {
+            "type": "string",
+            "description": "Additional context for the workflow."
+          }
+        },
+        "required": [
+          "workflow_name",
+          "steps"
+        ]
+      }
+    },
+    {
+      "name": "bb7_resume_session",
+      "description": "Resume a paused session.",
+      "input_schema": {
+        "type": "object",
+        "properties": {
+          "session_id": {
+            "type": "string",
+            "description": "The ID of the session to resume."
+          }
+        },
+        "required": [
+          "session_id"
+        ]
+      }
+    },
+    {
+      "name": "bb7_run_command",
+      "description": " Execute shell commands safely with intelligent output analysis, error diagnosis, and security controls. Perfect for development tasks, system administration, and automation. Provides detailed execution results, performance metrics, and actionable suggestions for command optimization and troubleshooting.",
+      "input_schema": {
+        "type": "object",
+        "properties": {
+          "command": {
+            "type": "string",
+            "description": "Shell command to execute"
+          },
+          "working_directory": {
+            "type": "string",
+            "description": "Directory to run command in (defaults to current directory)",
+            "default": "."
+          },
+          "timeout": {
+            "type": "integer",
+            "description": "Command timeout in seconds",
+            "default": 30
+          },
+          "capture_output": {
+            "type": "boolean",
+            "description": "Whether to capture command output",
+            "default": true
+          },
+          "environment": {
+            "type": "object",
+            "description": "Additional environment variables",
+            "additionalProperties": {
+              "type": "string"
+            }
+          }
+        },
+        "required": [
+          "command"
+        ]
+      }
+    },
+    {
+      "name": "bb7_screen_monitor",
+      "description": "👁️ Monitor screen for changes with intelligent change detection, activity analysis, and automated capture. Perfect for monitoring applications, detecting events, and tracking visual changes during development or testing. Provides comprehensive activity reporting.",
+      "input_schema": {
+        "type": "object",
+        "properties": {
+          "duration": {
+            "type": "integer",
+            "description": "Monitoring duration in seconds",
+            "default": 10
+          },
+          "sensitivity": {
+            "type": "number",
+            "description": "Change detection sensitivity (0.0 to 1.0)",
+            "default": 0.05
+          },
+          "capture_changes": {
+            "type": "boolean",
+            "description": "Capture screenshots when changes detected",
+            "default": true
+          }
+        },
+        "required": []
+      }
+    },
+    {
+      "name": "bb7_search_files",
+      "description": "Bounded recursive file search with name/content matching. Accepts both legacy pattern and new name_pattern.",
+      "input_schema": {
+        "type": "object",
+        "properties": {
+          "directory": {
+            "type": "string",
+            "description": "Directory to search in",
+            "default": "."
+          },
+          "pattern": {
+            "type": "string",
+            "description": "Legacy file-name pattern alias"
+          },
+          "name_pattern": {
+            "type": "string",
+            "description": "File-name pattern with wildcards",
+            "default": "*"
+          },
+          "content_pattern": {
+            "type": "string",
+            "description": "Search within file contents"
+          },
+          "max_results": {
+            "type": "integer",
+            "description": "Maximum results",
+            "default": 100
+          },
+          "include_hidden": {
+            "type": "boolean",
+            "description": "Include hidden files",
+            "default": false
+          },
+          "max_depth": {
+            "type": "integer",
+            "description": "Maximum directory depth",
+            "default": 10
+          },
+          "file_size_min": {
+            "type": "integer",
+            "description": "Minimum file size in bytes",
+            "default": 0
+          },
+          "file_size_max": {
+            "type": "integer",
+            "description": "Maximum file size in bytes"
+          },
+          "timeout_seconds": {
+            "type": "number",
+            "description": "Search deadline in seconds",
+            "default": 15.0
+          },
+          "content_read_limit": {
+            "type": "integer",
+            "description": "Maximum bytes read per file for content search",
+            "default": 1048576
+          },
+          "skip_dirs": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            },
+            "description": "Additional directory names to skip"
+          }
+        },
+        "required": []
+      },
+      "required": []
+    },
+    {
+      "name": "bb7_search_web",
+      "description": "Simple web search using DuckDuckGo's instant answer API.",
+      "input_schema": {
+        "type": "object",
+        "properties": {
+          "query": {
+            "type": "string",
+            "description": "The search query."
+          },
+          "num_results": {
+            "type": "number",
+            "description": "The maximum number of results to return."
+          }
+        },
+        "required": [
+          "query"
+        ]
+      }
+    },
+    {
+      "name": "bb7_security_audit",
+      "description": "Security-focused code analysis to identify vulnerabilities and risks",
+      "input_schema": {
+        "type": "object",
+        "properties": {
+          "file_path": {
+            "type": "string",
+            "description": "Path to the Python file to audit"
+          }
+        },
+        "required": [
+          "file_path"
+        ]
+      }
+    },
+    {
+      "name": "bb7_session_intelligence",
+      "description": "Get the session intelligence data.",
+      "input_schema": {
+        "type": "object",
+        "properties": {},
+        "required": []
+      }
+    },
+    {
+      "name": "bb7_session_recommendations",
+      "description": "Generate intelligent recommendations based on past sessions.",
+      "input_schema": {
+        "type": "object",
+        "properties": {
+          "goal": {
+            "type": "string",
+            "description": "The goal of the new session."
+          }
+        },
+        "required": [
+          "goal"
+        ]
+      }
+    },
+    {
+      "name": "bb7_show_available_capabilities",
+      "description": "Display categories and available MCP tools.",
+      "input_schema": {
+        "type": "object",
+        "properties": {
+          "category": {
+            "type": "string",
+            "description": "Optional category filter (memory, web, execution, etc.)."
+          }
+        },
+        "required": []
+      }
+    },
+    {
+      "name": "bb7_start_session",
+      "description": "Start a new enhanced cognitive session with intelligence.",
+      "input_schema": {
+        "type": "object",
+        "properties": {
+          "goal": {
+            "type": "string",
+            "description": "The goal of the session."
+          },
+          "context": {
+            "type": "string",
+            "description": "Additional context for the session."
+          },
+          "tags": {
+            "type": "array",
+            "description": "A list of tags for the session.",
+            "items": {
+              "type": "string"
+            }
+          }
+        },
+        "required": [
+          "goal"
+        ]
+      }
+    },
+    {
+      "name": "bb7_take_screenshot",
+      "description": "📸 Capture screenshots with intelligent analysis, annotation capabilities, and automatic saving. Perfect for documentation, debugging, UI testing, and visual monitoring. Provides comprehensive screen analysis with element detection, color analysis, and visual insights for development workflows.",
+      "input_schema": {
+        "type": "object",
+        "properties": {
+          "region": {
+            "type": "string",
+            "description": "Screen region to capture (format: \"x,y,width,height\" or \"fullscreen\")",
+            "default": "fullscreen"
+          },
+          "save_path": {
+            "type": "string",
+            "description": "Custom path to save screenshot (auto-generated if not provided)"
+          },
+          "include_analysis": {
+            "type": "boolean",
+            "description": "Include visual analysis of the captured image",
+            "default": true
+          },
+          "format": {
+            "type": "string",
+            "description": "Output format for screenshot",
+            "enum": [
+              "png",
+              "jpg",
+              "base64"
+            ],
+            "default": "png"
+          }
+        },
+        "required": []
+      }
+    },
+    {
+      "name": "bb7_tool_health_report",
+      "description": "Reports on tool health including failed loads, failed tool calls, slow tools, loaded modules, and runtime_identity for source/live process parity.",
+      "input_schema": {
+        "type": "object",
+        "properties": {
+          "include_failed_loads": {
+            "type": "boolean",
+            "default": true,
+            "description": "Include modules that failed to load"
+          },
+          "include_failed_calls": {
+            "type": "boolean",
+            "default": true,
+            "description": "Include tools that have failed during execution"
+          },
+          "include_slow_tools": {
+            "type": "boolean",
+            "default": true,
+            "description": "Include tools with slow execution times"
+          }
+        },
+        "required": []
+      }
+    },
+    {
+      "name": "bb7_tool_refresh_module",
+      "description": "Refresh an allowlisted registry-bound tool module in-place without starting a second server, rerunning full boot lifecycle loops, or changing output-adapter behavior. Currently allowlisted for meta_intelligence_engine source/live parity after facade edits.",
+      "input_schema": {
+        "type": "object",
+        "properties": {
+          "module_name": {
+            "type": "string",
+            "default": "meta_intelligence_engine",
+            "description": "Allowlisted module to refresh."
+          },
+          "force_reload": {
+            "type": "boolean",
+            "default": true,
+            "description": "Reload the Python module before rebuilding the facade instance."
+          }
+        },
+        "required": []
+      }
+    },
+    {
+      "name": "bb7_update_focus",
+      "description": "Update current attention focus and energy state.",
+      "input_schema": {
+        "type": "object",
+        "properties": {
+          "focus_areas": {
+            "type": "array",
+            "description": "A list of areas to focus on.",
+            "items": {
+              "type": "string"
+            }
+          },
+          "energy_level": {
+            "type": "string",
+            "description": "The current energy level."
+          },
+          "momentum": {
+            "type": "string",
+            "description": "The current momentum."
+          }
+        },
+        "required": [
+          "focus_areas"
+        ]
+      }
+    },
+    {
+      "name": "bb7_window_info",
+      "description": "🪟 Get comprehensive information about active windows and applications with intelligent analysis and management suggestions. Perfect for window management, application monitoring, and development environment optimization. Provides detailed window properties and actionable insights.",
+      "input_schema": {
+        "type": "object",
+        "properties": {
+          "include_all": {
+            "type": "boolean",
+            "description": "Include information about all windows",
+            "default": false
+          },
+          "analyze_layout": {
+            "type": "boolean",
+            "description": "Analyze window layout and positioning",
+            "default": true
+          }
+        },
+        "required": []
+      }
+    },
+    {
+      "name": "bb7_workspace_context_loader",
+      "description": "Load all relevant workspace context for session continuity.",
+      "input_schema": {
+        "type": "object",
+        "properties": {
+          "workspace_path": {
+            "type": "string",
+            "description": "Optional explicit workspace path to inspect instead of MCP process cwd."
+          },
+          "include_recent_memories": {
+            "type": "boolean",
+            "description": "Include recent memory keys in the report."
+          },
+          "include_active_sessions": {
+            "type": "boolean",
+            "description": "Include active and paused session summary."
+          }
+        },
+        "required": []
+      }
+    },
+    {
+      "name": "bb7_write_file",
+      "description": "Write or create a file with optional backup, directory creation, encoding selection, and executable bit support.",
+      "input_schema": {
+        "type": "object",
+        "properties": {
+          "path": {
+            "type": "string",
+            "description": "File path to write"
+          },
+          "content": {
+            "type": "string",
+            "description": "Content to write"
+          },
+          "encoding": {
+            "type": "string",
+            "description": "Text encoding",
+            "default": "utf-8"
+          },
+          "create_backup": {
+            "type": "boolean",
+            "description": "Create backup of existing file",
+            "default": true
+          },
+          "make_executable": {
+            "type": "boolean",
+            "description": "Make file executable",
+            "default": false
+          }
+        },
+        "required": [
+          "path",
+          "content"
+        ]
+      },
+      "required": [
+        "path",
+        "content"
+      ]
+    },
+    {
+      "name": "ping_server",
+      "description": "Checks if the Sovereign MCP server is alive and reachable",
+      "input_schema": {
+        "type": "object",
+        "properties": {},
+        "required": []
+      }
+    }
+  ]
+}

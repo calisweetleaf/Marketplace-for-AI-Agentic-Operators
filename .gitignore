@@ -1,0 +1,53 @@
+# Aeriadne Root Gitignore - Consolidated for Somnus-Intelligence-Stack Release
+
+# --- General / Root ---
+*.venv/
+.data/
+.env
+.env.*
+.gitignore/
+requirements.txt
+__pycache__/
+*.zip
+*.tar.gz
+*.tgz
+*.tar
+
+# --- OS / System ---
+.DS_Store
+Thumbs.db
+
+# --- Python / Caches ---
+*.py[cod]
+*$py.class
+.pytest_cache/
+.mypy_cache/
+.ruff_cache/
+.ipynb_checkpoints/
+venv/
+env/
+ENV/
+
+# --- CodeGraph ---
+# Database
+*.db
+*.db-wal
+*.db-shm
+# Cache
+.codegraph/cache/
+# Logs
+.codegraph/*.log
+# Hook markers
+.codegraph/.dirty
+
+# --- Mentat Runtime ---
+# Ignore ephemeral session tracking, sqlite databases, and telemetry logs.
+# But keep .mentat/scope.md (project configuration).
+**/.mentat/active_session.json
+**/.mentat/sessions/
+**/.mentat/insights/
+**/.mentat/handoff/
+**/.mentat/*.sqlite
+
+# --- Mentat Evals ---
+plugins/Mentat/evals/output/

@@ -1,0 +1,33 @@
+{
+  "ctm_session_bootstrap": {
+    "chain": ["bb7_exo_bootstrap", "bb7_lisan_intend", "bb7_exo_route"],
+    "priors": {"alpha": 7.0, "beta": 1.0},
+    "use_cases": [
+      "CTM session start",
+      "skill-guided repo entry",
+      "warm continue after cold-start scaffold"
+    ],
+    "tags": ["ctm", "session", "bootstrap"],
+    "ctmv3_added": "{{TODAY}}"
+  },
+  "ctm_workspace_activate": {
+    "chain": ["ctmv3_boot", "ctmv3_architecture_map", "ctmv3_sovereign_init", "ctmv3_dot_init"],
+    "priors": {"alpha": 5.0, "beta": 1.0},
+    "use_cases": [
+      "Cold-start activation of a fresh repo",
+      "Phase 5 ecosystem artifact construction"
+    ],
+    "tags": ["ctm", "activate", "ecosystem"],
+    "ctmv3_added": "{{TODAY}}"
+  },
+  "ctm_session_close": {
+    "chain": ["ctmv3_fingerprint", "ctmv3_session_close"],
+    "priors": {"alpha": 5.0, "beta": 1.0},
+    "use_cases": [
+      "Clean session shutdown",
+      "Topology drift detection at close"
+    ],
+    "tags": ["ctm", "session", "close"],
+    "ctmv3_added": "{{TODAY}}"
+  }
+}

@@ -1,0 +1,45 @@
+# ~/.grok/config.toml
+# Daily interactive Grok Build profile.
+
+[cli]
+auto_update = true
+
+[models]
+default = "grok-build"
+web_search = "grok-4.20-multi-agent"
+
+[ui]
+simple_mode = true
+vim_mode = false
+default_selected_permission = "allow_once"
+max_thoughts_width = 120
+
+[session]
+auto_compact_threshold_percent = 85
+load_envrc = true
+
+[tools]
+respect_gitignore = true
+
+[toolset.bash]
+timeout_secs = 120.0
+output_byte_limit = 65536
+
+[subagents]
+enabled = true
+default_model = "grok-build"
+
+[memory]
+enabled = false
+
+[ui.notifications]
+method = "auto"
+condition = "unfocused"
+idle_threshold_secs = 3
+events = ["turn_complete", "approval_required"]
+sleep_prevention = true
+progress_bar = true
+
+[ui.notifications.title]
+enabled = true
+items = ["action-required", "spinner", "activity", "session-name", "grok"]

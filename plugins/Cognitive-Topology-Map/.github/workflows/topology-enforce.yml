@@ -1,0 +1,117 @@
+name: Topology Enforce
+
+on:
+  push:
+    paths:
+      - "core/**"
+      - "docs/**"
+      - "research/**"
+      - "**.md"
+  pull_request:
+    paths:
+      - "core/**"
+      - "docs/**"
+      - "research/**"
+      - "**.md"
+
+jobs:
+  topology-enforce:
+    name: Verify topology fingerprint and CTM artifact integrity
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Set up Python 3.12
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+
+      - name: Check if CTMv3 is self-applied to this repo
+        id: ctm_present
+        run: |
+          PRESENT=0
+          if [ -d ".sovereign" ] && [ -f "TOPOLOGY.md" ] && [ -f "ARCHITECTURE_MAP.md" ]; then
+            PRESENT=1
+          fi
+          echo "present=$PRESENT" >> "$GITHUB_OUTPUT"
+          if [ "$PRESENT" = "1" ]; then
+            echo "CTMv3 artifacts found — will enforce fingerprint integrity."
+          else
+            echo "No CTMv3 artifacts found in this repo — skipping fingerprint check."
+          fi
+
+      - name: Run fingerprint check against self-applied CTMv3 artifacts
+        if: steps.ctm_present.outputs.present == '1'
+        run: |
+          set -euo pipefail
+          export PYTHONPATH="core"
+
+          # Run python -m ctmv3 fingerprint --check equivalent via the engine API
+          python3 - <<'PYEOF'
+          import sys
+          from pathlib import Path
+
+          sys.path.insert(0, "core")
+          from ctmv3.core import fingerprint as fp
+
+          root = Path(".")
+          matches, current_hash = fp.verify(root)
+
+          stored = fp.read_stored(root)
+          print(f"Stored hash:  {stored or '(none)'}")
+          print(f"Current hash: {current_hash}")
+
+          if stored is None:
+              print("WARNING: No stored fingerprint found. Run 'python3 -m ctmv3 fingerprint' to seed.")
+              # Treat as non-fatal on first run; fingerprint file may not have been committed
+              sys.exit(0)
+
+          if not matches:
+              print()
+              print("ERROR: Topology fingerprint mismatch.")
+              print("TOPOLOGY.md or ARCHITECTURE_MAP.md has changed since the last session close.")
+              print("Run 'python3 -m ctmv3 fingerprint' to update the stored hash, then commit.")
+              sys.exit(1)
+
+          print("OK: Fingerprint matches — no topology drift detected.")
+          PYEOF
+
+      - name: Validate CTM doc structure (when CTMv3 is self-applied)
+        if: steps.ctm_present.outputs.present == '1'
+        run: |
+          set -euo pipefail
+          FAILED=0
+
+          check_heading() {
+            local file="$1"
+            local heading="$2"
+            if ! grep -q "$heading" "$file" 2>/dev/null; then
+              echo "FAIL: $file is missing expected heading: $heading"
+              FAILED=$((FAILED + 1))
+            else
+              echo "OK:   $file contains '$heading'"
+            fi
+          }
+
+          # TOPOLOGY.md must have Load-Bearing Concepts section
+          [ -f "TOPOLOGY.md" ] && check_heading "TOPOLOGY.md" "Load-Bearing Concepts"
+
+          # ARCHITECTURE_MAP.md must have a ROOT node or Quick Reference
+          [ -f "ARCHITECTURE_MAP.md" ] && check_heading "ARCHITECTURE_MAP.md" "Quick Reference"
+
+          # PROVENANCE.md must have a Session Log
+          [ -f "PROVENANCE.md" ] && check_heading "PROVENANCE.md" "Session Log"
+
+          if [ "$FAILED" -gt 0 ]; then
+            echo "ERROR: $FAILED CTM document(s) are missing required structural sections."
+            exit 1
+          fi
+
+      - name: Skip — no CTMv3 artifacts present
+        if: steps.ctm_present.outputs.present == '0'
+        run: |
+          echo "No CTMv3 artifacts found in this repository."
+          echo "To activate CTMv3, run: python3 -m ctmv3 activate"
+          echo "This check is a no-op until CTMv3 is applied."

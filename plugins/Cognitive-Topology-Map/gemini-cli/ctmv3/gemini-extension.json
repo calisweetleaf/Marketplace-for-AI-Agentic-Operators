@@ -1,0 +1,8 @@
+{
+  "name": "ctmv3",
+  "version": "1.0.0",
+  "description": "CTMv3 workspace activation system — bootstraps a repo into a living, agent-operable workspace. Creates .sovereign/, AGENTS.md, ARCHITECTURE_MAP.md, TOPOLOGY.md, FAILURE_GRAMMAR.md, PROVENANCE.md, and the .claude/.codex/.github/ ecosystem artifacts. Not a skill maker — a codebase onboarding engine.",
+  "contextFileName": "GEMINI.md",
+  "excludeTools": [],
+  "homepage": "https://github.com/daeron/ctmv3-plugin"
+}

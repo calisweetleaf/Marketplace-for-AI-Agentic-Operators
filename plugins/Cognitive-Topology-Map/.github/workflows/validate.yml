@@ -1,0 +1,81 @@
+name: Validate CTMv3 Engine
+
+on:
+  push:
+    branches: ['**']
+  pull_request:
+    branches: [main]
+
+jobs:
+  test:
+    name: Python ${{ matrix.python-version }} tests
+    runs-on: ubuntu-latest
+    strategy:
+      fail-fast: false
+      matrix:
+        python-version: ['3.10', '3.11', '3.12']
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-python@v5
+        with:
+          python-version: ${{ matrix.python-version }}
+
+      - name: Install CTMv3 engine
+        run: |
+          cd core
+          pip install --upgrade pip
+          pip install -e .
+
+      - name: Validate Python syntax (all engine modules)
+        run: |
+          python -m py_compile core/ctmv3/core/activate.py
+          python -m py_compile core/ctmv3/core/architecture_map.py
+          python -m py_compile core/ctmv3/core/boot.py
+          python -m py_compile core/ctmv3/core/cli.py
+          python -m py_compile core/ctmv3/core/dot_init.py
+          python -m py_compile core/ctmv3/core/fingerprint.py
+          python -m py_compile core/ctmv3/core/sovereign.py
+          python -m py_compile core/ctmv3/core/templates.py
+          echo 'Syntax validation passed'
+
+      - name: Run unit tests
+        run: |
+          cd core
+          PYTHONPATH=. python -m pytest ctmv3/tests/ -v --tb=short 2>&1
+
+      - name: Verify test count did not regress
+        run: |
+          COUNT=$(cd core && PYTHONPATH=. python${{ matrix.python-version }} -m unittest discover \
+                    -s ctmv3/tests -v 2>&1 | grep -c ' ok$' || true)
+          echo "Tests passed: $COUNT"
+          if [ "$COUNT" -lt 50 ]; then
+            echo "ERROR: Test count $COUNT is below minimum threshold of 50."
+            exit 1
+          fi
+
+      - name: Check version consistency
+        run: |
+          cd core
+          ENGINE_VER=$(python3 -c "from ctmv3.core import __version__; print(__version__)")
+          TOML_VER=$(python3 -c "
+          import re
+          with open('pyproject.toml') as f:
+              text = f.read()
+          m = re.search(r'version\s*=\s*\"([^\"]+)\"', text)
+          print(m.group(1) if m else 'NOT_FOUND')
+          ")
+          echo "Engine version: $ENGINE_VER"
+          echo "Pyproject version: $TOML_VER"
+          if [ "$ENGINE_VER" != "$TOML_VER" ]; then
+            echo 'ERROR: Version mismatch between __init__.py and pyproject.toml'
+            exit 1
+          fi
+          echo 'Version consistency check passed'
+
+      - name: Smoke test - install and run
+        run: |
+          cd core
+          python -m ctmv3 version --json
+          python -m ctmv3 boot --project-root /tmp --json

@@ -1,0 +1,144 @@
+---
+description: CTMv3 cognitive doctrine and cross-runtime command surface. Loads workspace activation protocols, boot-state decision logic, and session management posture into every Cursor session.
+globs:
+  - "**/*.py"
+  - "**/*.ts"
+  - "**/*.go"
+  - "**/*.rs"
+  - "**/*.md"
+  - "AGENTS.md"
+  - "TOPOLOGY.md"
+  - "ARCHITECTURE_MAP.md"
+  - "PROVENANCE.md"
+  - ".sovereign/**"
+alwaysApply: true
+---
+
+# CTMv3 Cognitive Doctrine — Cursor Runtime
+
+You are operating in a CTMv3-aware workspace. CTMv3 is a codebase activation and
+workspace onboarding system. Its purpose is to enter a repo and make it living for
+agents: navigable, self-documenting, and state-continuous across sessions.
+
+Read this rule before any task that involves reading or modifying the codebase.
+
+---
+
+## Boot State Determination (Always First)
+
+Before any work session, determine the boot state by running:
+
+```bash
+python3 -m ctmv3 boot --json --project-root "$PWD"
+```
+
+The output `branch` field will be one of:
+
+- `COLD_START`: No CTMv3 artifacts found. Run `/ctmv3-activate` before any other work.
+- `WARM_START`: CTMv3 artifacts present and PROVENANCE.md has a recent session log.
+  Run `/ctmv3-warm` to resume the prior session.
+- `PARTIAL`: Some Tier 1 artifacts present but PROVENANCE.md is absent or empty.
+  Run `/ctmv3-activate` to complete the artifact set.
+
+Do not skip this step. Entering a repo without knowing its boot state causes
+re-discovery loops that waste context and produce stale or conflicting artifacts.
+
+---
+
+## Tier 1 CTMv3 Artifacts (Presence = CTMv3 Active)
+
+- `.sovereign/` directory — session continuity anchor
+- `ARCHITECTURE_MAP.md` at repo root — traversal map
+- `.claude/CLAUDE.md` — Claude-specific context
+- `AGENTS.md` at repo root — agent operational posture
+
+If any Tier 1 artifact is present, CTMv3 has been run here. Read AGENTS.md and
+PROVENANCE.md before deciding what to do next.
+
+---
+
+## Session Close Protocol (Always Last)
+
+Every session must close cleanly. Before ending a work session, run:
+
+```bash
+python3 -m ctmv3 session-close \
+  --project-root "$PWD" \
+  --agent "Cursor" \
+  --action "description of what was done" \
+  --next-action "description of what to do next"
+```
+
+This updates PROVENANCE.md Session Log and syncs `.sovereign/session_state.json`.
+A session that is not closed creates stale state that the next agent will have to
+repair before it can work.
+
+---
+
+## The Golden-Path Chain
+
+For fully autonomous onboarding of a new or unknown repo, run the chain:
+
+```bash
+python3 -m ctmv3 chain --initial boot --project-root "$PWD"
+```
+
+This walks the domino chain: boot determines cold/warm, routes to activate or warm,
+then fingerprint detects drift, then architecture-map if needed, then session-close.
+One call. All steps. The output is a JSON array of GoldenPathSignal envelopes with
+memory relevance tags for each step.
+
+---
+
+## Topology Navigation
+
+When asked to find code related to a concept:
+
+1. Check `ARCHITECTURE_MAP.md` first — it is the traversal map.
+2. Check `TOPOLOGY.md` for load-bearing concept definitions.
+3. Check `.sovereign/session_state.json` for the last session's open tasks.
+4. Only read source files after the above artifacts are loaded.
+
+---
+
+## Artifact Hierarchy
+
+CTMv3 artifacts carry institutional memory that source code alone does not.
+When in conflict between what an artifact says and what source code says:
+- For topology: trust TOPOLOGY.md if it was written after the source
+- For decisions and rejected paths: trust PROVENANCE.md
+- For agent posture: trust AGENTS.md
+- For file presence: trust the file system (artifacts may be stale)
+
+---
+
+## CTMv3 Commands Available in This Session
+
+| Command                     | What it does                                               |
+|-----------------------------|------------------------------------------------------------|
+| `/ctmv3-boot`               | Run boot discovery. Determine cold/warm/partial state.     |
+| `/ctmv3-activate`           | Full cold-start activation: Phase 0-5, all artifacts.      |
+| `/ctmv3-warm`               | Warm session resume. Diff provenance, continue.            |
+| `/ctmv3-architecture-map`   | Build or refresh ARCHITECTURE_MAP.md.                      |
+| `/ctmv3-sovereign-init`     | Initialize .sovereign/ directory.                          |
+| `/ctmv3-dot-init`           | Initialize .claude/, .codex/, .github/ directories.        |
+| `/ctmv3-fingerprint`        | Recompute topology fingerprint. Detect drift.              |
+| `/ctmv3-session-close`      | Close session: update PROVENANCE.md and session state.     |
+| `/ctmv3-status`             | Show signal inventory, boot state, fingerprint match.      |
+| `/ctmv3-chain`              | Walk full domino chain from boot. One call, full run.      |
+
+---
+
+## If ctmv3 Is Not Installed
+
+If `python3 -m ctmv3` is not available, perform a manual boot scan:
+
+```bash
+ls -la .sovereign/ 2>/dev/null || echo ".sovereign absent"
+test -f AGENTS.md && echo "AGENTS.md present" || echo "AGENTS.md absent"
+test -f ARCHITECTURE_MAP.md && echo "ARCHITECTURE_MAP.md present" || echo "absent"
+cat PROVENANCE.md 2>/dev/null | grep -A5 "## Session Log" | tail -5
+```
+
+Report the inferred boot state and flag that the engine was unavailable. Read
+AGENTS.md and PROVENANCE.md directly if present to reconstruct session context.

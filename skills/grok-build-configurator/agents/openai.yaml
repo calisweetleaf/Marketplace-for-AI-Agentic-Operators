@@ -1,0 +1,6 @@
+interface:
+  display_name: "Grok Build Configurator"
+  short_description: "Configure, audit, and troubleshoot xAI Grok Build CLI setups."
+  default_prompt: "Use this skill to configure or audit Grok Build for this repo."
+policy:
+  allow_implicit_invocation: true

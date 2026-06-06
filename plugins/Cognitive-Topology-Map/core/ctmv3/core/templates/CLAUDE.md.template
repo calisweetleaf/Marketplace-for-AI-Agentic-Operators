@@ -1,0 +1,69 @@
+# CLAUDE.md — {{PROJECT_NAME}}
+
+**Extends AGENTS.md. When in conflict, rebuild from AGENTS.md.**
+
+---
+
+## What This Project Is
+
+[TODO: 2-3 sentences — same as AGENTS.md. Claude Code-specific framing allowed.]
+
+Full topology: `ARCHITECTURE_MAP.md`
+
+---
+
+## Boot Protocol
+
+1. Check `.sovereign/session_state.json` for `warm_start_valid`
+2. Verify `.sovereign/topology_fingerprint.txt` matches current TOPOLOGY.md + ARCHITECTURE_MAP.md
+3. If warm: read PROVENANCE.md Session Log, confirm last action
+4. If cold or stale: full BOOT_PROTOCOL.md Section 2 discovery sequence
+5. After any substantive work: update PROVENANCE.md Session Log via `session-close`
+
+---
+
+## Available Tools
+
+Claude Code tools permitted by `.claude/settings.json`:
+- Bash(python:*) — run Python scripts
+- Read(*) — read any file
+- Write(src/**), Write(tests/**) — write in src and tests
+- Bash(go build:*) — build Go if applicable
+
+**Prohibited:**
+- Bash(rm -rf:*) — destructive operations require explicit confirmation
+- Write(manifest.json) — snapshot files are read-only by doctrine
+
+---
+
+## Architecture Reference
+
+See `ARCHITECTURE_MAP.md` — traversal map for cold entry navigation.
+
+---
+
+## What You Cannot Get Wrong
+
+[TODO: Top 3 LBCs from TOPOLOGY.md — same as AGENTS.md]
+
+1. **[LBC Name]**: [Definition. Misunderstanding: ...]
+2. **[LBC Name]**: [Definition. Misunderstanding: ...]
+3. **[LBC Name]**: [Definition. Misunderstanding: ...]
+
+---
+
+## Session Close Protocol
+
+When work is complete, call the CTMv3 engine session-close:
+
+```bash
+python -m ctmv3 session-close --agent "Claude Code" --action "[what was done]"
+```
+
+This updates PROVENANCE.md Session Log and session_state.json.
+
+---
+
+## If Something Smells Wrong
+
+Load `FAILURE_GRAMMAR.md` immediately. Do not continue work until the smell is classified.

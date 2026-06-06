@@ -1,0 +1,1304 @@
+{
+  "debug_code_workflow": {
+    "chain": [
+      "bb7_read_file",
+      "bb7_analyze_code_complete",
+      "bb7_run_command",
+      "bb7_memory_store"
+    ],
+    "priors": {
+      "alpha": 14,
+      "beta": 2
+    },
+    "description": "Standard debugging flow: read source → deep analysis → run tests → persist findings",
+    "use_cases": [
+      "debug",
+      "troubleshoot",
+      "fix bug",
+      "error",
+      "issue",
+      "problem",
+      "crash",
+      "exception"
+    ],
+    "tags": [
+      "debugging",
+      "code_quality",
+      "analysis",
+      "testing"
+    ],
+    "estimated_tokens": 850,
+    "avg_latency_seconds": 3.8,
+    "prerequisites": [
+      "file_path_known"
+    ],
+    "expected_outputs": [
+      "analysis_report",
+      "test_results",
+      "memory_id"
+    ]
+  },
+  "research_synthesis_workflow": {
+    "chain": [
+      "bb7_search_web",
+      "bb7_fetch_url",
+      "bb7_memory_store",
+      "bb7_capture_insight"
+    ],
+    "priors": {
+      "alpha": 10,
+      "beta": 1
+    },
+    "description": "Research pattern: web search → fetch content → store findings → capture insight",
+    "use_cases": [
+      "research",
+      "investigate",
+      "learn about",
+      "explore",
+      "find information",
+      "look up",
+      "how to"
+    ],
+    "tags": [
+      "research",
+      "web",
+      "synthesis",
+      "learning"
+    ],
+    "estimated_tokens": 1200,
+    "avg_latency_seconds": 6.2,
+    "prerequisites": [],
+    "expected_outputs": [
+      "research_summary",
+      "source_urls",
+      "memory_id",
+      "insight_id"
+    ]
+  },
+  "codebase_exploration_workflow": {
+    "chain": [
+      "bb7_analyze_project_structure",
+      "bb7_get_project_dependencies",
+      "bb7_get_code_metrics",
+      "bb7_memory_store"
+    ],
+    "priors": {
+      "alpha": 8,
+      "beta": 1
+    },
+    "description": "Codebase understanding: project structure → dependency graph → code metrics → remember",
+    "use_cases": [
+      "understand codebase",
+      "explore project",
+      "architecture",
+      "dependencies",
+      "overview",
+      "onboard"
+    ],
+    "tags": [
+      "codebase",
+      "architecture",
+      "exploration",
+      "dependencies"
+    ],
+    "estimated_tokens": 950,
+    "avg_latency_seconds": 4.5,
+    "prerequisites": [],
+    "expected_outputs": [
+      "structure_report",
+      "dependency_graph",
+      "metrics_summary",
+      "memory_id"
+    ]
+  },
+  "required_tool_workflow": {
+    "chain": [
+      "bb7_exo_bootstrap",
+      "bb7_exo_briefing",
+      "bb7_exo_list_tool_categories",
+      "bb7_exo_category_specific_tools",
+      "bb7_exo_route",
+      "bb7_exo_route_focused",
+      "bb7_exo_plan",
+      "bb7_exo_state",
+      "bb7_memory_search",
+      "bb7_session_intelligence",
+      "bb7_exo_reflect"
+    ],
+    "priors": {
+      "alpha": 14,
+      "beta": 5
+    },
+    "description": "Enforced exoskeleton loop: bootstrap and brief, route and plan, inspect state, then reflect.",
+    "use_cases": [
+      "task kickoff",
+      "tool routing",
+      "session continuity",
+      "workflow governance"
+    ],
+    "tags": [
+      "exoskeleton",
+      "routing",
+      "planning",
+      "session_state"
+    ],
+    "estimated_tokens": 950,
+    "avg_latency_seconds": 4.5,
+    "prerequisites": [],
+    "expected_outputs": [
+      "route_plan",
+      "selected_tools",
+      "session_state",
+      "reflection"
+    ]
+  },
+  "file_modification_workflow": {
+    "chain": [
+      "bb7_read_file",
+      "bb7_analyze_code_complete",
+      "bb7_write_file",
+      "bb7_memory_store"
+    ],
+    "priors": {
+      "alpha": 12,
+      "beta": 1
+    },
+    "description": "Safe file editing: read source → validate/analyze → write changes → log modification",
+    "use_cases": [
+      "edit file",
+      "modify code",
+      "update",
+      "change file",
+      "fix typo",
+      "refactor",
+      "rewrite"
+    ],
+    "tags": [
+      "file_operations",
+      "editing",
+      "modification",
+      "refactoring"
+    ],
+    "estimated_tokens": 680,
+    "avg_latency_seconds": 2.9,
+    "prerequisites": [
+      "file_path_known"
+    ],
+    "expected_outputs": [
+      "modified_file_path",
+      "change_summary"
+    ]
+  },
+  "security_audit_workflow": {
+    "chain": [
+      "bb7_analyze_project_structure",
+      "bb7_security_audit",
+      "bb7_analyze_code_complete",
+      "bb7_memory_store"
+    ],
+    "priors": {
+      "alpha": 6,
+      "beta": 1
+    },
+    "description": "Security review: scan project → security audit → deep code analysis → persist findings",
+    "use_cases": [
+      "security audit",
+      "vulnerability scan",
+      "security review",
+      "check security",
+      "pentest",
+      "hardening"
+    ],
+    "tags": [
+      "security",
+      "audit",
+      "vulnerability",
+      "compliance"
+    ],
+    "estimated_tokens": 1100,
+    "avg_latency_seconds": 7.3,
+    "prerequisites": [],
+    "expected_outputs": [
+      "security_report",
+      "vulnerability_list",
+      "remediation_plan"
+    ]
+  },
+  "session_bootstrap_workflow": {
+    "chain": [
+      "bb7_workspace_context_loader",
+      "bb7_auto_session_resume",
+      "bb7_memory_list",
+      "bb7_session_recommendations"
+    ],
+    "priors": {
+      "alpha": 11,
+      "beta": 1
+    },
+    "description": "Session startup: load context → resume session → check memory → get recommendations",
+    "use_cases": [
+      "start session",
+      "resume work",
+      "where were we",
+      "continue",
+      "pick up",
+      "what was i doing"
+    ],
+    "tags": [
+      "session",
+      "startup",
+      "context",
+      "continuity"
+    ],
+    "estimated_tokens": 700,
+    "avg_latency_seconds": 2.5,
+    "prerequisites": [],
+    "expected_outputs": [
+      "session_state",
+      "recent_memories",
+      "recommendations"
+    ]
+  },
+  "deployment_check_workflow": {
+    "chain": [
+      "bb7_analyze_project_structure",
+      "bb7_run_command",
+      "bb7_get_recent_changes",
+      "bb7_memory_store"
+    ],
+    "priors": {
+      "alpha": 7,
+      "beta": 1
+    },
+    "description": "Pre-deployment validation: check structure → run tests → review changes → log results",
+    "use_cases": [
+      "deploy",
+      "release",
+      "check deployment",
+      "pre-deploy",
+      "validate release",
+      "ship",
+      "publish"
+    ],
+    "tags": [
+      "deployment",
+      "validation",
+      "testing",
+      "release"
+    ],
+    "estimated_tokens": 890,
+    "avg_latency_seconds": 5.1,
+    "prerequisites": [],
+    "expected_outputs": [
+      "test_results",
+      "change_log",
+      "deployment_readiness"
+    ]
+  },
+  "documentation_generation_workflow": {
+    "chain": [
+      "bb7_analyze_project_structure",
+      "bb7_get_code_metrics",
+      "bb7_write_file",
+      "bb7_memory_store"
+    ],
+    "priors": {
+      "alpha": 5,
+      "beta": 1
+    },
+    "description": "Auto-documentation: analyze codebase → gather metrics → write docs → index findings",
+    "use_cases": [
+      "generate docs",
+      "document code",
+      "create readme",
+      "write documentation",
+      "docstrings"
+    ],
+    "tags": [
+      "documentation",
+      "code_documentation",
+      "readme",
+      "docstrings"
+    ],
+    "estimated_tokens": 980,
+    "avg_latency_seconds": 4.7,
+    "prerequisites": [],
+    "expected_outputs": [
+      "documentation_files",
+      "doc_index"
+    ]
+  },
+  "memory_deep_dive_workflow": {
+    "chain": [
+      "bb7_memory_intelligent_search",
+      "bb7_memory_concept_network",
+      "bb7_memory_get_insights",
+      "bb7_capture_insight"
+    ],
+    "priors": {
+      "alpha": 9,
+      "beta": 1
+    },
+    "description": "Memory synthesis: semantic search → concept graph → extract insights → capture new insight",
+    "use_cases": [
+      "recall",
+      "what do i know about",
+      "search memory",
+      "find context",
+      "related memories",
+      "knowledge"
+    ],
+    "tags": [
+      "memory",
+      "recall",
+      "synthesis",
+      "knowledge_graph"
+    ],
+    "estimated_tokens": 750,
+    "avg_latency_seconds": 3.1,
+    "prerequisites": [],
+    "expected_outputs": [
+      "search_results",
+      "concept_network",
+      "insights",
+      "new_insight_id"
+    ]
+  },
+  "system_diagnostics_workflow": {
+    "chain": [
+      "bb7_get_system_info",
+      "bb7_list_processes",
+      "bb7_run_command",
+      "bb7_memory_store"
+    ],
+    "priors": {
+      "alpha": 7,
+      "beta": 2
+    },
+    "description": "System health check: system info -> process list -> targeted shell diagnostics -> log diagnostics",
+    "use_cases": [
+      "system info",
+      "diagnostics",
+      "health check",
+      "performance",
+      "resources",
+      "cpu",
+      "memory usage"
+    ],
+    "tags": [
+      "system",
+      "diagnostics",
+      "health",
+      "monitoring"
+    ],
+    "estimated_tokens": 600,
+    "avg_latency_seconds": 2.2,
+    "prerequisites": [],
+    "expected_outputs": [
+      "system_report",
+      "process_list",
+      "diagnostic_output"
+    ]
+  },
+  "workflow_analysis_workflow": {
+    "chain": [
+      "bb7_analyze_workflow_patterns",
+      "bb7_learned_patterns",
+      "bb7_cross_session_analysis",
+      "bb7_memory_store"
+    ],
+    "priors": {
+      "alpha": 6,
+      "beta": 1
+    },
+    "description": "Meta-analysis: workflow patterns → learned patterns → cross-session insights → persist",
+    "use_cases": [
+      "analyze patterns",
+      "what patterns",
+      "workflow analysis",
+      "meta analysis",
+      "improve workflow"
+    ],
+    "tags": [
+      "meta_analysis",
+      "patterns",
+      "optimization",
+      "self_improvement"
+    ],
+    "estimated_tokens": 800,
+    "avg_latency_seconds": 3.5,
+    "prerequisites": [],
+    "expected_outputs": [
+      "pattern_report",
+      "learned_patterns",
+      "cross_session_insights"
+    ]
+  },
+  "multi_ai_coordination_workflow": {
+    "chain": [
+      "bb7_exo_get_recent_activity",
+      "bb7_workspace_context_loader",
+      "bb7_memory_search",
+      "bb7_exo_reflect"
+    ],
+    "priors": {
+      "alpha": 10,
+      "beta": 1
+    },
+    "description": "Multi-AI sync: get recent activity → load context → search memory → reflect on coordination",
+    "use_cases": [
+      "sync with other AIs",
+      "coordinate",
+      "what did other AIs do",
+      "shared context",
+      "team coordination"
+    ],
+    "tags": [
+      "multi_ai",
+      "coordination",
+      "sync",
+      "context_sharing",
+      "collaboration"
+    ],
+    "estimated_tokens": 680,
+    "avg_latency_seconds": 2.4,
+    "prerequisites": [],
+    "expected_outputs": [
+      "activity_summary",
+      "context_state",
+      "memory_results",
+      "coordination_reflection"
+    ]
+  },
+  "deep_memory_recall_workflow": {
+    "chain": [
+      "bb7_memory_surface_context",
+      "bb7_memory_get_related",
+      "bb7_memory_timeline",
+      "bb7_capture_insight"
+    ],
+    "priors": {
+      "alpha": 9,
+      "beta": 1
+    },
+    "description": "Ambient recall: surface context-relevant memories → fetch related entries → review timeline → capture synthesis",
+    "use_cases": [
+      "surface relevant memories",
+      "what do i know",
+      "ambient recall",
+      "context recovery",
+      "recover prior knowledge",
+      "recall related"
+    ],
+    "tags": [
+      "memory",
+      "recall",
+      "surface_context",
+      "bm25",
+      "ambient_intelligence"
+    ],
+    "estimated_tokens": 800,
+    "avg_latency_seconds": 3.2,
+    "prerequisites": [],
+    "expected_outputs": [
+      "surfaced_memories",
+      "related_entries",
+      "timeline_view",
+      "insight_id"
+    ]
+  },
+  "session_cognition_bootstrap_workflow": {
+    "chain": [
+      "bb7_memory_surface_context",
+      "bb7_lisan_recall",
+      "bb7_workspace_context_loader",
+      "bb7_auto_session_resume"
+    ],
+    "priors": {
+      "alpha": 10,
+      "beta": 1
+    },
+    "description": "Full cognition bootstrap: single-call context resurrection (memories + plans + decisions + momentum) → load workspace → resume session. The SOTA++ session start sequence.",
+    "use_cases": [
+      "start",
+      "new session",
+      "cold start",
+      "what was i working on",
+      "context load",
+      "resume cognition",
+      "session boot"
+    ],
+    "tags": [
+      "session",
+      "bootstrap",
+      "cognition",
+      "journal",
+      "memory",
+      "continuity",
+      "lisan"
+    ],
+    "estimated_tokens": 750,
+    "avg_latency_seconds": 2.8,
+    "prerequisites": [],
+    "expected_outputs": [
+      "surfaced_context",
+      "prior_reasoning",
+      "workspace_state",
+      "session_recommendation"
+    ]
+  },
+  "bulk_memory_ingest_workflow": {
+    "chain": [
+      "bb7_memory_bulk_store",
+      "bb7_memory_surface_context",
+      "bb7_memory_get_insights",
+      "bb7_exo_reflect"
+    ],
+    "priors": {
+      "alpha": 7,
+      "beta": 1
+    },
+    "description": "Bulk memory ingest: atomic multi-entry store → surface context → gather insights → reflect on knowledge state",
+    "use_cases": [
+      "bulk store",
+      "store many memories",
+      "ingest data",
+      "batch memory",
+      "load knowledge",
+      "import context"
+    ],
+    "tags": [
+      "memory",
+      "bulk",
+      "ingest",
+      "atomic",
+      "batch"
+    ],
+    "estimated_tokens": 680,
+    "avg_latency_seconds": 2.3,
+    "prerequisites": [],
+    "expected_outputs": [
+      "store_confirmation",
+      "surfaced_memories",
+      "insights",
+      "knowledge_state"
+    ]
+  },
+  "agent_distributed_cognition_workflow": {
+    "chain": [
+      "bb7_agent_health",
+      "bb7_agent_capabilities",
+      "bb7_agent_run",
+      "bb7_agent_handoff",
+      "bb7_memory_store"
+    ],
+    "priors": {
+      "alpha": 8,
+      "beta": 1
+    },
+    "description": "Distributed agent execution: check agent health → get capabilities → run agent → handoff to another → store results. All share canon data dir.",
+    "use_cases": [
+      "run autonomous agent",
+      "agent planning",
+      "agent debugging",
+      "agent analysis",
+      "cross-agent collaboration",
+      "distributed cognition"
+    ],
+    "tags": [
+      "agent",
+      "autonomous",
+      "distributed",
+      "cognition",
+      "openrouter",
+      "handoff"
+    ],
+    "estimated_tokens": 920,
+    "avg_latency_seconds": 15.0,
+    "prerequisites": [
+      "OPENROUTER_API_KEY configured"
+    ],
+    "expected_outputs": [
+      "agent_results",
+      "executed_tools",
+      "handoff_results",
+      "memory_id"
+    ]
+  },
+  "agent_planning_workflow": {
+    "chain": [
+      "bb7_agent_run",
+      "bb7_memory_surface_context",
+      "bb7_lisan_recall",
+      "bb7_exo_reflect"
+    ],
+    "priors": {
+      "alpha": 9,
+      "beta": 1
+    },
+    "description": "Agent-powered planning: run planner agent → resurrect context (memories + decisions) → reflect. Continuous loop until complete.",
+    "use_cases": [
+      "agent planning",
+      "autonomous planning",
+      "multi-step task",
+      "complex workflow"
+    ],
+    "tags": [
+      "agent",
+      "planning",
+      "autonomous",
+      "continuous",
+      "lisan"
+    ],
+    "estimated_tokens": 1100,
+    "avg_latency_seconds": 20.0,
+    "prerequisites": [
+      "OPENROUTER_API_KEY configured"
+    ],
+    "expected_outputs": [
+      "execution_plan",
+      "tool_executions",
+      "memory_id",
+      "reflection"
+    ]
+  },
+  "memory_maintenance_workflow": {
+    "chain": [
+      "bb7_memory_stats",
+      "bb7_memory_consolidate",
+      "bb7_memory_consolidate_index",
+      "bb7_memory_store"
+    ],
+    "priors": {
+      "alpha": 5,
+      "beta": 1
+    },
+    "description": "Memory housekeeping: pull stats and Ebbinghaus decay distribution → archive old low-importance entries from active store → prune BM25 index stale entries → store maintenance log. Run periodically to keep retrieval quality high.",
+    "use_cases": [
+      "clean up memory",
+      "memory maintenance",
+      "archive old memories",
+      "compact memory store",
+      "prune memory",
+      "memory health"
+    ],
+    "tags": [
+      "memory",
+      "maintenance",
+      "housekeeping",
+      "archival",
+      "bm25_index"
+    ],
+    "estimated_tokens": 600,
+    "avg_latency_seconds": 3.0,
+    "prerequisites": [],
+    "expected_outputs": [
+      "stats_report",
+      "archived_count",
+      "active_count",
+      "archive_filename",
+      "maintenance_memory_id"
+    ],
+    "tool_sources": {
+      "bb7_memory_stats": "memory_tool.py :: EnhancedMemoryTool.get_stats()",
+      "bb7_memory_consolidate": "memory_tool.py :: EnhancedMemoryTool.consolidate_memories()",
+      "bb7_memory_consolidate_index": "memory_interconnect.py :: MemoryInterconnectionEngine.consolidate_memories()",
+      "bb7_memory_store": "memory_tool.py :: EnhancedMemoryTool.store()"
+    }
+  },
+  "agent_debug_workflow": {
+    "chain": [
+      "bb7_agent_health",
+      "bb7_agent_run",
+      "bb7_agent_handoff",
+      "bb7_memory_store"
+    ],
+    "priors": {
+      "alpha": 7,
+      "beta": 1
+    },
+    "description": "Autonomous debugging execution: confirm agent plane healthy → launch debugger agent (diagnoses via actual tool calls) → optionally hand off to analyzer agent for deep root-cause → store findings. Agent iterates internally up to 30 cycles.",
+    "use_cases": [
+      "autonomous debug",
+      "agent diagnose",
+      "let agent fix it",
+      "automated troubleshoot",
+      "agent-driven error analysis"
+    ],
+    "tags": [
+      "agent",
+      "debugging",
+      "autonomous",
+      "distributed"
+    ],
+    "estimated_tokens": 950,
+    "avg_latency_seconds": 25.0,
+    "prerequisites": [
+      "OPENROUTER_API_KEY configured"
+    ],
+    "expected_outputs": [
+      "health_status",
+      "agent_results",
+      "tool_executions",
+      "handoff_state",
+      "debug_memory_id"
+    ],
+    "tool_sources": {
+      "bb7_agent_health": "openrouter_agent_tool.py :: OpenRouterAgentTool.bb7_agent_health()",
+      "bb7_agent_run": "openrouter_agent_tool.py :: OpenRouterAgentTool.bb7_agent_run() — agent_type=debugger",
+      "bb7_agent_handoff": "openrouter_agent_tool.py :: OpenRouterAgentTool.bb7_agent_handoff()",
+      "bb7_memory_store": "memory_tool.py :: EnhancedMemoryTool.store()"
+    }
+  },
+  "memory_gap_analysis_workflow": {
+    "chain": [
+      "bb7_memory_cluster",
+      "bb7_memory_find_gaps",
+      "bb7_memory_graph",
+      "bb7_memory_store"
+    ],
+    "priors": {
+      "alpha": 4,
+      "beta": 1
+    },
+    "description": "Knowledge gap detection: cluster indexed memories by BM25 semantic similarity → surface concepts referenced 3+ times without a dedicated entry → export DOT-format relationship graph → store gap report. Drives deliberate knowledge base expansion.",
+    "use_cases": [
+      "knowledge gaps",
+      "what am i missing",
+      "memory gaps",
+      "knowledge base audit",
+      "concept coverage",
+      "undocumented concepts"
+    ],
+    "tags": [
+      "memory",
+      "knowledge_graph",
+      "gap_analysis",
+      "clustering",
+      "bm25"
+    ],
+    "estimated_tokens": 850,
+    "avg_latency_seconds": 4.0,
+    "prerequisites": [
+      "memory_store populated with at least 20 entries for meaningful clustering"
+    ],
+    "expected_outputs": [
+      "cluster_report",
+      "gap_concepts_list",
+      "dot_graph",
+      "gap_report_memory_id"
+    ],
+    "tool_sources": {
+      "bb7_memory_cluster": "memory_interconnect.py :: MemoryInterconnectionEngine.cluster_memories()",
+      "bb7_memory_find_gaps": "memory_interconnect.py :: MemoryInterconnectionEngine.find_knowledge_gaps()",
+      "bb7_memory_graph": "memory_interconnect.py :: MemoryInterconnectionEngine.get_memory_graph()",
+      "bb7_memory_store": "memory_tool.py :: EnhancedMemoryTool.store()"
+    }
+  },
+  "exo_capability_briefing_workflow": {
+    "chain": [
+      "bb7_exo_bootstrap",
+      "bb7_exo_briefing",
+      "bb7_exo_preemptive_recovery",
+      "bb7_exo_route_focused"
+    ],
+    "priors": {
+      "alpha": 5,
+      "beta": 1
+    },
+    "description": "Session orientation and focused routing: bootstrap exoskeleton state (loads golden_paths.json, builds tool catalog, syncs live tools, seeds chain priors) → generate natural-language capability briefing (what can be done, category breakdown, high-confidence paths available) → pre-analyze recovery vectors for the planned execution context → route with focused intent for tighter, higher-confidence chain selection. Use at session start when the agent needs to self-orient before committing to a task chain.",
+    "use_cases": [
+      "what can you do",
+      "orient session",
+      "capability overview",
+      "what tools are available",
+      "focused routing",
+      "start new task session",
+      "session warmup",
+      "describe your capabilities"
+    ],
+    "tags": [
+      "exoskeleton",
+      "orientation",
+      "capability",
+      "routing",
+      "phase2"
+    ],
+    "estimated_tokens": 600,
+    "avg_latency_seconds": 3.2,
+    "prerequisites": [
+      "tool_manifest.json populated",
+      "golden_paths.json present"
+    ],
+    "expected_outputs": [
+      "bootstrap_report",
+      "capability_briefing",
+      "recovery_analysis",
+      "focused_route"
+    ],
+    "tool_sources": {
+      "bb7_exo_bootstrap": "exoskeleton_tool.py :: ExoskeletonTool.bootstrap() — Phase 1",
+      "bb7_exo_briefing": "exoskeleton_tool.py :: ExoskeletonTool.briefing() — Phase 2, natural-language capability narrative",
+      "bb7_exo_preemptive_recovery": "exoskeleton_tool.py :: ExoskeletonTool.preemptive_recovery() — Phase 2, pre-execution risk analysis",
+      "bb7_exo_route_focused": "exoskeleton_tool.py :: ExoskeletonTool.route_focused() — Phase 2, intent-focused chain selection"
+    }
+  },
+  "exo_checkpointed_plan_workflow": {
+    "chain": [
+      "bb7_exo_plan",
+      "bb7_exo_execute_step",
+      "bb7_exo_resume_plan",
+      "bb7_exo_kpi_report",
+      "bb7_exo_reflect"
+    ],
+    "priors": {
+      "alpha": 4,
+      "beta": 1
+    },
+    "description": "Full autonomous plan execution loop with crash-safe checkpointing: generate beam-search plan (3 variants: balanced/fast/deep, all prepended with bb7_workspace_context_loader) → execute one checkpointed step (state persisted to data/exoskeleton/active_plans.json) → resume plan from checkpoint after any interruption → generate KPI report over execution outcomes → reflect to update Bayesian chain priors. The checkpoint/resume pair makes this pattern safe for long-horizon tasks running across restarts.",
+    "use_cases": [
+      "run a plan",
+      "execute autonomously",
+      "multi-step task",
+      "checkpoint execution",
+      "resume plan",
+      "long running task",
+      "kpi report",
+      "autonomous workflow"
+    ],
+    "tags": [
+      "exoskeleton",
+      "execution",
+      "planning",
+      "checkpointing",
+      "kpi",
+      "phase3"
+    ],
+    "estimated_tokens": 1100,
+    "avg_latency_seconds": 45.0,
+    "prerequisites": [
+      "bb7_exo_bootstrap completed",
+      "task_description provided"
+    ],
+    "expected_outputs": [
+      "plan_with_three_variants",
+      "step_execution_result",
+      "checkpoint_id",
+      "kpi_report",
+      "updated_bayesian_priors"
+    ],
+    "tool_sources": {
+      "bb7_exo_plan": "exoskeleton_tool.py :: ExoskeletonTool.plan() — Phase 1, beam search 3 variants",
+      "bb7_exo_execute_step": "exoskeleton_tool.py :: ExoskeletonTool.execute_step() — Phase 3, writes active_plans.json",
+      "bb7_exo_resume_plan": "exoskeleton_tool.py :: ExoskeletonTool.resume_plan() — Phase 3, reads active_plans.json",
+      "bb7_exo_kpi_report": "exoskeleton_tool.py :: ExoskeletonTool.kpi_report() — Phase 3",
+      "bb7_exo_reflect": "exoskeleton_tool.py :: ExoskeletonTool.reflect() — Phase 1, updates alpha/beta priors"
+    }
+  },
+  "exo_multi_ai_coordination_workflow": {
+    "chain": [
+      "bb7_exo_get_recent_activity",
+      "bb7_exo_state",
+      "bb7_exo_route",
+      "bb7_memory_store"
+    ],
+    "priors": {
+      "alpha": 3,
+      "beta": 1
+    },
+    "description": "Multi-AI session handoff and coordination: read cross-AI activity log (all AI instances append to data/exoskeleton/cross_ai_activity.jsonl on tool use) → assess current exoskeleton state snapshot (category momentum matrix, active workflow position, tool reliability scores) → route next action with full cross-session context informing scoring → persist coordination state to memory. Required when multiple AI processes share the same exoskeleton and sovereign memory plane and need to avoid duplicating or conflicting work.",
+    "use_cases": [
+      "multi AI coordination",
+      "session handoff",
+      "what has another AI done",
+      "cross AI activity",
+      "resume from another session",
+      "coordinated agents",
+      "shared context"
+    ],
+    "tags": [
+      "exoskeleton",
+      "multi_ai",
+      "coordination",
+      "session",
+      "phase2"
+    ],
+    "estimated_tokens": 500,
+    "avg_latency_seconds": 2.5,
+    "prerequisites": [
+      "bb7_exo_bootstrap completed",
+      "cross_ai_activity.jsonl populated by at least one other AI instance"
+    ],
+    "expected_outputs": [
+      "cross_ai_activity_summary",
+      "state_snapshot",
+      "next_route",
+      "coordination_memory_id"
+    ],
+    "tool_sources": {
+      "bb7_exo_get_recent_activity": "exoskeleton_tool.py :: ExoskeletonTool.get_recent_activity() — Phase 2, reads cross_ai_activity.jsonl",
+      "bb7_exo_state": "exoskeleton_tool.py :: ExoskeletonTool.state() — Phase 1",
+      "bb7_exo_route": "exoskeleton_tool.py :: ExoskeletonTool.route() — Phase 1",
+      "bb7_memory_store": "memory_tool.py :: EnhancedMemoryTool.store()"
+    }
+  },
+  "planner_plan_workflow": {
+    "chain": [
+      "bb7_planner_health",
+      "bb7_planner_plan",
+      "bb7_memory_store"
+    ],
+    "priors": {
+      "alpha": 5,
+      "beta": 1
+    },
+    "description": "LLM-backed structured plan generation: verify planner is configured and API key present → call OpenRouter to generate a JSON execution plan (summary + ordered steps each with title/why/concrete actions/acceptance criteria/risk assessment + handoff_template) → persist plan to memory for retrieval and handoff. Distinct from exoskeleton planning: this produces a human-readable, LLM-reasoned plan document rather than a tool-chain routing decision.",
+    "use_cases": [
+      "plan this",
+      "make a plan",
+      "execution plan",
+      "what are the steps",
+      "step by step plan",
+      "structured approach",
+      "how do I do this",
+      "plan before acting"
+    ],
+    "tags": [
+      "planning",
+      "llm",
+      "structured_plan",
+      "openrouter"
+    ],
+    "estimated_tokens": 900,
+    "avg_latency_seconds": 8.0,
+    "prerequisites": [
+      "OPENROUTER_API_KEY configured"
+    ],
+    "expected_outputs": [
+      "health_status",
+      "structured_plan_json",
+      "memory_id"
+    ],
+    "tool_sources": {
+      "bb7_planner_health": "openrouter_planner_tool.py :: OpenRouterPlannerTool.bb7_planner_health()",
+      "bb7_planner_plan": "openrouter_planner_tool.py :: OpenRouterPlannerTool.bb7_planner_plan() — async, OpenRouter chat completions",
+      "bb7_memory_store": "memory_tool.py :: EnhancedMemoryTool.store()"
+    }
+  },
+  "planner_to_exo_workflow": {
+    "chain": [
+      "bb7_planner_plan",
+      "bb7_exo_route",
+      "bb7_exo_execute_step",
+      "bb7_memory_store"
+    ],
+    "priors": {
+      "alpha": 3,
+      "beta": 1
+    },
+    "description": "LLM plan to exoskeleton execution bridge: generate a structured JSON execution plan via OpenRouter (human-readable step decomposition) → use exoskeleton routing to select the optimal tool chain from the sovereign catalog for the stated intent → execute the first checkpointed step → persist result. Combines LLM-reasoned planning with Bayesian tool routing for a two-tier task decomposition.",
+    "use_cases": [
+      "plan then execute",
+      "generate plan and run it",
+      "autonomous task with reasoning",
+      "llm planned execution",
+      "reasoned autonomous action"
+    ],
+    "tags": [
+      "planning",
+      "exoskeleton",
+      "execution",
+      "llm",
+      "two_tier"
+    ],
+    "estimated_tokens": 1400,
+    "avg_latency_seconds": 20.0,
+    "prerequisites": [
+      "OPENROUTER_API_KEY configured",
+      "bb7_exo_bootstrap completed",
+      "intent clearly stated"
+    ],
+    "expected_outputs": [
+      "structured_plan_json",
+      "tool_route",
+      "step_execution_result",
+      "memory_id"
+    ],
+    "tool_sources": {
+      "bb7_planner_plan": "openrouter_planner_tool.py :: OpenRouterPlannerTool.bb7_planner_plan() — async",
+      "bb7_exo_route": "exoskeleton_tool.py :: ExoskeletonTool.route() — Phase 1, Bayesian tool selection",
+      "bb7_exo_execute_step": "exoskeleton_tool.py :: ExoskeletonTool.execute_step() — Phase 3, checkpointed",
+      "bb7_memory_store": "memory_tool.py :: EnhancedMemoryTool.store()"
+    }
+  },
+  "workflows_debug_code_path": {
+    "chain": [
+      "bb7_read_file",
+      "bb7_analyze_code_complete",
+      "bb7_run_command",
+      "bb7_memory_store"
+    ],
+    "priors": {
+      "alpha": 6,
+      "beta": 2
+    },
+    "description": "Code-debug workflow aligned from workflows.md.",
+    "use_cases": [
+      "debug failing code",
+      "trace runtime regressions"
+    ],
+    "tags": [
+      "debug",
+      "analysis",
+      "memory"
+    ],
+    "estimated_tokens": 2200,
+    "avg_latency_seconds": 3.6,
+    "prerequisites": [
+      "Target file path known"
+    ],
+    "expected_outputs": [
+      "Root-cause analysis",
+      "Actionable remediation notes"
+    ]
+  },
+  "workflows_research_synthesis_path": {
+    "chain": [
+      "bb7_search_web",
+      "bb7_fetch_url",
+      "bb7_memory_store",
+      "bb7_capture_insight"
+    ],
+    "priors": {
+      "alpha": 5,
+      "beta": 2
+    },
+    "description": "Research-and-synthesis path aligned from workflows.md.",
+    "use_cases": [
+      "collect and summarize references",
+      "capture derived insight"
+    ],
+    "tags": [
+      "research",
+      "web",
+      "synthesis"
+    ],
+    "estimated_tokens": 2400,
+    "avg_latency_seconds": 4.1,
+    "prerequisites": [
+      "Internet access enabled"
+    ],
+    "expected_outputs": [
+      "Source-grounded summary",
+      "Persistent memory entry"
+    ]
+  },
+  "workflows_session_bootstrap_path": {
+    "chain": [
+      "bb7_workspace_context_loader",
+      "bb7_auto_session_resume",
+      "bb7_start_session"
+    ],
+    "priors": {
+      "alpha": 7,
+      "beta": 1
+    },
+    "description": "Session bootstrap path aligned from workflows.md.",
+    "use_cases": [
+      "cold start",
+      "resume multi-hour work"
+    ],
+    "tags": [
+      "session",
+      "bootstrap",
+      "continuity"
+    ],
+    "estimated_tokens": 900,
+    "avg_latency_seconds": 1.8,
+    "prerequisites": [
+      "Workspace path available"
+    ],
+    "expected_outputs": [
+      "Recovered context",
+      "Active session state"
+    ]
+  },
+  "lisan_recall_workflow": {
+    "chain": [
+      "bb7_lisan_recall",
+      "bb7_exo_route",
+      "bb7_exo_plan"
+    ],
+    "priors": {
+      "alpha": 8,
+      "beta": 1
+    },
+    "description": "Long-horizon task resumption: single-call context resurrection → intent routing → plan generation. The canonical session-start sequence.",
+    "use_cases": [
+      "resume task",
+      "pick up where i left off",
+      "continue working",
+      "long horizon task",
+      "multi-session project",
+      "what was the plan",
+      "context resurrection",
+      "recall context"
+    ],
+    "tags": [
+      "lisan",
+      "recall",
+      "resumption",
+      "context",
+      "long_horizon"
+    ],
+    "estimated_tokens": 700,
+    "avg_latency_seconds": 2.5,
+    "prerequisites": [],
+    "expected_outputs": [
+      "context_blob",
+      "routing_recommendations",
+      "candidate_plans"
+    ]
+  },
+  "lisan_distill_workflow": {
+    "chain": [
+      "bb7_agent_run",
+      "bb7_lisan_distill",
+      "bb7_exo_reflect"
+    ],
+    "priors": {
+      "alpha": 6,
+      "beta": 1
+    },
+    "description": "Autonomous agent execution with RFT data capture: run agent → log trajectory for fine-tuning dataset → reflect outcomes into Bayesian priors. Closes the data flywheel.",
+    "use_cases": [
+      "agent task",
+      "autonomous execution",
+      "capture training data",
+      "distill trajectory",
+      "rft data",
+      "fine-tuning"
+    ],
+    "tags": [
+      "lisan",
+      "distillation",
+      "rft",
+      "agent",
+      "training_data"
+    ],
+    "estimated_tokens": 900,
+    "avg_latency_seconds": 20.0,
+    "prerequisites": [
+      "OPENROUTER_API_KEY configured"
+    ],
+    "expected_outputs": [
+      "agent_results",
+      "trajectory_id",
+      "heuristics",
+      "reflection"
+    ]
+  },
+  "lisan_intend_workflow": {
+    "chain": [
+      "bb7_lisan_intend",
+      "bb7_exo_route",
+      "bb7_exo_plan"
+    ],
+    "priors": {
+      "alpha": 6,
+      "beta": 1
+    },
+    "description": "Transparent intent analysis: decompose user message into intents → confirm routing → generate plan. Use when routing results seem unexpected or to debug orchestration.",
+    "use_cases": [
+      "understand intent",
+      "verify routing",
+      "debug routing",
+      "spectral analysis",
+      "intent decomposition",
+      "why did it route to that tool"
+    ],
+    "tags": [
+      "lisan",
+      "intent",
+      "spectral",
+      "transparency",
+      "debug_routing"
+    ],
+    "estimated_tokens": 500,
+    "avg_latency_seconds": 1.2,
+    "prerequisites": [],
+    "expected_outputs": [
+      "decomposed_intents",
+      "routing_recommendations",
+      "candidate_plans"
+    ]
+  },
+  "auto_discovered_auto_workspace_context_loader_10step": {
+    "chain": [
+      "bb7_workspace_context_loader",
+      "bb7_auto_session_resume",
+      "bb7_lisan_recall",
+      "bb7_lisan_intend",
+      "bb7_exo_bootstrap",
+      "bb7_exo_get_recent_activity",
+      "bb7_exo_briefing",
+      "bb7_exo_list_tool_categories",
+      "bb7_exo_category_specific_tools",
+      "bb7_exo_route"
+    ],
+    "priors": {
+      "alpha": 5.9254981287468755,
+      "beta": 1.0
+    },
+    "description": "Auto-discovered from 5 successful executions (reliability=85.56%)",
+    "use_cases": [
+      "auto-execute bb7_workspace_context_loader → bb7_auto_session_resume → bb7_lisan_recall → bb7_lisan_intend → bb7_exo_bootstrap → bb7_exo_get_recent_activity → bb7_exo_briefing → bb7_exo_list_tool_categories → bb7_exo_category_specific_tools → bb7_exo_route"
+    ],
+    "tags": [
+      "auto-discovered",
+      "proven",
+      "autonomous-discovery"
+    ],
+    "estimated_tokens": 1500,
+    "avg_latency_seconds": 20.0,
+    "prerequisites": [],
+    "expected_outputs": [
+      "executed_chain",
+      "reflection"
+    ],
+    "auto_discovered": true,
+    "discovery_timestamp": 1776991942.3381562,
+    "success_count": 5
+  },
+  "auto_discovered_auto_workspace_context_loader_4step": {
+    "chain": [
+      "bb7_workspace_context_loader",
+      "bb7_auto_session_resume",
+      "bb7_exo_bootstrap",
+      "bb7_exo_route"
+    ],
+    "priors": {
+      "alpha": 5.9254981287468755,
+      "beta": 1.0
+    },
+    "description": "Auto-discovered from 5 successful executions (reliability=85.56%)",
+    "use_cases": [
+      "auto-execute bb7_workspace_context_loader → bb7_auto_session_resume → bb7_exo_bootstrap → bb7_exo_route"
+    ],
+    "tags": [
+      "auto-discovered",
+      "proven",
+      "autonomous-discovery"
+    ],
+    "estimated_tokens": 900,
+    "avg_latency_seconds": 8.0,
+    "prerequisites": [],
+    "expected_outputs": [
+      "executed_chain",
+      "reflection"
+    ],
+    "auto_discovered": true,
+    "discovery_timestamp": 1779511898.8854907,
+    "success_count": 5
+  }
+}

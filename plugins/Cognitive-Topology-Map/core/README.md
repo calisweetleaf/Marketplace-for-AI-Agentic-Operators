@@ -1,0 +1,88 @@
+# CTMv3 Core Engine
+
+Python activation engine for CTMv3. Host adapters (Claude Code, Codex, opencode,
+Gemini CLI) shell out to this engine. Stdlib-only. Python 3.10+.
+
+## What This Is
+
+CTMv3 is a workspace activation system, not a skill maker. It enters a repo and
+scaffolds the full agent-operable structure: topology docs, session state,
+.xyz directories, fingerprinting, and provenance tracking.
+
+## Module Map
+
+| Module | Purpose |
+|--------|---------|
+| `cli.py` | `python -m ctmv3 <cmd>` entry point, all subcommands |
+| `boot.py` | BOOT_PROTOCOL.md discovery sequence, SignalInventory, branch classification |
+| `fingerprint.py` | SHA-256 of TOPOLOGY.md + ARCHITECTURE_MAP.md, drift detection |
+| `sovereign.py` | `.sovereign/` directory management, session_state.json, PROVENANCE appends |
+| `dot_init.py` | Scaffold `.claude/`, `.codex/`, `.github/` with CTM artifacts |
+| `architecture_map.py` | Scaffold ARCHITECTURE_MAP.md from template |
+| `activate.py` | Full Phase 0-5 cold-start orchestrator |
+| `templates.py` | Template loader/renderer from `templates/` dir |
+| `tests/test_engine.py` | 50 unittest tests covering all modules |
+
+## CLI Quick Reference
+
+```bash
+python -m ctmv3 boot --project-root /path/to/repo
+python -m ctmv3 activate --project-root /path/to/repo
+python -m ctmv3 activate --project-root /path/to/repo --force
+python -m ctmv3 warm --project-root /path/to/repo
+python -m ctmv3 status --project-root /path/to/repo --json
+python -m ctmv3 fingerprint --project-root /path/to/repo
+python -m ctmv3 session-close --agent "Claude Code" --action "did X" --project-root /path/to/repo
+python -m ctmv3 dot-init --target all --project-root /path/to/repo
+python -m ctmv3 sovereign-init --project-root /path/to/repo
+python -m ctmv3 architecture-map --from-topology --project-root /path/to/repo
+```
+
+All subcommands accept `--json` for machine-readable stdout output.
+
+## Exit Codes
+
+- 0 — success
+- 1 — user error (bad args, existing artifacts without --force)
+- 2 — corrupt state
+- 3 — missing prerequisite
+
+## Idempotency Contract
+
+Running `activate` twice without `--force` on a repo that already has CTM
+artifacts will abort with exit code 1 and a human-readable message. This
+protects prior agent work. Pass `--force` only when deliberate overwrite
+is intended.
+
+## Protected Files
+
+These files are never overwritten without `--force`:
+`AGENTS.md`, `CLAUDE.md`, `ARCHITECTURE_MAP.md`, `TOPOLOGY.md`,
+`FAILURE_GRAMMAR.md`, `PROVENANCE.md`
+
+## Adapter Integration Pattern
+
+```python
+import subprocess, json, sys
+
+result = subprocess.run(
+    [sys.executable, "-m", "ctmv3", "boot", "--project-root", repo_path, "--json"],
+    capture_output=True, text=True
+)
+inventory = json.loads(result.stdout)
+branch = inventory["branch"]  # "COLD_START" | "WARM_START" | "PARTIAL"
+```
+
+## Running Tests
+
+```bash
+python3 -m unittest discover /agent/workspace/ctmv3-plugin/core/tests/ -v
+```
+
+50 tests, stdlib unittest only, no external dependencies.
+
+## Templates
+
+Templates live in `core/templates/`. Edit them without re-shipping code.
+`templates.py` provides `load(name)` and `render(name, **context)`.
+Variable syntax: `{{VARIABLE_NAME}}`. Unmatched variables remain in output.

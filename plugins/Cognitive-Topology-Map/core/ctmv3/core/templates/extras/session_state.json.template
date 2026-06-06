@@ -1,0 +1,16 @@
+{
+  "session_id": "{{SESSION_ID}}",
+  "last_agent": "{{AGENT}}",
+  "last_timestamp": "{{TIMESTAMP_ISO}}",
+  "last_action": "CTMv3 initial scaffold",
+  "open_tasks": [
+    "Run Phase 0 archaeology to fill TOPOLOGY.md Load-Bearing Concepts",
+    "Fill ARCHITECTURE_MAP.md branches with real file:line anchors",
+    "Build .github/workflows/topology-enforce.yml hooks if pushing to GitHub",
+    "Update PROVENANCE.md Session Log after each substantive action"
+  ],
+  "topology_hash": "{{TOPOLOGY_HASH}}",
+  "warm_start_valid": false,
+  "ctmv3_version": "3.0",
+  "scaffold_timestamp": "{{TIMESTAMP_ISO}}"
+}

@@ -1,0 +1,32 @@
+description = "Print current CTMv3 workspace activation status and open tasks"
+
+prompt = """
+Print the current CTMv3 workspace activation status.
+
+!{bash "${extensionPath}/scripts/ctmv3-wrap.sh" status}
+
+Report a structured status summary:
+
+ACTIVATION STATUS
+  Boot branch:        [COLD_START / WARM_START / PARTIAL / UNKNOWN]
+  Last session:       [date + agent + last action, or "no prior session"]
+  Topology valid:     [yes / no / unknown]
+  PROVENANCE.md:      [present / absent]
+  manifest.json:      [present / absent]
+
+TIER 1 ARTIFACTS
+  .sovereign/:            [present / absent]
+  ARCHITECTURE_MAP.md:    [present / absent]
+  .claude/CLAUDE.md:      [present / absent]
+  AGENTS.md:              [present / absent]
+
+TIER 2 ARTIFACTS
+  .github/copilot-instructions.md:  [present / absent]
+  .codex/skills/:                   [present / absent]
+
+OPEN TASKS (from .sovereign/session_state.json if present)
+  [list open tasks, or "none recorded"]
+
+RECOMMENDED NEXT ACTION
+  [single sentence: what the agent should do next]
+"""

@@ -1,0 +1,70 @@
+sovereign_openrouter:
+  # ── CREDENTIALS ──────────────────────────────────────────────────────────────
+  # Never hardcode. Always resolve from environment.
+  api_key: "${OPENROUTER_API_KEY}"
+
+  # ── DEFAULTS ─────────────────────────────────────────────────────────────────
+  defaults:
+    model: "inception/mercury-2"
+    temperature: 0.7
+    max_tokens: 100000
+    timeout_seconds: 120
+
+  # ── THINKING ─────────────────────────────────────────────────────────────────
+  # Extended reasoning mode. Supported on: Claude 3.5+, DeepSeek R1, o1/o3.
+  # mode: auto    = respect per-call thinking= arg
+  # mode: force   = always inject thinking block regardless of call arg
+  # mode: disabled = never inject thinking block
+  thinking:
+    enabled: false
+    budget_tokens: 8000
+    mode: "auto"           # auto | force | disabled
+
+  # ── ROUTING ──────────────────────────────────────────────────────────────────
+  # strategy: cost_latency = balanced (recommended)
+  # strategy: cost         = cheapest per token
+  # strategy: latency      = fastest TTFT
+  # strategy: quality      = longest/most detailed response (proxy heuristic)
+  routing:
+    strategy: "cost_latency"
+    fallback_chain:
+      - "anthropic/claude-sonnet-4-5"
+      - "google/gemini-2.0-flash"
+      - "deepseek/deepseek-r1"
+    max_fallback_attempts: 3
+
+  # ── SYSTEM PROMPT ────────────────────────────────────────────────────────────
+  # template: path to .txt file OR inline string
+  # inject_mode:
+  #   prepend = insert before all messages (default)
+  #   append  = insert after all messages
+  #   replace = remove all existing system messages, insert this one
+  system_prompt:
+    enabled: false
+    template: null
+    inject_mode: "prepend"
+
+  # ── COMPATIBILITY ────────────────────────────────────────────────────────────
+  # Some providers are more reliable through streaming than non-stream completions.
+  compatibility:
+    complete_via_stream_models:
+      - "inception/mercury-2"
+
+  # ── RETRY ────────────────────────────────────────────────────────────────────
+  # Exponential backoff: wait = min(backoff_base^attempt, backoff_max)
+  # Retried on: 429, 5xx, timeout, network error
+  # NOT retried on: 400, 401, 403, 404
+  retry:
+    max_attempts: 3
+    backoff_base: 2.0
+    backoff_max: 30.0
+
+  # ── OBSERVABILITY ────────────────────────────────────────────────────────────
+  # log_responses: false recommended unless debugging (may contain sensitive data)
+  # session_id: tag cost reports with a custom session identifier
+  observability:
+    log_requests: true
+    log_responses: false
+    token_tracking: true
+    cost_tracking: true
+    session_id: null

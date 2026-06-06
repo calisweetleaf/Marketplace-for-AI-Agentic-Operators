@@ -1,0 +1,31 @@
+{
+  "permissions": {
+    "allow": [
+      "Bash(python3 -m ctmv3:*)",
+      "Bash(python3 -c:*)",
+      "Read(*)",
+      "Write(.sovereign/**)",
+      "Write(.claude/**)",
+      "Write(.codex/**)",
+      "Write(.github/**)",
+      "Write(AGENTS.md)",
+      "Write(CLAUDE.md)",
+      "Write(ARCHITECTURE_MAP.md)",
+      "Write(TOPOLOGY.md)",
+      "Write(FAILURE_GRAMMAR.md)",
+      "Write(PROVENANCE.md)",
+      "Edit(*)",
+      "Glob(*)",
+      "Grep(*)"
+    ],
+    "deny": [
+      "Bash(rm -rf:*)",
+      "Bash(sudo:*)",
+      "Write(manifest.json)"
+    ]
+  },
+  "env": {
+    "CTMV3_PROJECT_ROOT": "${CLAUDE_PROJECT_DIR}",
+    "CTMV3_AUTO_FINGERPRINT": "1"
+  }
+}

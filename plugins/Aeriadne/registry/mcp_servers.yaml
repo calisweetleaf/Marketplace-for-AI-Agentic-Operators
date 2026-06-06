@@ -1,0 +1,17 @@
+mcp_servers:
+  - id: sovereign-bb7
+    name: SovereignMCP / BB7
+    type: mcp-card
+    status: canonical-reference
+    vendored: false
+    path: mcp/servers/sovereign-bb7.md
+    canonical_root: /home/daeron/Somnus-MCP
+    data_root: /home/daeron/Somnus-MCP/data
+    capabilities:
+      - memory_context
+      - context_resurrection
+      - file_context_persistence
+      - journal_decision_provenance
+      - cognitive_routing
+      - session_continuity
+    note: Aeriadne references this server plane; it does not copy or fork it.

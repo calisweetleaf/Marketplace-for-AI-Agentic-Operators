@@ -1,0 +1,11 @@
+{
+  "mcpServers": {
+    "sovereign-mcp-https": {
+      "url": "https://0.0.0.0:8443",
+      "api_key": "2txcpUMlmoGhFVkpdCggJeQ42FhLWPC1gIb-29jEDnw",
+      "headers": {
+        "Authorization": "Bearer 2txcpUMlmoGhFVkpdCggJeQ42FhLWPC1gIb-29jEDnw"
+      }
+    }
+  }
+}

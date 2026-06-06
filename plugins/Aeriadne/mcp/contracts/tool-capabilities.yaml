@@ -1,0 +1,25 @@
+capabilities:
+  memory_context:
+    canonical_server: sovereign-bb7
+    required_for:
+      - deep-continuity
+      - state-resurrection
+      - decision-recall
+  file_context_persistence:
+    canonical_server: sovereign-bb7
+    required_for:
+      - file-aware-context
+      - persistence-artifacts
+  code_intelligence:
+    canonical_server: codegraph
+    required_for:
+      - symbol-search
+      - impact-analysis
+      - call-graph
+  state_machine:
+    canonical_server: mentat
+    required_for:
+      - planning
+      - reflection
+      - handoff
+      - drift-detection

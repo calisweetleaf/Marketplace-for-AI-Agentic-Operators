@@ -1,0 +1,75 @@
+{
+  "ctm_session_bootstrap": {
+    "chain": ["bb7_exo_bootstrap", "bb7_lisan_intend", "bb7_exo_route"],
+    "priors": {"alpha": 7.0, "beta": 1.0},
+    "use_cases": ["CTM session start", "skill-guided repo entry"],
+    "tags": ["ctm", "session", "bootstrap"]
+  },
+  "distillation_run": {
+    "chain": [
+      "bb7_exo_bootstrap",
+      "bb7_lisan_intend",
+      "rosemary_distill_cold_start",
+      "rosemary_distill_run",
+      "rosemary_distill_verify"
+    ],
+    "priors": {"alpha": 8.5, "beta": 1.2},
+    "use_cases": [
+      "Run a full distillation pass on the current snapshot",
+      "Resume a partial distillation from the last checkpoint"
+    ],
+    "tags": ["distillation", "pipeline", "production"],
+    "constraints": {
+      "max_ram_gb": 12,
+      "requires_gpu": false,
+      "checkpoint_format": "safetensors"
+    }
+  },
+  "warm_start_continue": {
+    "chain": [
+      "bb7_exo_bootstrap",
+      "ctm_warm_start_read",
+      "bb7_lisan_intend",
+      "bb7_exo_route"
+    ],
+    "priors": {"alpha": 9.0, "beta": 0.8},
+    "use_cases": [
+      "Continue work from a warm session",
+      "Agent re-entry after context reset"
+    ],
+    "tags": ["ctm", "warm", "session", "continuation"],
+    "validity_check": {
+      "max_age_days": 30,
+      "require_fingerprint_match": true
+    }
+  },
+  "schema_reconciliation": {
+    "chain": [
+      "bb7_exo_bootstrap",
+      "ctm_read_runtime_formats",
+      "ctm_diff_adapter_manifest",
+      "ctm_apply_schema_fix",
+      "ctm_fingerprint_update"
+    ],
+    "priors": {"alpha": 6.0, "beta": 2.0},
+    "use_cases": [
+      "Reconcile adapter manifests against RUNTIME_FORMATS.md",
+      "Apply schema audit findings from SCHEMA_AUDIT.md"
+    ],
+    "tags": ["schema", "adapter", "reconciliation", "audit"],
+    "notes": "Only run when RUNTIME_FORMATS.md or an adapter manifest has changed."
+  },
+  "session_close_standard": {
+    "chain": [
+      "ctm_update_provenance_log",
+      "ctm_fingerprint_update",
+      "ctm_write_session_state"
+    ],
+    "priors": {"alpha": 8.0, "beta": 1.0},
+    "use_cases": [
+      "Standard session close after any CTMv3-active session",
+      "Close after topology drift — always re-fingerprint"
+    ],
+    "tags": ["ctm", "session", "close", "provenance"]
+  }
+}

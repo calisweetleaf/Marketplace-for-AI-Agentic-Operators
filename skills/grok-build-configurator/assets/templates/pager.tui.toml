@@ -1,0 +1,42 @@
+# ~/.grok/pager.toml
+# TUI appearance and terminal behavior.
+
+[terminal]
+alt_screen = "auto"
+
+[animation]
+fps = 30
+wave_rows = 32
+show_fps = false
+
+[prompt]
+collapse_unfocused = true
+mouse_hover = true
+show_prefix = true
+compact = false
+
+[scrollback.layout]
+outer_vpad = 1
+outer_hpad_left = 2
+outer_hpad_right = 2
+block_pad_left = 2
+block_pad_right = 2
+
+[scrollback.scrollbar]
+enabled = true
+
+[scrollback.display]
+sticky_headers = true
+tab_width = 4
+expandable_indicator = true
+expandable_indicator_char = ">"
+selection_buttons = false
+
+[scrollback.blocks.edit]
+expanded_by_default = true
+hunk_separator = "..."
+
+[todo]
+badge_format = "default"
+
+disable_plugins = false

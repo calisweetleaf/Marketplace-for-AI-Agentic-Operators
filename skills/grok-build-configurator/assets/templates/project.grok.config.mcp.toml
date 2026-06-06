@@ -1,0 +1,18 @@
+# .grok/config.toml
+# Project-scoped Grok config supports MCP servers only.
+
+[mcp_servers.linear]
+url = "https://mcp.linear.app/mcp"
+enabled = true
+
+[mcp_servers.filesystem]
+command = "npx"
+args = ["-y", "@modelcontextprotocol/server-filesystem", "${PWD}"]
+enabled = false
+startup_timeout_sec = 10
+tool_timeout_sec = 60
+
+[mcp_servers.internal-tools]
+url = "https://mcp.internal.example.com/mcp"
+headers = { "Authorization" = "Bearer ${INTERNAL_MCP_TOKEN}" }
+enabled = false

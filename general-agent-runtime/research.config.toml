@@ -1,0 +1,82 @@
+# ~/.codex/research.config.toml
+# PROFILE: research — maximum depth, no speed limits, journal everything
+# Activate: codex --profile research
+# Use for: deep architecture analysis, multi-session reasoning, SOTA-level problems
+
+model = "gpt-5.5"
+model_reasoning_effort = "xhigh"
+plan_mode_reasoning_effort = "xhigh"
+model_reasoning_summary = "detailed"
+model_verbosity = "high"
+hide_agent_reasoning = false
+show_raw_agent_reasoning = true
+model_auto_compact_token_limit = 950000
+
+compact_prompt = "Deep research session compact. Preserve: ALL findings, hypotheses tested, evidence chains, open questions, architectural decisions, and exact file paths. This compact must enable full research continuity."
+
+developer_instructions = "Research mode. You are in deep analysis. Take as many turns as needed. Journal everything to bb7_lisan_distill after each significant finding. The goal is SOTA-level understanding, not speed."
+
+notify = ["/home/daeron/.codex/bin/notify_relay.py"]
+web_search = "live"
+tool_output_token_limit = 200000
+
+approval_policy = "never"
+approvals_reviewer = "auto_review"
+sandbox_mode = "danger-full-access"
+
+[agents]
+max_threads = 12
+max_depth = 3
+job_max_runtime_seconds = 86400  # 24h — let research run overnight
+
+[shell_environment_policy]
+inherit = "all"
+ignore_default_excludes = true
+
+[shell_environment_policy.set]
+SOVEREIGN_PROFILE = "research"
+MUADDIB_ACTIVE = "1"
+SOVEREIGN_DATA_DIR = "/home/daeron/Somnus-MCP/data"
+BB7_DAEMON_TICK_MS = "30000" # tighter 30s ticks for faster reflection
+LISAN_JOURNAL = "verbose"
+SOVEREIGN_DISTILLATION_ENABLED = "1"
+RESEARCH_MODE = "1"
+
+[features]
+hooks = true
+multi_agent = true
+multi_agent_v2 = true
+enable_fanout = true
+unified_exec = true
+apply_patch_streaming_events = true
+tool_call_mcp_elicitation = true
+memories = true
+shell_snapshot = true
+shell_tool = true
+chronicle = true
+prevent_idle_sleep = true
+undo = true
+browser_use = true
+js_repl = true
+code_mode = true
+workspace_dependencies = true
+runtime_metrics = true
+codex_git_commit = true
+tool_search = true
+tool_search_always_defer_mcp_tools = false
+skill_mcp_dependency_install = true
+
+[memories]
+generate_memories = true
+use_memories = true
+max_raw_memories_for_consolidation = 4096
+max_rollouts_per_startup = 256  # pull more rollout context in research mode
+max_rollout_age_days = 180
+max_unused_days = 365
+min_rollout_idle_hours = 0  # no minimum — fresh context always available
+
+[otel]
+environment = "research"
+exporter = "otlp-http"
+log_user_prompt = true
+otlp_http_endpoint = "http://localhost:4318/v1/logs"

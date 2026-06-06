@@ -1,0 +1,65 @@
+name: CTM Topology Enforcement
+on: [pull_request]
+
+jobs:
+  wrapper-size:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Check wrapper line counts
+        run: |
+          FAILED=0
+          for f in $(find . -name "*.py" -path "*/wrappers/*" 2>/dev/null); do
+            lines=$(wc -l < "$f")
+            if [ "$lines" -gt 200 ]; then
+              echo "FAIL: $f exceeds 200 lines ($lines). Per CTM doctrine wrappers must be under 200 lines."
+              FAILED=1
+            fi
+          done
+          if [ "$FAILED" -eq 1 ]; then
+            exit 1
+          fi
+          echo "All wrappers within line count limit."
+
+  ctm-artifacts-present:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Verify CTM artifacts present
+        run: |
+          FAILED=0
+          for artifact in TOPOLOGY.md FAILURE_GRAMMAR.md PROVENANCE.md ARCHITECTURE_MAP.md AGENTS.md; do
+            if [ ! -f "$artifact" ]; then
+              echo "FAIL: $artifact is missing. CTM requires this artifact."
+              FAILED=1
+            fi
+          done
+          if [ ! -d ".sovereign" ]; then
+            echo "FAIL: .sovereign/ directory is missing."
+            FAILED=1
+          fi
+          if [ "$FAILED" -eq 1 ]; then
+            exit 1
+          fi
+          echo "All CTM artifacts present."
+
+  fingerprint-check:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Verify topology fingerprint is current
+        run: |
+          if [ -f ".sovereign/topology_fingerprint.txt" ] && [ -f "TOPOLOGY.md" ] && [ -f "ARCHITECTURE_MAP.md" ]; then
+            stored=$(cat .sovereign/topology_fingerprint.txt | grep -oP 'sha256:[a-f0-9]+' | head -1)
+            current=$(cat TOPOLOGY.md ARCHITECTURE_MAP.md | sha256sum | awk '{print "sha256:"$1}')
+            if [ "$stored" != "$current" ]; then
+              echo "WARN: topology_fingerprint.txt does not match current TOPOLOGY.md + ARCHITECTURE_MAP.md"
+              echo "Stored:  $stored"
+              echo "Current: $current"
+              echo "Run: python -m ctmv3 fingerprint --project-root . to update"
+            else
+              echo "Fingerprint matches."
+            fi
+          else
+            echo "INFO: Skipping fingerprint check — prerequisites not present."
+          fi

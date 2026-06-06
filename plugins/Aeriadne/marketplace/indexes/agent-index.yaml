@@ -1,0 +1,9 @@
+agent_sets:
+  - id: aeriadne-subagents
+    path: agents/subagents
+    agents:
+      - prompt-architect
+      - package-cartographer
+      - compatibility-auditor
+      - registry-scribe
+      - release-sentinel

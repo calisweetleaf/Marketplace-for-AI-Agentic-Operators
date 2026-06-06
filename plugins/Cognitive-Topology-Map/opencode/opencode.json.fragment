@@ -1,0 +1,41 @@
+{
+  "_comment": "CTMv3 opencode.json fragment — paste relevant sections into your project's opencode.json.",
+  "_note": "This file is documentation only. Do not auto-merge. Review each section before adopting.",
+
+  "$schema": "https://opencode.ai/config.json",
+
+  "_section_plugin": "Load the CTMv3 plugin from the local plugins directory (auto-loaded if file is present there). Use the npm form only if you publish the plugin to npm.",
+  "plugin": [],
+
+  "_section_permission": "Optional: set a global permission baseline. The ctmv3-architect subagent overrides bash permissions to allow only python3 -m ctmv3 * commands.",
+  "permission": {
+    "bash": "ask"
+  },
+
+  "_section_mcp": "Optional: if you expose ctmv3 as an MCP server (not the default setup), wire it here.",
+  "mcp": {
+    "_example_ctmv3_mcp": {
+      "_comment": "Remove this block unless you are running ctmv3 as an MCP server.",
+      "type": "local",
+      "command": "python3",
+      "args": ["-m", "ctmv3", "mcp-server", "--project-root", "${workspaceFolder}"]
+    }
+  },
+
+  "_section_agent_override": "Optional: override the ctmv3-architect agent's model or permissions at project level.",
+  "agent": {
+    "ctmv3-architect": {
+      "_comment": "Override only if you want different model or permissions than the adapter's defaults.",
+      "model": "anthropic/claude-opus-4-5",
+      "temperature": 0.2,
+      "permission": {
+        "bash": {
+          "*": "deny",
+          "python3 -m ctmv3 *": "allow",
+          "ls *": "allow",
+          "test *": "allow"
+        }
+      }
+    }
+  }
+}

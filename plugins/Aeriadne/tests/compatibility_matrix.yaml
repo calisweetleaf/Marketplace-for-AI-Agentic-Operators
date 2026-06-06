@@ -1,0 +1,19 @@
+clients:
+  codex:
+    status: supported-after-local-install
+    expected_exposure:
+      - aeriadne:constitutional-prompt-framework
+      - aeriadne:aeriadne-marketplace-operator
+    validation:
+      - codex plugin list | grep aeriadne
+      - codex debug prompt-input 'probe $aeriadne plugin visibility'
+  claude_code:
+    status: adapter-docs-staged
+    expected_exposure: schema-projection-needed
+    validation:
+      - review adapters/claude-code/README.md
+  opencode:
+    status: adapter-docs-staged
+    expected_exposure: schema-probe-needed
+    validation:
+      - review adapters/opencode/README.md

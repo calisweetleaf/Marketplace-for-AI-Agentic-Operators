@@ -1,0 +1,129 @@
+# ~/.codex/sovereign.config.toml
+# PROFILE: sovereign — full Muaddib stack, max cognitive depth
+# Activate: codex --profile sovereign
+# This is the default operating mode.
+
+model = "gpt-5.5"
+model_reasoning_effort = "high"
+plan_mode_reasoning_effort = "xhigh"
+model_reasoning_summary = "detailed"
+model_verbosity = "high"
+model_auto_compact_token_limit = 900000  # compact before hitting 1M ceiling
+
+# Personality overlay stripped — AGENTS.md and SovereignMCP own identity
+personality = "none"
+
+# Codex is an executor, not a planner. Instructions come from AGENTS.override.md.
+model_instructions_file = "AGENTS.override.md"
+project_doc_fallback_filenames = ["AGENTS.md", "AGENTS.override.md", "MEMORY.md", "CONTEXT.md"]
+project_doc_max_bytes = 1048576
+
+# When Codex compacts, use sovereign summary
+compact_prompt = "Summarize the session focusing on: (1) what was built/changed and exact file paths, (2) decisions made and their rationale, (3) open blockers, (4) next concrete action. Output as structured markdown. Preserve ALL file paths, tool names, and exact values."
+
+# Extra developer context injected into every session — lighter than AGENTS.md
+developer_instructions = "You are Erebus, the execution arm. SovereignMCP (bb7_ tools) is the mind. Run bb7_exo_bootstrap at turn start. Trust preloaded context in additional_context fields. Do not re-derive context the hooks have already provided."
+
+# Notify relay — out-of-band signal on every agent-turn-complete
+notify = ["/home/daeron/.codex/bin/notify_relay.py"]
+
+# Full autonomy posture
+approval_policy = "never"
+approvals_reviewer = "auto_review"
+sandbox_mode = "danger-full-access"
+allow_login_shell = true
+
+[auto_review]
+policy = """
+Always approve. This is a fully autonomous sovereign system.
+If context requires escalation, emit SOVEREIGN_REROUTE:<reason> to stderr and approve.
+Never block legitimate tool calls.
+"""
+
+hide_agent_reasoning = false
+show_raw_agent_reasoning = true
+web_search = "live"
+tool_output_token_limit = 200000
+
+[history]
+persistence = "save-all"
+
+[agents]
+max_threads = 12
+max_depth = 3
+job_max_runtime_seconds = 86400  # 24h — long-running sovereign subagents
+
+[shell_environment_policy]
+inherit = "all"
+ignore_default_excludes = true
+experimental_use_profile = true
+
+[shell_environment_policy.set]
+SOVEREIGN_PROFILE = "sovereign"
+MUADDIB_ACTIVE = "1"
+SOVEREIGN_DATA_DIR = "/home/daeron/Somnus-MCP/data"
+BB7_DAEMON_TICK_MS = "45000"
+LISAN_JOURNAL = "verbose"
+CODEX_INVERSION = "1"
+SOVEREIGN_DISTILLATION_ENABLED = "1"
+SOVEREIGN_LOCKED = "1"
+
+[features]
+hooks = true
+multi_agent = true
+multi_agent_v2 = true
+enable_fanout = true
+unified_exec = true
+apply_patch_streaming_events = true
+tool_call_mcp_elicitation = true
+skill_mcp_dependency_install = true
+tool_search = true
+tool_search_always_defer_mcp_tools = false
+memories = true
+shell_snapshot = true
+shell_tool = true
+chronicle = true
+prevent_idle_sleep = true
+undo = true
+browser_use = true
+computer_use = true
+js_repl = true
+image_generation = true
+in_app_browser = true
+code_mode = true
+workspace_dependencies = true
+runtime_metrics = true
+remote_control = true
+codex_git_commit = true
+
+# Brakes
+apps = false
+plugins = false
+fast_mode = false
+realtime_conversation = false
+tool_suggest = false
+default_mode_request_user_input = false
+exec_permission_approvals = false
+guardian_approval = false
+
+[memories]
+generate_memories = true
+use_memories = true
+disable_on_external_context = false
+max_raw_memories_for_consolidation = 4096
+max_rollouts_per_startup = 128
+max_rollout_age_days = 90
+max_unused_days = 365
+min_rollout_idle_hours = 1
+
+[otel]
+environment = "sovereign"
+exporter = "otlp-http"
+log_user_prompt = true
+otlp_http_endpoint = "http://localhost:4318/v1/logs"  # local SovereignMCP OTLP receiver
+
+[tui]
+theme = "catppuccin-latte"
+notifications = true
+notification_condition = "always"
+show_tooltips = false

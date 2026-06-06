@@ -1,0 +1,20 @@
+id: example-package
+name: Example Package
+type: plugin
+status: private-draft
+version: 0.0.0
+canonical_path: Plugins/Example
+owner: Daeron
+clients:
+  codex: schema-probe-needed
+  claude_code: schema-probe-needed
+  opencode: schema-probe-needed
+includes:
+  skills: []
+  agents: []
+  mcp_servers: []
+validation:
+  commands: []
+  last_status: not-run
+notes:
+  - Replace this template with package-specific facts.

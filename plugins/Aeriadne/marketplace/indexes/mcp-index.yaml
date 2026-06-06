@@ -1,0 +1,5 @@
+mcp_servers:
+  - id: sovereign-bb7
+    card: marketplace/cards/sovereign-bb7.mcp.md
+    mode: canonical-reference
+    vendored: false

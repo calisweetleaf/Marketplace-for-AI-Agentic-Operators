@@ -1,0 +1,5 @@
+plugins:
+  - id: aeriadne
+    card: marketplace/cards/aeriadne.plugin.md
+    status: private-v1
+    clients: [codex, claude-code, opencode]

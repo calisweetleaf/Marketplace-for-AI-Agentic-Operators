@@ -1,0 +1,30 @@
+description = "Close the CTMv3 session cleanly: update PROVENANCE.md log and flush session state"
+
+prompt = """
+Close the current CTMv3 session cleanly.
+
+!{bash "${extensionPath}/scripts/ctmv3-wrap.sh" session-close}
+
+Every CTM-active session must close cleanly. Agents that do not close sessions
+create stale state that corrupts the next agent's warm start.
+
+The session close protocol:
+
+1. Update PROVENANCE.md Session Log:
+   Date | Agent | Last action | Topology drift? | Next recommended action
+
+2. If topology drifted during this session: update TOPOLOGY.md affected sections.
+
+3. If a new path was rejected during this session: log it in PROVENANCE.md
+   Rejected Alternatives (Graveyard).
+
+4. Update .sovereign/session_state.json with:
+   last_agent, timestamp, last_action, topology_hash, open_tasks
+
+Report:
+- What was logged in PROVENANCE.md Session Log
+- Whether topology drift was detected and what was updated
+- Whether any rejected paths were logged to the Graveyard
+- The updated open_tasks list in session_state.json
+- Confirmation that warm_start_valid is set to true in session_state.json
+"""

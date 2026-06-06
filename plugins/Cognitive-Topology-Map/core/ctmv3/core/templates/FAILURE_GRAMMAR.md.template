@@ -1,0 +1,111 @@
+# FAILURE_GRAMMAR — {{PROJECT_NAME}}
+
+**Snapshot**: v1.0 — {{TODAY}}
+**Domain**: {{PROJECT_NAME}}
+
+---
+
+## CATEGORY 1: Pre-Failure Signatures
+
+[TODO: Smells that do not prove failure but require investigation.]
+
+### Smell 1: [Name]
+**What it looks like**: [Description]
+**Why it is a smell**: [Explanation]
+**Action**: [What to investigate]
+
+### Smell 2: Output Confidence / Complexity Mismatch
+**What it looks like**: Output appears more certain or simpler than the domain warrants.
+**Why it is a smell**: Complex domains produce complex outputs. Clean, simple results on first run
+suggest either shallow analysis or swallowed errors.
+**Action**: Inspect the integration layer for broad exception handling.
+
+### Smell 3: Zero Warnings in Complex System Log
+**What it looks like**: Log contains only INFO-level entries from a system doing complex work.
+**Why it is a smell**: Healthy complex systems produce warnings. No warnings means error handling
+is wrong, not that everything went perfectly.
+**Action**: Check error suppression in handlers and wrappers.
+
+---
+
+## CATEGORY 2: False Success Patterns
+
+[TODO: These pass superficial checks but fail under real load.]
+
+### False Success 1: [Name]
+**What it looks like**: [Description]
+**The actual problem**: [Root cause]
+**Detection**: [How to catch this before it matters]
+
+### False Success 2: Schema Validity Without Semantic Validity
+**What it looks like**: All validation gates pass, hashes verify, structure is correct.
+**The actual problem**: Schema gates catch structural errors, not semantic ones.
+The data can be structurally valid and semantically wrong.
+**Detection**: Run cross-domain sampling, not just schema validation.
+
+---
+
+## CATEGORY 3: Adversarial Signatures (if applicable)
+
+[TODO: Only fill if this domain is OSINT, RE, or adversarially-influenced.
+Remove this section if the domain is not adversarial.]
+
+### Adversarial Pattern 1: [Name]
+**What it looks like**: [Description]
+**Detection**: [How to identify this pattern]
+
+---
+
+## CATEGORY 4: Recovery Protocols
+
+### Recovery 1: Fail Fast, Recover Clean
+1. Surface the actual error — do not suppress it
+2. Classify: is this a wrapper error, module error, or integration environment error?
+3. Fix at the correct layer — module errors fix in module, integration errors in wrapper
+4. Verify the fix in isolation before re-testing the integration
+
+### Recovery 2: Snapshot Rollback
+If the integration is broken beyond rapid fix:
+1. Do not patch in place
+2. Roll back to the previous named snapshot
+3. Diagnose against the clean state
+4. Re-integrate with corrected approach
+
+---
+
+## CATEGORY 5: Agent Ecosystem Integration Failures
+
+### Ecosystem Failure 1: AGENTS.md Written Before Topology Is Known
+**What it looks like**: AGENTS.md references modules that do not exist, or describes
+a tooling posture incompatible with the actual production stack.
+**Detection**: Cross-reference every module, file, and tool reference against the actual
+project tree. If 2 or more references are invalid — full rebuild.
+**Recovery**: Do not patch. Rebuild from TOPOLOGY.md.
+
+### Ecosystem Failure 2: Stale Line Anchors in ARCHITECTURE_MAP.md
+**What it looks like**: Agent navigates to a file:line anchor and finds a different
+function or a blank line.
+**Detection**: Spot-check 3 line anchors from the Quick Reference table.
+**Recovery**: Update Quick Reference table first, then branch entry points.
+
+### Ecosystem Failure 3: session_state.json Treated as Ground Truth
+**What it looks like**: Agent reads warm_start_valid=true and skips boot protocol,
+proceeding on topology that has drifted since last session.
+**Detection**: If significant time has passed (more than 7 days) or PROVENANCE.md shows
+architectural changes since the fingerprint was written — do not trust the flag.
+**Recovery**: Run warm validity check per BOOT_PROTOCOL.md Section 3.1.
+
+---
+
+## Failure Grammar Quick Reference
+
+| Smell | Category | Severity | Action |
+|-------|----------|----------|--------|
+| Output simpler than domain warrants | Pre-failure | HIGH | Inspect immediately |
+| Zero warnings in complex system log | Pre-failure | MEDIUM | Check error suppression |
+| Schema valid but no semantic sampling | False success | HIGH | Run cross-domain sampling |
+| AGENTS.md references non-existent modules | Ecosystem | HIGH | Full AGENTS.md rebuild |
+| ARCHITECTURE_MAP.md line anchors wrong | Ecosystem | MEDIUM | Anchor audit and repair |
+| session_state.json warm_start_valid=true but stale | Ecosystem | HIGH | Run BOOT_PROTOCOL Section 3.1 |
+| CLAUDE.md and AGENTS.md diverged | Ecosystem | HIGH | Reconcile from AGENTS.md |
+| [TODO: domain-specific smell] | [category] | [severity] | [action] |

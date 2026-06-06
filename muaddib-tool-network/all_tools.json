@@ -1,0 +1,643 @@
+{
+  "bb7_fetch_url": {
+    "file": "enhanced_web_tool.py",
+    "args": [
+      "arguments"
+    ],
+    "doc": "Fetch and analyze web content from any URL with automatic content type detection,\nsmart text extraction, and comprehensive metadata analysis. Perfect for documentation research,\nAPI exploration, content analysis, and gathering information from web resources."
+  },
+  "bb7_search_web": {
+    "file": "enhanced_web_tool.py",
+    "args": [
+      "arguments"
+    ],
+    "doc": "Search the web using multiple search engines with intelligent result aggregation and analysis.\nPerfect for research, finding documentation, discovering code examples, and gathering information\non development topics. Provides ranked results with content previews and actionable insights\nfor each found resource."
+  },
+  "bb7_analyze_webpage": {
+    "file": "enhanced_web_tool.py",
+    "args": [
+      "arguments"
+    ],
+    "doc": "Perform comprehensive analysis of webpage structure, content quality, SEO factors, and\ntechnical characteristics. Perfect for web development, content auditing, competitor analysis,\nand understanding webpage architecture. Provides detailed insights into page performance,\naccessibility, and optimization opportunities."
+  },
+  "bb7_download_file": {
+    "file": "enhanced_web_tool.py",
+    "args": [
+      "arguments"
+    ],
+    "doc": "Download files from web URLs with intelligent handling of different content types,\nprogress tracking, and automatic organization. Perfect for downloading documentation,\ncode samples, data files, and other web resources. Provides safety checks and\ncomprehensive download management with metadata preservation."
+  },
+  "bb7_take_screenshot": {
+    "file": "visual_tool.py",
+    "args": [
+      "arguments"
+    ],
+    "doc": "\ud83d\udcf8 Capture screenshots with intelligent analysis, annotation capabilities, and automatic saving. \nPerfect for documentation, debugging, UI testing, and visual monitoring. Provides comprehensive \nscreen analysis with element detection, color analysis, and visual insights."
+  },
+  "bb7_find_on_screen": {
+    "file": "visual_tool.py",
+    "args": [
+      "arguments"
+    ],
+    "doc": "\ud83d\udd0d Find visual elements on screen using intelligent pattern matching, color detection, \nand coordinate identification. Perfect for UI automation, testing, and visual debugging. \nProvides precise element location with confidence scoring."
+  },
+  "bb7_click_element": {
+    "file": "visual_tool.py",
+    "args": [
+      "arguments"
+    ],
+    "doc": "\ud83d\uddb1\ufe0f Click on visual elements with intelligent targeting, multiple click types, and precise \npositioning. Perfect for UI automation, testing workflows, and interactive debugging. \nSupports various click types with smart element detection."
+  },
+  "bb7_screen_monitor": {
+    "file": "visual_tool.py",
+    "args": [
+      "arguments"
+    ],
+    "doc": "\ud83d\udc41\ufe0f Monitor screen for changes with intelligent change detection, activity analysis, and \nautomated capture. Perfect for monitoring applications, detecting events, and tracking \nvisual changes during development or testing."
+  },
+  "bb7_window_info": {
+    "file": "visual_tool.py",
+    "args": [
+      "arguments"
+    ],
+    "doc": "\ud83e\ude9f Get comprehensive information about active windows and applications with intelligent \nanalysis and management suggestions. Perfect for window management, application monitoring, \nand development environment optimization."
+  },
+  "bb7_journal_record_thought": {
+    "file": "thought_journal_tool.py",
+    "args": [
+      "content",
+      "type",
+      "context",
+      "confidence",
+      "tags",
+      "linked_memories",
+      "linked_files"
+    ],
+    "doc": "Record a thought, insight, hypothesis, observation, or question.\n\nArgs:\n    content: The thought/reasoning content.\n    type: One of thought|insight|hypothesis|observation|question.\n    context: Situational context that prompted this thought.\n    confidence: Confidence level 0.0-1.0 (default 0.7).\n    tags: Optional classification tags.\n    linked_memories: Keys from memory_tool to link to this thought.\n    linked_files: File paths relevant to this thought.\n\nReturns:\n    Confirmation string with assigned entry ID."
+  },
+  "bb7_journal_capture_decision": {
+    "file": "thought_journal_tool.py",
+    "args": [
+      "decision",
+      "rationale",
+      "alternatives",
+      "constraints",
+      "risk_assessment",
+      "success_criteria",
+      "linked_memories",
+      "linked_files"
+    ],
+    "doc": "Record a decision with full provenance: rationale, alternatives considered,\nconstraints, risk assessment, and success criteria.\n\nArgs:\n    decision: What was decided.\n    rationale: Why this decision was made.\n    alternatives: Comma-separated or JSON array of alternatives considered.\n    constraints: Comma-separated or JSON array of constraints that shaped this.\n    risk_assessment: What could go wrong with this decision.\n    success_criteria: How to know if this decision was correct.\n    linked_memories: Memory keys relevant to this decision.\n    linked_files: File paths relevant to this decision.\n\nReturns:\n    Confirmation string with decision summary and entry ID."
+  },
+  "bb7_journal_add_outcome": {
+    "file": "thought_journal_tool.py",
+    "args": [
+      "entry_id",
+      "outcome",
+      "validated"
+    ],
+    "doc": "Retrospectively record what happened as a result of a thought or decision.\nFor decisions, sets status to 'validated' or 'invalidated'.\n\nArgs:\n    entry_id: Journal entry ID (8-char hex from prior record/capture call).\n    outcome: Description of what actually happened.\n    validated: True=confirmed correct, False=was wrong, None=unknown yet.\n\nReturns:\n    Confirmation with updated status."
+  },
+  "bb7_journal_search": {
+    "file": "thought_journal_tool.py",
+    "args": [
+      "query",
+      "max_results",
+      "entry_type"
+    ],
+    "doc": "BM25-ranked full-text search across all journal entries.\n\nArgs:\n    query: Search query.\n    max_results: Maximum results to return (default 5).\n    entry_type: Filter by type: thought|insight|hypothesis|observation|question|decision\n\nReturns:\n    Formatted ranked result list."
+  },
+  "bb7_journal_get_decision_trail": {
+    "file": "thought_journal_tool.py",
+    "args": [
+      "topic",
+      "days"
+    ],
+    "doc": "Get the chronological decision history for a topic.\nUses BM25 to find relevant decisions, then orders them by creation time.\n\nArgs:\n    topic: Topic or keyword to trace decisions for.\n    days: Look-back window in days (default 90).\n\nReturns:\n    Chronological narrative of decisions, status, and outcomes."
+  },
+  "bb7_journal_surface_relevant": {
+    "file": "thought_journal_tool.py",
+    "args": [
+      "context_text",
+      "max_results"
+    ],
+    "doc": "Proactively surface journal entries most relevant to the current context.\nApplies a 1.5\u00d7 recency boost to entries from the last 7 days.\n\nArgs:\n    context_text: Current work context, task description, or code snippet.\n    max_results: Max entries to surface (default 5).\n\nReturns:\n    Ranked list of relevant thoughts and decisions."
+  },
+  "bb7_journal_detect_conflicts": {
+    "file": "thought_journal_tool.py",
+    "args": [
+      "topic"
+    ],
+    "doc": "Find decisions that may contradict each other on the same topic.\n\nUses BM25 similarity + negation word heuristic to identify pairs\nof decisions where one affirms what another denies.\n\nArgs:\n    topic: Optional topic to focus conflict detection (empty = scan all decisions).\n\nReturns:\n    Formatted report of detected conflicts."
+  },
+  "bb7_journal_generate_retrospective": {
+    "file": "thought_journal_tool.py",
+    "args": [
+      "days"
+    ],
+    "doc": "Synthesise journal entries from the last N days into a retrospective document.\n\nSections:\n  1. Decisions made (with validation status)\n  2. Key insights captured\n  3. Hypotheses (validated vs invalidated)\n  4. Open questions\n  5. Decision quality metrics\n\nArgs:\n    days: Look-back window in days (default 30).\n\nReturns:\n    Formatted retrospective document."
+  },
+  "bb7_journal_get_reasoning_chain": {
+    "file": "thought_journal_tool.py",
+    "args": [
+      "decision_id"
+    ],
+    "doc": "Reconstruct the reasoning chain that led to a specific decision.\n\nFollows the decision's linked_thoughts to collect supporting thought\nentries, then sorts them chronologically to show how reasoning evolved.\n\nArgs:\n    decision_id: ID of the decision entry to trace.\n\nReturns:\n    Chronological reasoning chain narrative."
+  },
+  "bb7_journal_stats": {
+    "file": "thought_journal_tool.py",
+    "args": [],
+    "doc": "Journal statistics: entry counts, decision quality, outcome rate,\nmost common tags, and recent activity summary."
+  },
+  "bb7_journal_linked_entries": {
+    "file": "thought_journal_tool.py",
+    "args": [
+      "memory_key",
+      "include_content"
+    ],
+    "doc": "Given a memory key, return all journal entries that linked to it.\n\nThis is the reverse lookup: memory_key \u2192 [journal entries].\nUseful for understanding *why* a memory was created or what decisions\nreference it.\n\nArgs:\n    memory_key: The memory store key to look up.\n    include_content: If True, include entry content previews.\n\nReturns:\n    Formatted string listing linked journal entries."
+  },
+  "bb7_start_session": {
+    "file": "session_manager_tool.py",
+    "args": [
+      "goal",
+      "context",
+      "tags"
+    ],
+    "doc": "Start a new enhanced cognitive session with intelligence"
+  },
+  "bb7_log_event": {
+    "file": "session_manager_tool.py",
+    "args": [
+      "event_type",
+      "description",
+      "details"
+    ],
+    "doc": "Enhanced event logging with auto-memory formation"
+  },
+  "bb7_capture_insight": {
+    "file": "session_manager_tool.py",
+    "args": [
+      "insight",
+      "concept",
+      "relationships"
+    ],
+    "doc": "Enhanced insight capture with auto-memory and relationship tracking"
+  },
+  "bb7_get_session_insights": {
+    "file": "session_manager_tool.py",
+    "args": [
+      "session_id"
+    ],
+    "doc": "Get comprehensive insights about a session"
+  },
+  "bb7_cross_session_analysis": {
+    "file": "session_manager_tool.py",
+    "args": [
+      "days_back"
+    ],
+    "doc": "Analyze patterns across multiple sessions"
+  },
+  "bb7_record_workflow": {
+    "file": "session_manager_tool.py",
+    "args": [
+      "workflow_name",
+      "steps",
+      "context"
+    ],
+    "doc": "Record a procedural workflow or pattern"
+  },
+  "bb7_update_focus": {
+    "file": "session_manager_tool.py",
+    "args": [
+      "focus_areas",
+      "energy_level",
+      "momentum"
+    ],
+    "doc": "Update current attention focus and energy state"
+  },
+  "bb7_pause_session": {
+    "file": "session_manager_tool.py",
+    "args": [
+      "reason"
+    ],
+    "doc": "Pause the current session"
+  },
+  "bb7_resume_session": {
+    "file": "session_manager_tool.py",
+    "args": [
+      "session_id"
+    ],
+    "doc": "Resume a paused session"
+  },
+  "bb7_list_sessions": {
+    "file": "session_manager_tool.py",
+    "args": [
+      "status",
+      "limit"
+    ],
+    "doc": "List all sessions with optional status filter"
+  },
+  "bb7_get_session_summary": {
+    "file": "session_manager_tool.py",
+    "args": [
+      "session_id"
+    ],
+    "doc": "Get a detailed summary of a specific session"
+  },
+  "bb7_link_memory_to_session": {
+    "file": "session_manager_tool.py",
+    "args": [
+      "memory_key"
+    ],
+    "doc": "Link a memory key to the current session"
+  },
+  "bb7_run_command": {
+    "file": "shell_tool.py",
+    "args": [
+      "arguments"
+    ],
+    "doc": " Execute shell commands safely with intelligent output analysis, error diagnosis, and \nsecurity controls. Perfect for development tasks, system administration, and automation.\nProvides detailed execution results, performance metrics, and actionable suggestions for \ncommand optimization and troubleshooting."
+  },
+  "bb7_get_system_info": {
+    "file": "shell_tool.py",
+    "args": [
+      "arguments"
+    ],
+    "doc": " Get comprehensive system information including hardware specs, OS details, running processes, \ndisk usage, memory utilization, and network status. Perfect for troubleshooting, performance \nmonitoring, and understanding your development environment. Provides actionable insights for \nsystem optimization and resource management."
+  },
+  "bb7_list_processes": {
+    "file": "shell_tool.py",
+    "args": [
+      "arguments"
+    ],
+    "doc": " List and analyze running processes with intelligent filtering, resource usage analysis, \nand performance insights. Perfect for troubleshooting resource issues, monitoring system \nperformance, and identifying processes that may be affecting development work. Provides \nactionable recommendations for process management and optimization."
+  },
+  "bb7_get_command_history": {
+    "file": "shell_tool.py",
+    "args": [
+      "arguments"
+    ],
+    "doc": " View command execution history with performance analysis, success rates, and usage patterns.\nPerfect for reviewing recent development activities, analyzing command performance, and \nidentifying frequently used commands for automation opportunities. Provides insights into \ncommand efficiency and suggests optimizations."
+  },
+  "bb7_exo_bootstrap": {
+    "file": "exoskeleton_tool.py",
+    "args": [
+      "include_recent_outcomes",
+      "include_healthcheck"
+    ],
+    "doc": "Bootstrap capability context for each turn."
+  },
+  "bb7_exo_list_tool_categories": {
+    "file": "exoskeleton_tool.py",
+    "args": [],
+    "doc": "List all categories and samples."
+  },
+  "bb7_exo_category_specific_tools": {
+    "file": "exoskeleton_tool.py",
+    "args": [
+      "category",
+      "limit"
+    ],
+    "doc": "List category-specific tools with priors."
+  },
+  "bb7_exo_route": {
+    "file": "exoskeleton_tool.py",
+    "args": [
+      "intent",
+      "max_candidates",
+      "include_neighbors",
+      "neighbor_distance"
+    ],
+    "doc": "Retrieve top tools for an intent using semantic and graph signals."
+  },
+  "bb7_exo_plan": {
+    "file": "exoskeleton_tool.py",
+    "args": [
+      "intent",
+      "context",
+      "beam_width",
+      "max_chain_length"
+    ],
+    "doc": "Generate candidate execution chains with confidence and fallback."
+  },
+  "bb7_exo_reflect": {
+    "file": "exoskeleton_tool.py",
+    "args": [
+      "plan_id",
+      "tools_used",
+      "success",
+      "error",
+      "intent",
+      "recovery_strategy"
+    ],
+    "doc": "Update priors after execution and store reflection telemetry."
+  },
+  "bb7_exo_state": {
+    "file": "exoskeleton_tool.py",
+    "args": [
+      "limit"
+    ],
+    "doc": "Return exoskeleton priors, macros, and recovery hints."
+  },
+  "bb7_exo_get_recent_activity": {
+    "file": "exoskeleton_tool.py",
+    "args": [
+      "limit"
+    ],
+    "doc": "Get recent activity from all AI instances - call at session start to sync context.\n\nReturns a concise summary of what other AIs have been doing, including:\n- Recent tool executions and their outcomes\n- Active workflows being pursued\n- Discovered patterns (macros)\n\nThis enables multi-AI coordination by sharing state across instances."
+  },
+  "bb7_exo_briefing": {
+    "file": "exoskeleton_tool.py",
+    "args": [
+      "intent",
+      "max_recommendations"
+    ],
+    "doc": "Generate a natural-language capability narrative for the current intent.\n\nThis is the *paradigm shift* tool: instead of raw routing scores it\nreturns a human-readable briefing that helps the LLM understand what\nit can do, what workflows are proven, and where the system stands\nright now \u2014 in plain prose.\n\nArgs:\n    intent: The user-facing goal or task description.\n    max_recommendations: Maximum recommended tools to surface.\n\nReturns:\n    Dict with ``narrative`` (markdown string), ``recommended_first_call``,\n    ``workflow_plan``, ``confidence_score``, and optional extras."
+  },
+  "bb7_exo_preemptive_recovery": {
+    "file": "exoskeleton_tool.py",
+    "args": [
+      "intent",
+      "risk_tolerance"
+    ],
+    "doc": "Analyse a planned workflow for failure risks *before* execution.\n\nScans the best plan for each step's reliability, finds alternatives\nfor weak links, and generates risk-aware recommendations.\n\nArgs:\n    intent: The task intent to plan for.\n    risk_tolerance: One of ``conservative``, ``moderate``, ``aggressive``.\n\nReturns:\n    Dict with per-step risk analysis, alternatives, and overall\n    risk score."
+  },
+  "bb7_exo_route_focused": {
+    "file": "exoskeleton_tool.py",
+    "args": [
+      "intent",
+      "top_n"
+    ],
+    "doc": "Progressive-disclosure routing: return only the top-N tools with\na single sentence each, plus a hint about how many more are available.\n\nThis is for contexts where token economy matters \u2014 the LLM gets a\ntight, actionable list instead of a full routing dump.\n\nArgs:\n    intent: The task intent.\n    top_n: Number of tools to surface (default 5).\n\nReturns:\n    Dict with ``focused_tools``, ``total_available``, and\n    ``expansion_hint``."
+  },
+  "bb7_exo_execute_step": {
+    "file": "exoskeleton_tool.py",
+    "args": [
+      "plan_id",
+      "step_index",
+      "tool_name",
+      "result_summary",
+      "success",
+      "dry_run"
+    ],
+    "doc": "Record step execution in a checkpointed plan.\n\nThis does NOT execute the tool itself \u2014 the LLM runs the tool and then\ncalls this to log the outcome. The checkpoint is updated atomically so\nplans survive crashes.\n\nArgs:\n    plan_id: Plan identifier from bb7_exo_plan.\n    step_index: 0-based step index in the chain.\n    tool_name: Tool that was executed (auto-resolved from chain if omitted).\n    result_summary: Brief summary of the step outcome.\n    success: Whether the step succeeded.\n    dry_run: If True, preview the checkpoint mutation without persisting.\n\nReturns:\n    Updated plan checkpoint with KPI."
+  },
+  "bb7_exo_resume_plan": {
+    "file": "exoskeleton_tool.py",
+    "args": [
+      "plan_id"
+    ],
+    "doc": "Resume a checkpointed plan from where it left off.\n\nReturns the plan state, completed steps, remaining steps, and the\nnext tool to execute. Call this at session start to continue\ninterrupted multi-step workflows.\n\nArgs:\n    plan_id: Plan identifier to resume.\n\nReturns:\n    Plan checkpoint with next-action guidance."
+  },
+  "bb7_exo_kpi_report": {
+    "file": "exoskeleton_tool.py",
+    "args": [
+      "plan_id"
+    ],
+    "doc": "Generate a KPI report for one or all active plans.\n\nProvides completion rate, success rate, elapsed time, throughput,\nand health assessment for each plan.\n\nArgs:\n    plan_id: Specific plan to report on. If omitted, reports all active plans.\n\nReturns:\n    KPI report with per-plan metrics and aggregate stats."
+  },
+  "bb7_exo_suggest_next": {
+    "file": "exoskeleton_tool.py",
+    "args": [
+      "current_tool",
+      "current_category",
+      "intent"
+    ],
+    "doc": "Orchestration prediction: suggest next tools/actions given current context.\n\nThis is the key orchestration tool - given what just happened (current_tool)\nor what you're trying to do (intent), it predicts the logical next steps\nby combining:\n- Category transition probabilities from momentum tracking\n- Golden path / auto-discovered workflow continuity\n- Cross-category dependencies (memory\u2192analysis\u2192execution chains)\n\nArgs:\n    current_tool: Tool that was just executed (for momentum prediction)\n    current_category: Category of current work (alternative to current_tool)\n    intent: Optional intent to find next steps for\n\nReturns:\n    Dict with suggested next tools, predicted workflows, and orchestration hints."
+  },
+  "bb7_lisan_recall": {
+    "file": "exoskeleton_tool.py",
+    "args": [
+      "context",
+      "max_memories",
+      "include_plans",
+      "include_activity",
+      "include_decisions"
+    ],
+    "doc": "Context Resurrection: single-call session recovery for long-horizon tasks.\n\nAggregates:\n  1. Relevant memories via BM25 (calls bb7_memory_surface_context directly)\n  2. Active plans from checkpoint (active_plans.json)\n  3. Recent cross-AI activity (cross_ai_activity.jsonl)\n  4. Session momentum state\n  5. Relevant prior decisions (CognitiveJournalSubsystem)\n\nReturns a single LLM-ready context blob plus structured fields.\nReplaces bb7_journal_surface_relevant for session resumption."
+  },
+  "bb7_lisan_distill": {
+    "file": "exoskeleton_tool.py",
+    "args": [
+      "trajectory",
+      "source_plane",
+      "session_id",
+      "total_tokens",
+      "latency_seconds",
+      "tool_error_count"
+    ],
+    "doc": "Explicit distillation: log a complete LLM trajectory for RFT.\n\nCalled by bb7_agent_run after completing a task (success or max-iterations).\nTrajectory is a list of role/content/tool_calls dicts (standard chat format)."
+  },
+  "bb7_lisan_intend": {
+    "file": "exoskeleton_tool.py",
+    "args": [
+      "user_message",
+      "verbosity"
+    ],
+    "doc": "Expose spectral intent analysis as a direct MCP tool.\n\nMakes lisan's routing reasoning VISIBLE to the AI using MCP.\nReturns decomposed intents, confidence scores, recommended tool categories,\nmomentum bonus, and golden path match."
+  },
+  "bb7_agent_health": {
+    "file": "openrouter_agent_tool.py",
+    "args": [],
+    "doc": "Return agent integration health - ALL data in canon dir."
+  },
+  "bb7_agent_list": {
+    "file": "openrouter_agent_tool.py",
+    "args": [],
+    "doc": "List all available agents."
+  },
+  "bb7_agent_capabilities": {
+    "file": "openrouter_agent_tool.py",
+    "args": [
+      "agent_type"
+    ],
+    "doc": "Get specific agent capabilities."
+  },
+  "bb7_agent_nodes": {
+    "file": "openrouter_agent_tool.py",
+    "args": [],
+    "doc": "List all active agent nodes in the cognitive plane."
+  },
+  "bb7_agent_messages": {
+    "file": "openrouter_agent_tool.py",
+    "args": [
+      "channel",
+      "since"
+    ],
+    "doc": "Get messages from the cognitive plane."
+  },
+  "bb7_agent_handoff": {
+    "file": "openrouter_agent_tool.py",
+    "args": [
+      "to_agent",
+      "context",
+      "task"
+    ],
+    "doc": "Hand off to another agent with shared context."
+  },
+  "bb7_agent_call": {
+    "file": "openrouter_agent_tool.py",
+    "args": [
+      "agent_type",
+      "task",
+      "context"
+    ],
+    "doc": "Synchronously call another agent (non-blocking)."
+  },
+  "bb7_agent_run": {
+    "file": "openrouter_agent_tool.py",
+    "args": [
+      "agent_type",
+      "task",
+      "context",
+      "model",
+      "temperature",
+      "max_iterations",
+      "execute_tools"
+    ],
+    "doc": "Run an agent with ACTUAL TOOL EXECUTION in distributed cognitive plane."
+  },
+  "bb7_agent_status": {
+    "file": "openrouter_agent_tool.py",
+    "args": [],
+    "doc": "Get status of all active agent nodes."
+  },
+  "bb7_analyze_workflow_patterns": {
+    "file": "auto_tool_module.py",
+    "args": [
+      "analysis_depth",
+      "time_range_days"
+    ],
+    "doc": "\ud83d\udd0d Analyze workflow patterns with AI-driven insights and optimization opportunities"
+  },
+  "bb7_performance_optimization": {
+    "file": "auto_tool_module.py",
+    "args": [
+      "optimization_type",
+      "target_metrics"
+    ],
+    "doc": "Advanced performance optimization with real-time monitoring and intelligent tuning"
+  },
+  "bb7_intelligent_automation": {
+    "file": "auto_tool_module.py",
+    "args": [
+      "automation_scope",
+      "learning_mode"
+    ],
+    "doc": "Intelligent automation with adaptive learning and proactive task handling"
+  },
+  "bb7_cognitive_optimization": {
+    "file": "auto_tool_module.py",
+    "args": [
+      "focus_area",
+      "personalization_level"
+    ],
+    "doc": "Cognitive optimization for enhanced focus, creativity, and decision-making"
+  },
+  "bb7_optimization_results": {
+    "file": "auto_tool_module.py",
+    "args": [
+      "experiment_id",
+      "include_recommendations"
+    ],
+    "doc": "Comprehensive optimization results with actionable insights and next steps"
+  },
+  "bb7_adaptive_learning": {
+    "file": "auto_tool_module.py",
+    "args": [
+      "learning_scope",
+      "adaptation_speed"
+    ],
+    "doc": "Adaptive learning system that evolves based on user behavior and preferences"
+  },
+  "bb7_workspace_context_loader": {
+    "file": "auto_tool_module.py",
+    "args": [
+      "include_recent_memories",
+      "include_active_sessions",
+      "workspace_path"
+    ],
+    "doc": "Load workspace context and recent state for session continuity."
+  },
+  "bb7_show_available_capabilities": {
+    "file": "auto_tool_module.py",
+    "args": [
+      "category"
+    ],
+    "doc": "Show MCP tool categories and available tools."
+  },
+  "bb7_auto_session_resume": {
+    "file": "auto_tool_module.py",
+    "args": [
+      "workspace_path",
+      "user_intent"
+    ],
+    "doc": "Analyze existing sessions and suggest best resume/start action."
+  },
+  "bb7_intelligent_tool_guide": {
+    "file": "auto_tool_module.py",
+    "args": [
+      "user_query",
+      "context"
+    ],
+    "doc": "Analyze user intent and suggest an optimal tool sequence."
+  },
+  "bb7_analyze_code_complete": {
+    "file": "enhanced_code_analysis_tool.py",
+    "args": [
+      "arguments"
+    ],
+    "doc": "Complete code analysis with all features"
+  },
+  "bb7_python_execute_secure": {
+    "file": "enhanced_code_analysis_tool.py",
+    "args": [
+      "arguments"
+    ],
+    "doc": "Secure Python code execution"
+  },
+  "bb7_security_audit": {
+    "file": "enhanced_code_analysis_tool.py",
+    "args": [
+      "arguments"
+    ],
+    "doc": "Security-focused code analysis"
+  },
+  "bb7_get_execution_audit": {
+    "file": "enhanced_code_analysis_tool.py",
+    "args": [
+      "arguments"
+    ],
+    "doc": "Get Python execution audit log"
+  },
+  "bb7_planner_health": {
+    "file": "openrouter_planner_tool.py",
+    "args": [],
+    "doc": "Return planner integration and persistence health details."
+  },
+  "bb7_planner_template": {
+    "file": "openrouter_planner_tool.py",
+    "args": [
+      "intent",
+      "context",
+      "max_steps"
+    ],
+    "doc": "Generate a reusable planner prompt template for a given intent."
+  },
+  "bb7_planner_plan": {
+    "file": "openrouter_planner_tool.py",
+    "args": [
+      "intent",
+      "context",
+      "constraints",
+      "max_steps",
+      "model",
+      "temperature",
+      "retries",
+      "timeout",
+      "dry_run"
+    ],
+    "doc": "Generate a structured execution plan using OpenRouter."
+  }
+}

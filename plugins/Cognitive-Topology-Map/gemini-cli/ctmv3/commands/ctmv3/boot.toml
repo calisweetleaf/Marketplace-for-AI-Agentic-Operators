@@ -1,0 +1,21 @@
+description = "Run CTMv3 boot discovery and print signal inventory (cold/warm/partial branch)"
+
+prompt = """
+Run the CTMv3 boot discovery sequence:
+
+!{bash "${extensionPath}/scripts/ctmv3-wrap.sh" boot --json}
+
+Parse the JSON output and report:
+- Branch: COLD_START, WARM_START, or PARTIAL
+- Tier 1 signals found (strong CTM presence indicators)
+- Tier 2 signals found (partial CTM or related tooling)
+- Tier 3 signals found (config spine)
+- PROVENANCE.md present: yes/no
+- manifest.json present: yes/no
+- Last session: date + last action, or "none"
+
+After reporting, state the recommended next action based on the branch:
+- COLD_START: recommend running /ctmv3:activate for full Phase 0-5 activation
+- WARM_START: confirm topology validity, then proceed with task
+- PARTIAL: identify which CTM artifacts are missing, recommend targeted archaeology
+"""

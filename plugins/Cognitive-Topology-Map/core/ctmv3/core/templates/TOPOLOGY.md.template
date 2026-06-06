@@ -1,0 +1,105 @@
+# TOPOLOGY — {{PROJECT_NAME}}
+
+**Snapshot**: v1.0 — {{TODAY}}
+**Language**: {{LANGUAGE}}
+**Complexity**: UNKNOWN — fill after archaeology
+
+---
+
+## Load-Bearing Concepts
+
+[TODO: Identify 3–7 concepts whose misunderstanding causes cascading failures.
+For each concept use the format below.]
+
+### LBC 1: [Name]
+Definition: [Precise, not generous]
+Why load-bearing: [What cascades if this is wrong]
+Common misunderstanding: [The specific wrong model most agents will construct]
+Verification: [How to confirm you actually understand this, not just pattern-matched it]
+
+---
+
+## Interface Map
+
+### Inputs
+[TODO: What enters this system, with invariants — not type signatures, behavioral contracts]
+
+### Outputs
+[TODO: What exits, with guarantees]
+
+### Wrapper Contract (if applicable)
+[TODO: The behavioral contract between the wrapper and the tool layer]
+
+---
+
+## Complexity Distribution
+
+[TODO: Mermaid diagram — mandatory if 4+ nodes]
+
+Component-level breakdown:
+| Component | Density | Notes |
+|-----------|---------|-------|
+| [TODO: component] | DENSE/MEDIUM/THIN | [notes] |
+
+---
+
+## Dependency Graph
+
+[TODO: Mermaid diagram showing what depends on what]
+
+```mermaid
+graph TD
+    A[Entry Point] --> B[Core Logic]
+    B --> C[Output Layer]
+```
+
+---
+
+## Baked-In Decisions
+
+[TODO: Invisible load-bearing walls — decisions that look changeable but silently cannot be]
+
+1. [Decision]: [What it is, why it is baked in, what changes if you try to change it]
+
+---
+
+## Anti-Concepts
+
+[TODO: Things that look like they belong but do not. False attractors.]
+
+| Looks Like It Belongs | Actually Does Not | Why |
+|-----------------------|------------------|-----|
+| [TODO] | [TODO] | [TODO] |
+
+---
+
+## Temporal Structure
+
+| Component | Mutability | Change Cadence |
+|-----------|------------|----------------|
+| [TODO] | Immutable | Snapshot-locked |
+| [TODO] | Mutable | Per-integration |
+
+---
+
+## Failure Attractors
+
+[TODO: Where do agents reliably fail, even with correct knowledge?]
+
+1. [Attractor]: [Why agents fail here even with correct knowledge]
+
+---
+
+## Config File Spine
+
+| File | Present | What It Encodes |
+|------|---------|-----------------|
+| pyproject.toml | {{HAS_PYPROJECT}} | [dependencies, entry points, tool config] |
+| go.mod | {{HAS_GOMOD}} | [module path, Go version, require block] |
+| Cargo.toml | {{HAS_CARGO}} | [features, binary entry points, workspace] |
+| package.json | {{HAS_PACKAGEJSON}} | [scripts, dependencies, main entry] |
+| manifest.json | {{HAS_MANIFEST}} | [snapshot version, hash, production file set] |
+| AGENTS.md | {{HAS_AGENTS}} | [agent posture, last encoding summary] |
+| CLAUDE.md | {{HAS_CLAUDE}} | [Claude Code session history, operational constraints] |
+| .sovereign/ | {{HAS_SOVEREIGN}} | [warm start validity, last session timestamp] |
+| .github/ | {{HAS_GITHUB}} | [CI enforcement, agent context files] |

@@ -1,0 +1,100 @@
+# AGENTS.md — {{PROJECT_NAME}}
+
+**Canonical posture for all agents operating in this repository.**
+**Authority**: AGENTS.md is canonical. CLAUDE.md extends it. When in conflict, rebuild from AGENTS.md.
+
+---
+
+## What This Project Is
+
+[TODO: 2-3 sentences. What this codebase does, what drives it, what the primary
+architectural constraint is. Be operational, not promotional.]
+
+Full topology: see `ARCHITECTURE_MAP.md` for navigable traversal map.
+
+---
+
+## Boot Protocol (Read Before Any Work)
+
+1. Check `.sovereign/session_state.json` — is `warm_start_valid` true?
+2. Check `.sovereign/topology_fingerprint.txt` — does it match current `TOPOLOGY.md`?
+3. If warm and valid: read `PROVENANCE.md` Session Log, confirm last state, proceed.
+4. If cold or stale: run full discovery sequence per `BOOT_PROTOCOL.md` Section 2.
+5. After any substantive work: update `PROVENANCE.md` Session Log.
+
+---
+
+## What You Cannot Get Wrong
+
+[TODO: 3-7 load-bearing concepts from TOPOLOGY.md. Abbreviated with the common
+misunderstanding for each. These are the concepts whose misunderstanding causes
+cascading failures.]
+
+1. **[LBC Name]**: [One-line definition. Common wrong model: ...]
+2. **[LBC Name]**: [One-line definition. Common wrong model: ...]
+3. **[LBC Name]**: [One-line definition. Common wrong model: ...]
+
+---
+
+## Architecture
+
+[TODO: Paste or reference the dependency graph from TOPOLOGY.md.
+Full topology: ARCHITECTURE_MAP.md]
+
+---
+
+## What Already Exists (Do Not Reimplement)
+
+[TODO: List production modules or components that should be used via integration,
+not reimplemented.]
+
+- `[module]` — [what it does, how to call it]
+
+---
+
+## Baked-In Decisions (Do Not Question These)
+
+[TODO: From TOPOLOGY.md Baked-In Decisions — decisions that look changeable
+but silently cannot be.]
+
+1. [Decision]: [Why it is baked in]
+
+---
+
+## If Something Smells Wrong
+
+See `FAILURE_GRAMMAR.md` for full taxonomy. Top signals:
+1. [TODO: top pre-failure signature from FAILURE_GRAMMAR.md]
+2. [TODO: second pre-failure signature]
+3. Zero warnings in complex system log — check error suppression immediately.
+
+---
+
+## Tools Available
+
+[TODO: List project-specific CLI tools, scripts, or commands agents should use.]
+
+- `[tool command]` — [what it does]
+
+---
+
+## Operations Requiring Explicit Confirmation
+
+[TODO: List any operations that should not be executed without operator confirmation.
+Common examples: deleting data, modifying manifest.json, production deploys.]
+
+- [Operation]: [Why it requires confirmation]
+
+---
+
+## CTM Artifacts in This Repo
+
+| Artifact | Location | Purpose |
+|----------|----------|---------|
+| TOPOLOGY.md | repo root | Cognitive topology map — load-bearing concepts, complexity distribution |
+| FAILURE_GRAMMAR.md | repo root | Pre-failure signatures, false success patterns |
+| PROVENANCE.md | repo root | Decision log, session log, rejected paths |
+| ARCHITECTURE_MAP.md | repo root | Traversal map — navigate by question not summary |
+| .sovereign/ | repo root | Session continuity, topology fingerprint |
+| .claude/settings.json | .claude/ | Claude Code permissions |
+| .github/copilot-instructions.md | .github/ | Repo-wide agent context |

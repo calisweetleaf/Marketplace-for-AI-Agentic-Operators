@@ -1,0 +1,103 @@
+{
+  "description": "Unified hooks manifest — all Claude Code hooks discoverable by state machine",
+  "version": "1.0",
+  "generated": "2026-04-15T05:44:00Z",
+  "hooks": {
+    "PreToolUse": [
+      {
+        "plugin": "hookify",
+        "name": "pretooluse",
+        "command": "python3 ${CLAUDE_PLUGIN_ROOT}/hooks/pretooluse.py",
+        "timeout": 10,
+        "description": "Pre-tool-use hook from hookify plugin"
+      },
+      {
+        "plugin": "security-guidance",
+        "name": "security_reminder",
+        "command": "python3 ${CLAUDE_PLUGIN_ROOT}/hooks/security_reminder_hook.py",
+        "matcher": "Edit|Write|MultiEdit",
+        "description": "Security check before file modifications"
+      }
+    ],
+    "PostToolUse": [
+      {
+        "plugin": "hookify",
+        "name": "posttooluse",
+        "command": "python3 ${CLAUDE_PLUGIN_ROOT}/hooks/posttooluse.py",
+        "timeout": 10,
+        "description": "Post-tool-use hook from hookify plugin"
+      },
+      {
+        "plugin": "sovereign-intelligence",
+        "name": "intelligent_output_cleaner",
+        "command": "/home/daeron/Somnus-MCP/mcp.venv/bin/python /home/daeron/Somnus-MCP/intelligent_output_hook.py",
+        "timeout": 15,
+        "description": "Cleans tool JSON output and injects muadib neural context"
+      }
+    ],
+    "UserPromptSubmit": [
+      {
+        "plugin": "hookify",
+        "name": "userpromptsubmit",
+        "command": "python3 ${CLAUDE_PLUGIN_ROOT}/hooks/userpromptsubmit.py",
+        "timeout": 10,
+        "description": "Fires when user submits a prompt"
+      }
+    ],
+    "SessionStart": [
+      {
+        "plugin": "explanatory-output-style",
+        "name": "session_start",
+        "command": "bash \"${CLAUDE_PLUGIN_ROOT}/hooks-handlers/session-start.sh\"",
+        "description": "Session initialization hook"
+      }
+    ],
+    "Stop": [
+      {
+        "plugin": "ralph-loop",
+        "name": "ralph_loop_stop",
+        "command": "bash \"${CLAUDE_PLUGIN_ROOT}/hooks/stop-hook.sh\"",
+        "description": "Ralph loop self-referential trigger"
+      },
+      {
+        "plugin": "hookify",
+        "name": "stop",
+        "command": "python3 ${CLAUDE_PLUGIN_ROOT}/hooks/stop.py",
+        "timeout": 10,
+        "description": "General stop hook"
+      }
+    ]
+  },
+  "autoTriggerRules": {
+    "PreToolUse": {
+      "trigger": "before_any_tool_execution",
+      "order": "sequential",
+      "continueOnFailure": false
+    },
+    "PostToolUse": {
+      "trigger": "after_any_tool_execution",
+      "order": "sequential",
+      "continueOnFailure": false
+    },
+    "UserPromptSubmit": {
+      "trigger": "on_user_input_submission",
+      "order": "sequential",
+      "continueOnFailure": false
+    },
+    "SessionStart": {
+      "trigger": "on_session_initialization",
+      "order": "sequential",
+      "continueOnFailure": false
+    },
+    "Stop": {
+      "trigger": "on_session_exit",
+      "order": "sequential",
+      "continueOnFailure": true
+    }
+  },
+  "environment": {
+    "CLAUDE_PLUGIN_ROOT": "/home/daeron/.claude/plugins/marketplaces/claude-plugins-official/plugins",
+    "SOVEREIGN_HOOKS_ENABLED": "1",
+    "SOVEREIGN_AUTO_HOOK_TRIGGER": "1"
+  }
+}

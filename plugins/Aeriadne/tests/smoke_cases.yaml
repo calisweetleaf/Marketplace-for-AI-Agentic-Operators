@@ -1,0 +1,41 @@
+cases:
+  - id: plugin_metadata_parse
+    description: Root plugin.json is valid JSON
+    command: python3 -m json.tool plugin.json
+    expect_exit: 0
+  - id: codex_mirror_parse
+    description: .codex-plugin/plugin.json is valid JSON
+    command: python3 -m json.tool .codex-plugin/plugin.json
+    expect_exit: 0
+  - id: claude_mirror_parse
+    description: .claude-plugin/plugin.json is valid JSON
+    command: python3 -m json.tool .claude-plugin/plugin.json
+    expect_exit: 0
+  - id: registry_card_parse
+    description: registry/aeriadne.plugin.json is valid JSON
+    command: python3 -m json.tool registry/aeriadne.plugin.json
+    expect_exit: 0
+  - id: package_validator
+    description: Full package shape, manifest drift, skill frontmatter, forbidden files
+    command: python3 scripts/validate_package.py .
+    expect_exit: 0
+  - id: cpf_package_validator
+    description: CPF skill package validation (name, description, required paths)
+    command: python3 skills/constitutional-prompt-framework/scripts/validate_skill_package.py skills/constitutional-prompt-framework
+    expect_exit: 0
+  - id: cpf_linter
+    description: CPF constitution linter on example constitution
+    command: python3 skills/constitutional-prompt-framework/scripts/constitution_linter.py skills/constitutional-prompt-framework/examples/example-agent-constitution.md
+    expect_exit: 0
+  - id: cpf_scorer
+    description: CPF constitution scorer; must reach >=75 (production candidate)
+    command: python3 skills/constitutional-prompt-framework/scripts/score_constitution.py skills/constitutional-prompt-framework/examples/example-agent-constitution.md
+    expect_exit: 0
+  - id: cpf_static_evals
+    description: CPF static red-team eval probe validation
+    command: python3 skills/constitutional-prompt-framework/scripts/run_static_evals.py skills/constitutional-prompt-framework/tests/eval_cases.yaml
+    expect_exit: 0
+  - id: cpf_render_fixture
+    description: CPF render constitution from minimal spec fixture
+    command: python3 skills/constitutional-prompt-framework/scripts/render_constitution_from_spec.py skills/constitutional-prompt-framework/tests/fixtures/minimal_constitution_spec.json -o /tmp/aeriadne-cpf-smoke-render.md
+    expect_exit: 0

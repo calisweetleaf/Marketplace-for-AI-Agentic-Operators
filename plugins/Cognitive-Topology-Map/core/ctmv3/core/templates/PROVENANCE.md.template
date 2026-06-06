@@ -1,0 +1,67 @@
+# PROVENANCE — {{PROJECT_NAME}}
+
+**Loaded by**: Agent at session start, snapshot work, lineage checks
+**Purpose**: Records the history of decisions so future agents do not re-discover
+rejected paths. The collective memory of the system — independent of any agent's
+context window, independent of any session's continuity.
+
+---
+
+## Snapshot Lineage
+
+| Version | Date | Source Project | Changes from Previous |
+|---------|------|---------------|-----------------------|
+| v1.0 | {{TODAY}} | {{PROJECT_NAME}} | Initial CTMv3 activation |
+
+**Current authoritative snapshot**: v1.0 — {{TODAY}}
+**SHA-256 manifest hash**: [TODO: populate from manifest.json if present]
+
+---
+
+## Architectural Decisions (Chronological)
+
+### Decision 1: CTMv3 Activation
+**Date**: {{TODAY}}
+**Context**: Initial workspace activation pass on {{PROJECT_NAME}}
+**Options considered**:
+1. Manual documentation — deferred: not agent-operable
+2. **CTMv3 activation — chosen**: produces living, agent-operable workspace structure
+**Implications**: All agents entering this repo should run BOOT_PROTOCOL.md discovery
+before any work begins.
+**Revisit condition**: If CTM artifacts are found to conflict with existing project tooling.
+
+---
+
+## Rejected Alternatives (Graveyard)
+
+[TODO: Log paths tried and rejected during development.]
+
+### Rejected: [Name]
+**What it was**: [Description]
+**Why it looked appealing**: [The seductive part]
+**Why it was rejected**: [The actual problem]
+**Status**: Permanently rejected | Deferred | Superseded by [alternative]
+
+---
+
+## Open Questions
+
+| Question | Assumption Made | Impact if Wrong |
+|----------|----------------|-----------------|
+| [TODO: question] | [assumption] | [what breaks] |
+
+---
+
+## Integration History
+
+| Module | Source | Integrated | Status | Notes |
+|--------|--------|-----------|--------|-------|
+| [TODO: module] | [source] | [date] | Active | [notes] |
+
+---
+
+## Session Log
+
+| Date | Agent | Action | Topology Drift? | Next Recommended Action |
+|------|-------|--------|----------------|------------------------|
+| {{TODAY}} | CTMv3 Engine | Initial activation — scaffolded CTMv3 artifacts | no | Fill TOPOLOGY.md LBCs and ARCHITECTURE_MAP.md branches |

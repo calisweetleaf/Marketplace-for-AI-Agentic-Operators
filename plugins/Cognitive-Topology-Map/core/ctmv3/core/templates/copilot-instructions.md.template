@@ -1,0 +1,70 @@
+# {{PROJECT_NAME}} — Agent Context
+
+## What This Codebase Is
+
+[TODO: 2-3 sentences from TOPOLOGY.md: domain, primary purpose, key constraint.
+Be operational. What does this system DO and what drives it?]
+
+Full topology: `ARCHITECTURE_MAP.md`
+
+---
+
+## Architecture
+
+[TODO: Paste the dependency graph from TOPOLOGY.md.
+Reference: full traversal map at ARCHITECTURE_MAP.md]
+
+---
+
+## What You Cannot Get Wrong (Load-Bearing Concepts)
+
+[TODO: 3-7 LBCs from TOPOLOGY.md — abbreviated, with the common misunderstanding field.
+These are the concepts whose misunderstanding causes cascading failures.]
+
+1. **[LBC Name]**: [One-line definition.] Common misunderstanding: [wrong model]
+2. **[LBC Name]**: [One-line definition.] Common misunderstanding: [wrong model]
+3. **[LBC Name]**: [One-line definition.] Common misunderstanding: [wrong model]
+
+---
+
+## What Already Exists (Do Not Reimplement)
+
+[TODO: List modules, libraries, or tools already in production in this repo.
+Prefer integration over reimplementation.]
+
+- `[module]` — [what it does]
+
+---
+
+## Baked-In Decisions (Do Not Question These)
+
+[TODO: From TOPOLOGY.md Baked-In Decisions. These are decisions that look
+changeable but silently cannot be.]
+
+1. [Decision]: [Why it cannot be changed without cascading consequences]
+
+---
+
+## If Something Smells Wrong
+
+See `FAILURE_GRAMMAR.md`. Top 3 pre-failure signals to investigate first:
+
+1. [TODO: top signal from FAILURE_GRAMMAR.md]
+2. [TODO: second signal]
+3. Zero warnings in complex system log — check error suppression.
+
+---
+
+## CTM Boot Protocol
+
+Before any work in this repo:
+1. Check `.sovereign/session_state.json` — warm or cold entry?
+2. If warm: verify `.sovereign/topology_fingerprint.txt` hash still matches
+3. Read `PROVENANCE.md` Session Log — what was the last action?
+4. If cold: run full discovery per `BOOT_PROTOCOL.md` Section 2.
+
+---
+
+## Tools
+
+[TODO: List project-specific CLI tools and commands.]

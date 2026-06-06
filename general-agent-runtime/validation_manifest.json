@@ -1,0 +1,67 @@
+{
+  "artifact_sha256": {
+    "AGENTS_merged.md": "5ecb239ba2e2b01decf83e55ea300f2d979daafeaba5a22970fc47c00265f4c5",
+    "README_DEPLOYMENT.md": "e0976f8fb9efc923e7077be89853a1080d2685098c76e4c101d54a75f2933bfe",
+    "bin/hooks/_lib.py": "f77b5b9aa2586dd8b834f2b5231c74bb26af2d8dcfef2780f918e0c532cb064a",
+    "bin/hooks/post_compact.py": "64da8f451ccbecf75b47a940b0837c11e4dfcbfae757e82626ee27f9dac37e68",
+    "bin/hooks/post_tool_use.py": "fedb6b4ba84ff467306b43e7a76f9af06ef08d58f984a2ecf32f2e22cf0589e9",
+    "bin/hooks/pre_compact.py": "6a05bdab3710d442bd3939d65bf518584e0968dfc98f30065fefe02c5926e331",
+    "bin/hooks/pre_tool_use.py": "86022b02718e4d767c064af238107f11a16a26aec18fc885b097a29c3926c62b",
+    "bin/hooks/session_start.py": "1c2ad11eaae9a654e5bb2e09c3d7de7d5eb2283cce96d4021d58ae58130090b7",
+    "bin/hooks/stop.py": "0801ad781e364db00c129246e0be6b9958517e4a8b095b859de659d81c282229",
+    "bin/hooks/subagent_start.py": "957829788711856e004d2b57e3b0ab4d9152966963fe75699a1af6cd97ad0cc6",
+    "bin/hooks/subagent_stop.py": "48f83bcb1c327a517b606014074437cc4dfb134d9ad405d83ab06dc7a1a1f0e6",
+    "bin/hooks/user_prompt_submit.py": "f5d45bb1b0122b3b2d6d15d084cc63dcea5098dfbbb2c1b2cd732aed43f2177b",
+    "bin/notify_relay.py": "1c2cdc2f91e2fd18c100804fc0a402dd680014761e6ea7780c9ba7651276b3ff",
+    "config_patched.toml": "d627f584409408eab9fba54470d278cbc42ab11f93a453a196de8a568d542a4a",
+    "hooks.json": "d8ccf40fbd1bc527d2f3cd6ad176c05666f2ba6f8637d62d444f6f2728d23d79",
+    "requirements.toml": "f0526424ab4427a4f666e4c97e735546e58eac6369ac4ba36ba037775b648a1d",
+    "research.config.toml": "e4f48752448690c16f24d42891c41ccd3417e5b975c20ac24abf602e70be50be",
+    "sovereign.config.toml": "9195a5db2b169ce7ac20a05d967da046c00a52fd3abd67938c20bff6fbd64a98",
+    "stealth.config.toml": "bbee2ac467ca0d187dda58cc701f99fb70ad01eecc431327fd57d8294a138adf"
+  },
+  "base_overwritten": false,
+  "config_diff": {
+    "changed": [
+      {
+        "current": true,
+        "key": "features.plugins",
+        "staged": false
+      }
+    ],
+    "only_current": [
+      "hooks.state./home/daeron/.codex/hooks.json:permission_request:0:0.trusted_hash",
+      "hooks.state./home/daeron/.codex/hooks.json:post_tool_use:0:0.trusted_hash",
+      "hooks.state./home/daeron/.codex/hooks.json:pre_tool_use:0:0.trusted_hash",
+      "hooks.state./home/daeron/.codex/hooks.json:stop:0:0.trusted_hash",
+      "hooks.state./home/daeron/.codex/hooks.json:user_prompt_submit:0:0.trusted_hash"
+    ],
+    "only_stage": []
+  },
+  "fixes_applied": [
+    "Converted invalid multiline inline shell_environment_policy.set tables to TOML subtables in profile configs.",
+    "Removed duplicate feature keys from profile configs.",
+    "Resolved invalid otel exporter scalar/table collision by using otlp_http_endpoint scalar.",
+    "Rebased config_patched.toml to retain current external_migration and mentions_v2 flags.",
+    "Rewrote hooks.json to use CODEX_HOME fallback so staging can test without base overwrite and deployment can use ~/.codex/bin/hooks.",
+    "Patched hook scripts to call live SovereignMCP tool signatures and keep stdout hook-JSON-clean.",
+    "Added deployable bin/notify_relay.py stub.",
+    "Updated README_DEPLOYMENT.md to match actual staged files and deployment paths."
+  ],
+  "generated_at": "2026-05-27T02:35:00-05:00",
+  "next_actions": [
+    "Review staged config/hook behavior and decide whether hooks should deploy under ~/.codex/bin/hooks as staged.",
+    "Before copying out, back up current ~/.codex/config.toml and ~/.codex/hooks.json.",
+    "Copy config_patched.toml to ~/.codex/config.toml, hooks.json to ~/.codex/hooks.json, and bin/ to ~/.codex/bin only after approval.",
+    "Do not deploy /etc/codex/requirements.toml until root-level policy is explicitly approved."
+  ],
+  "source_zip": "/home/daeron/.codex/SOVEREIGN_CODEX_V2-2.zip",
+  "stage_dir": "/home/daeron/.codex/DESK/SOVEREIGN_CODEX_V2-2",
+  "validation": {
+    "base_safety": "PASS: no staged artifact was copied over /home/daeron/.codex/config.toml or /home/daeron/.codex/hooks.json",
+    "hook_smoke": "PASS: SessionStart, UserPromptSubmit, PreToolUse, PermissionRequest, PostToolUse, PreCompact, PostCompact, SubagentStart, SubagentStop, Stop exited 0; stdout empty or valid JSON; stderr empty",
+    "json_parse": "PASS: hooks.json parsed and all 10 configured Codex hook events were smoke-tested via /bin/sh with CODEX_HOME=stage",
+    "python_compile": "PASS: bin/hooks/*.py and bin/notify_relay.py compiled with py_compile",
+    "toml_parse": "PASS: config_patched, sovereign, stealth, research, requirements parsed with Python tomllib"
+  }
+}

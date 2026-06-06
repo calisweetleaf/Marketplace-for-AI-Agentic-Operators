@@ -1,0 +1,31 @@
+# ~/.grok/config.toml
+# CI-safe baseline. Pair with command-line --permission-mode dontAsk and explicit --allow rules.
+
+[cli]
+auto_update = false
+
+[models]
+default = "grok-build"
+
+[tools]
+respect_gitignore = true
+
+[toolset.bash]
+timeout_secs = 180.0
+output_byte_limit = 131072
+
+[memory]
+enabled = false
+
+[subagents]
+enabled = false
+
+[permission]
+rules = [
+  { action = "allow", tool = "read" },
+  { action = "allow", tool = "grep" },
+  { action = "allow", tool = "bash", pattern = "git *" },
+  { action = "allow", tool = "bash", pattern = "gh *" },
+  { action = "deny",  tool = "bash", pattern = "rm *" },
+  { action = "deny",  tool = "bash", pattern = "rm -rf *" },
+]

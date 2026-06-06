@@ -1,0 +1,3 @@
+interface:
+  display_name: "Document Omniscient"
+  short_description: "Explicit-invocation deep corpus analysis with tool-aware synthesis and memory gating"

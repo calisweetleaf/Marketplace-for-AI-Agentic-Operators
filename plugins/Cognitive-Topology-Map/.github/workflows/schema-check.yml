@@ -1,0 +1,161 @@
+name: Schema Check
+
+on:
+  push:
+    paths:
+      - "claude-code/**"
+      - "codex/**"
+      - "opencode/**"
+      - "gemini-cli/**"
+      - "cursor/**"
+      - "research/RUNTIME_FORMATS.md"
+      - "docs/SCHEMA_AUDIT.md"
+  pull_request:
+    paths:
+      - "claude-code/**"
+      - "codex/**"
+      - "opencode/**"
+      - "gemini-cli/**"
+      - "cursor/**"
+      - "research/RUNTIME_FORMATS.md"
+      - "docs/SCHEMA_AUDIT.md"
+
+jobs:
+  schema-check:
+    name: Adapter schema validation
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Set up Python 3.12
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+
+      - name: JSON syntax — all adapter manifests and hooks
+        run: |
+          set -euo pipefail
+          FAILED=0
+          for f in \
+            claude-code/.claude-plugin/plugin.json \
+            claude-code/settings.json \
+            claude-code/hooks/hooks.json \
+            codex/config-fragments/hooks.json.fragment \
+            gemini-cli/ctmv3/gemini-extension.json
+          do
+            if [ ! -f "$f" ]; then
+              echo "SKIP (absent): $f"
+              continue
+            fi
+            if python3 -c "import json; json.load(open('$f'))" 2>/dev/null; then
+              echo "OK:   $f"
+            else
+              echo "FAIL: $f — invalid JSON"
+              FAILED=$((FAILED + 1))
+            fi
+          done
+          if [ "$FAILED" -gt 0 ]; then
+            echo "ERROR: $FAILED JSON file(s) failed syntax check."
+            exit 1
+          fi
+
+      - name: Required fields — claude-code hooks.json
+        run: |
+          python3 - <<'PYEOF'
+          import json, sys, os
+
+          path = "claude-code/hooks/hooks.json"
+          if not os.path.exists(path):
+              print(f"SKIP (absent): {path}")
+              sys.exit(0)
+
+          data = json.load(open(path))
+          # hooks.json must be a dict with at least one hook key
+          if not isinstance(data, dict):
+              print(f"FAIL: {path} is not a JSON object")
+              sys.exit(1)
+
+          print(f"OK: {path} is a valid JSON object with {len(data)} top-level key(s)")
+          PYEOF
+
+      - name: Required fields — codex hooks.json.fragment
+        run: |
+          python3 - <<'PYEOF'
+          import json, sys, os
+
+          path = "codex/config-fragments/hooks.json.fragment"
+          if not os.path.exists(path):
+              print(f"SKIP (absent): {path}")
+              sys.exit(0)
+
+          data = json.load(open(path))
+          if not isinstance(data, dict):
+              print(f"FAIL: {path} is not a JSON object")
+              sys.exit(1)
+
+          print(f"OK: {path} is a valid JSON object with {len(data)} top-level key(s)")
+          PYEOF
+
+      - name: Required fields — gemini-cli extension manifest
+        run: |
+          python3 - <<'PYEOF'
+          import json, sys, os
+
+          path = "gemini-cli/ctmv3/gemini-extension.json"
+          if not os.path.exists(path):
+              print(f"SKIP (absent): {path}")
+              sys.exit(0)
+
+          data = json.load(open(path))
+          required_fields = ["name", "version"]
+          missing = [f for f in required_fields if f not in data]
+          if missing:
+              print(f"FAIL: {path} is missing required fields: {missing}")
+              sys.exit(1)
+
+          print(f"OK: {path} has all required fields: {required_fields}")
+          PYEOF
+
+      - name: TOML structural check — gemini-cli command files
+        run: |
+          set -euo pipefail
+          COUNT=0
+          FAILED=0
+          for f in $(find gemini-cli -name "*.toml" 2>/dev/null); do
+            if grep -q 'description = ' "$f" && grep -q 'prompt = ' "$f"; then
+              echo "OK:   $f"
+              COUNT=$((COUNT + 1))
+            else
+              echo "FAIL: $f — missing 'description' or 'prompt' field"
+              FAILED=$((FAILED + 1))
+            fi
+          done
+          echo "$COUNT TOML files checked."
+          if [ "$FAILED" -gt 0 ]; then
+            echo "ERROR: $FAILED TOML file(s) failed structural check."
+            exit 1
+          fi
+
+      - name: Bash script syntax — adapter scripts
+        run: |
+          set -euo pipefail
+          COUNT=0
+          FAILED=0
+          for s in $(find claude-code codex opencode gemini-cli cursor \
+                         -name "*.sh" -type f 2>/dev/null); do
+            if bash -n "$s" 2>/dev/null; then
+              echo "OK:   $s"
+              COUNT=$((COUNT + 1))
+            else
+              echo "FAIL: $s — bash syntax error"
+              bash -n "$s"
+              FAILED=$((FAILED + 1))
+            fi
+          done
+          echo "$COUNT bash scripts checked."
+          if [ "$FAILED" -gt 0 ]; then
+            echo "ERROR: $FAILED script(s) have syntax errors."
+            exit 1
+          fi

@@ -1,0 +1,121 @@
+name: Topology Enforce — rosemary-distill
+
+# Example: topology-enforce configured for the rosemary-distill repository.
+# This shows a fully configured instance of the topology-enforce workflow.
+# The key differences from the generic template:
+#   - Triggers on pushes to main and develop only (not all branches)
+#   - Validates TOPOLOGY.md has the "Distillation Pipeline" LBC section
+#   - Checks that the fingerprint matches after any PR that touches src/ or TOPOLOGY.md
+
+on:
+  push:
+    branches:
+      - main
+      - develop
+    paths:
+      - "src/**"
+      - "TOPOLOGY.md"
+      - "ARCHITECTURE_MAP.md"
+      - ".sovereign/**"
+  pull_request:
+    branches:
+      - main
+      - develop
+    paths:
+      - "src/**"
+      - "TOPOLOGY.md"
+      - "ARCHITECTURE_MAP.md"
+      - ".sovereign/**"
+
+jobs:
+  topology-enforce:
+    name: Rosemary topology integrity check
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Set up Python 3.12
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+
+      - name: Install CTMv3 engine (from plugin checkout)
+        run: |
+          # CTMv3 is stdlib-only — no pip install needed.
+          # The engine is vendored under .ctmv3/core/ in this repo.
+          echo "PYTHONPATH=.ctmv3/core" >> "$GITHUB_ENV"
+
+      - name: Verify topology fingerprint
+        run: |
+          python3 - <<'PYEOF'
+          import sys
+          from pathlib import Path
+
+          sys.path.insert(0, ".ctmv3/core")
+          from ctmv3.core import fingerprint as fp
+
+          root = Path(".")
+          matches, current_hash = fp.verify(root)
+          stored = fp.read_stored(root)
+
+          print(f"Stored:  {stored or '(none)'}")
+          print(f"Current: {current_hash}")
+
+          if stored is None:
+              print("WARNING: No fingerprint file committed. Seed with: python3 -m ctmv3 fingerprint")
+              sys.exit(0)
+
+          if not matches:
+              print()
+              print("FAIL: Fingerprint mismatch — TOPOLOGY.md or ARCHITECTURE_MAP.md changed")
+              print("without updating the stored fingerprint.")
+              print()
+              print("Fix: run 'python3 -m ctmv3 fingerprint' and commit the updated")
+              print(".sovereign/topology_fingerprint.txt before merging.")
+              sys.exit(1)
+
+          print("OK: No topology drift.")
+          PYEOF
+
+      - name: Validate project-specific TOPOLOGY.md sections
+        run: |
+          set -euo pipefail
+          FAILED=0
+
+          require_section() {
+            local heading="$1"
+            if grep -q "$heading" TOPOLOGY.md; then
+              echo "OK:   TOPOLOGY.md contains '$heading'"
+            else
+              echo "FAIL: TOPOLOGY.md is missing required section: $heading"
+              FAILED=$((FAILED + 1))
+            fi
+          }
+
+          # rosemary-distill has four required LBC sections.
+          # These headings are project-specific — edit for your repo.
+          require_section "Session State"
+          require_section "Fingerprint Invariant"
+          require_section "Distillation Pipeline"
+          require_section "Checkpoint Format"
+
+          if [ "$FAILED" -gt 0 ]; then
+            echo ""
+            echo "ERROR: TOPOLOGY.md is missing $FAILED required section(s)."
+            echo "Fill the missing sections before merging."
+            exit 1
+          fi
+
+      - name: Check ARCHITECTURE_MAP.md has file anchors
+        run: |
+          # In this repo, ARCHITECTURE_MAP.md must reference at least one file:line anchor
+          # (e.g., src/distill/pipeline.py:42). An arch map with no anchors is not useful.
+          if grep -q 'src/.*\.py:[0-9]' ARCHITECTURE_MAP.md; then
+            echo "OK: ARCHITECTURE_MAP.md contains at least one file:line anchor."
+          else
+            echo "WARNING: ARCHITECTURE_MAP.md has no file:line anchors."
+            echo "This is acceptable for initial commits. Fill the anchors before the next warm session."
+            # Not a failure — warn only on first commit.
+          fi

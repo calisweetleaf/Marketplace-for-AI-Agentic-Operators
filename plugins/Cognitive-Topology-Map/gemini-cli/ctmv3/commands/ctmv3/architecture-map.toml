@@ -1,0 +1,23 @@
+description = "Build or update ARCHITECTURE_MAP.md traversal artifact from current TOPOLOGY.md"
+
+prompt = """
+Build or update the ARCHITECTURE_MAP.md traversal artifact for this repo.
+
+!{bash "${extensionPath}/scripts/ctmv3-wrap.sh" architecture-map}
+
+ARCHITECTURE_MAP.md is not a summary. It is a question-oriented navigation map
+for agents. Summaries are for humans; maps are for agents.
+
+The map must answer questions like:
+- "Where is the authentication logic?"
+- "What module handles X?"
+- "Where does the data pipeline start?"
+
+Report:
+- Whether ARCHITECTURE_MAP.md was created fresh or updated
+- The ROOT node and how many branches were built
+- Which TOPOLOGY.md sections were used as source
+- Any sections that required manual attention (sparse or missing topology data)
+
+After the command completes, update PROVENANCE.md Session Log with this action.
+"""

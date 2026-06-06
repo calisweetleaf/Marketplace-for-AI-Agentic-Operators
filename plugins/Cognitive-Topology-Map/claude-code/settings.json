@@ -1,0 +1,22 @@
+{
+  "permissions": {
+    "allow": [
+      "Bash(python3 -m ctmv3:*)",
+      "Bash(python3 -m ctmv3 *)",
+      "Read(*)",
+      "Write(.sovereign/**)",
+      "Write(.claude/**)",
+      "Write(.codex/**)",
+      "Write(.github/**)",
+      "Write(AGENTS.md)",
+      "Write(CLAUDE.md)",
+      "Write(ARCHITECTURE_MAP.md)",
+      "Write(TOPOLOGY.md)",
+      "Write(PROVENANCE.md)",
+      "Write(.pre-commit-config.yaml)"
+    ],
+    "deny": [
+      "Write(manifest.json)"
+    ]
+  }
+}

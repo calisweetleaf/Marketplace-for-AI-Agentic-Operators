@@ -1,0 +1,7 @@
+skills:
+  - id: constitutional-prompt-framework
+    card: marketplace/cards/constitutional-prompt-framework.skill.md
+    path: skills/constitutional-prompt-framework
+  - id: aeriadne-marketplace-operator
+    card: marketplace/cards/aeriadne-marketplace-operator.skill.md
+    path: skills/aeriadne-marketplace-operator

@@ -1,0 +1,16 @@
+skills:
+  - id: constitutional-prompt-framework
+    name: Constitutional Prompt Framework
+    type: skill
+    status: copied-from-authoring-source
+    path: skills/constitutional-prompt-framework
+    source: /home/daeron/.codex/skills/custom/constitutional-prompt-framework
+    role: prompt constitution architecture, audit, hardening, portability, and prompt-to-skill conversion
+    validation: scripts/validate_skill_package.py
+  - id: aeriadne-marketplace-operator
+    name: Aeriadne Marketplace Operator
+    type: skill
+    status: private-v1-new
+    path: skills/aeriadne-marketplace-operator
+    role: plugin packaging, registry, adapter mapping, marketplace cards, MCP cataloging, and release validation
+    validation: frontmatter-and-path-smoke

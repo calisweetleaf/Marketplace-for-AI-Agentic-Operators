@@ -1,0 +1,13 @@
+{
+  "mcpServers": {
+    "SovereignMCP": {
+      "command": "C:\\Users\\treyr\\mcp\\mcp.venv\\Scripts\\python.exe",
+      "args": [
+        "C:\\Users\\treyr\\mcp\\mcp_server.py"
+      ],
+      "env": {
+        "SOVEREIGN_DATA_DIR": "C:\\Users\\treyr\\mcp\\data"
+      }
+    }
+  }
+}

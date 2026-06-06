@@ -1,0 +1,271 @@
+{
+  "schema_version": "2.0",
+  "last_audited": "2026-04-09",
+  "auditor": "Claude — systematic file-by-file audit against live tool get_tools() registries",
+  "audit_notes": "All tool names verified against actual get_tools() implementations. Key disambiguation: bb7_memory_insights (memory_tool.py, composite stats+BM25 summary) vs bb7_memory_get_insights (memory_interconnect.py, pure BM25 concept network report) are distinct tools — both valid, different scopes. All bb7_exo_* references in pre-existing workflows confirmed present in exoskeleton_tool.py get_tools(). All bb7_journal_* references confirmed present in thought_journal_tool.py get_tools(). Unresolved tools tracked in unresolved_tool_references — all expected in session_manager_tool.py or other unaudited files. | 2026-04-08: Removed thought_journal_tool (11 tools). Added lisan subsystems: DistillationSubsystem, CognitiveJournalSubsystem. 3 new tools: bb7_lisan_recall, bb7_lisan_distill, bb7_lisan_intend. Added 3 new workflows: lisan_recall, lisan_distill, lisan_intend. | 2026-04-09: Confirmed enhanced_web_tool.py exists but NOT registered in mcp_server.py — uses aiohttp async, same sovereign data dir pattern, has enhanced features (SEO analysis, webpage analysis) but not integrated. Added distillation pipeline integration notes.",
+  "distillation_integration": {
+    "description": "Telemetry flywheel for RFT data capture",
+    "storage_path": "data/distillation_dataset/trajectories_YYYY-MM-DD.jsonl",
+    "capture_modes": [
+      "external_rpc",
+      "bb7_agent_run"
+    ],
+    "heuristics": [
+      "contains_tool_error",
+      "deep_tool_chain",
+      "high_latency"
+    ],
+    "forward_path": "Scored trajectories feed into fine-tuning dataset for behavioral cloning"
+  },
+  "audit_summary": {
+    "audit_date": "2026-03-01",
+    "files_audited": 7,
+    "total_files_in_tools_dir": 14,
+    "files_audited_list": [
+      "memory_tool.py",
+      "memory_interconnect.py",
+      "openrouter_agent_tool.py",
+      "web_tool.py",
+      "exoskeleton_tool.py",
+      "openrouter_planner_tool.py",
+      "thought_journal_tool.py"
+    ],
+    "unaudited_files": [
+      "auto_tool_module.py (68.5KB) — likely tool auto-registration and discovery",
+      "enhanced_code_analysis_tool.py (75.9KB) — likely sources bb7_analyze_code_complete, bb7_security_audit, bb7_get_code_metrics, bb7_analyze_project_structure",
+      "file_tool.py (14.6KB) — likely sources bb7_read_file, bb7_write_file, bb7_get_recent_changes",
+      "project_context_tool.py (25.6KB) — likely sources bb7_analyze_project_structure, bb7_get_project_dependencies, bb7_workspace_context_loader",
+      "session_manager_tool.py (66.8KB) — prime suspect for bb7_session_intelligence, bb7_auto_session_resume, bb7_session_recommendations, bb7_workspace_context_loader, bb7_capture_insight",
+      "shell_tool.py (58.0KB) — likely sources bb7_run_command, bb7_get_system_info, bb7_list_processes",
+      "visual_tool.py (48.2KB) — likely sources visual/screenshot tools"
+    ],
+    "tools_confirmed_count": 47,
+    "workflows_total": 29,
+    "workflows_pre_audit": 20,
+    "workflows_added_this_audit": 9,
+    "chain_tools_with_unresolved_source": [
+      "bb7_capture_insight",
+      "bb7_session_intelligence",
+      "bb7_auto_session_resume",
+      "bb7_workspace_context_loader",
+      "bb7_session_recommendations",
+      "bb7_analyze_code_complete",
+      "bb7_analyze_project_structure",
+      "bb7_get_code_metrics",
+      "bb7_get_project_dependencies",
+      "bb7_read_file",
+      "bb7_write_file",
+      "bb7_run_command",
+      "bb7_security_audit",
+      "bb7_get_system_info",
+      "bb7_list_processes",
+      "bb7_get_recent_changes",
+      "bb7_analyze_workflow_patterns",
+      "bb7_cross_session_analysis",
+      "bb7_learned_patterns"
+    ]
+  },
+  "architecture_notes": {
+    "sovereign_data_dir": "/home/daeron/Somnus-MCP/data/ — single source of truth for all persistent state. Override via SOVEREIGN_DATA_DIR env var. All tools write here. Subdirectories: memory_store.json, thought_journal.json, journal_index.json, journal_memory_index.json, planner/planner_runs.jsonl, planner/planner_state.json, agents/messages/{channel}.jsonl, exoskeleton/active_plans.json, exoskeleton/cross_ai_activity.jsonl, web_cache/",
+    "atomic_writes": "All disk writes use temp-file-then-os.replace() pattern across all tool files. Windows-safe retry loop (8 attempts) for transient PermissionError/winerror 5/32 in memory_tool.py.",
+    "golden_paths_circular": "ExoskeletonTool reads this file on init and seeds chain_priors (Bayesian alpha/beta per workflow name) from it. Improving golden_paths.json directly improves routing intelligence on next server start. This file is both documentation and executable configuration.",
+    "bm25_implementations": "Three independent BM25 engines: (1) MemoryInterconnectionEngine — canonical, Okapi BM25 k1=1.5 b=0.75 Robertson-Sparck Jones IDF, persistent indices, 4-pass force_rebuild(). (2) EnhancedMemoryTool — loads MemoryInterconnectionEngine as sub-engine with graceful fallback stub. (3) ThoughtJournalTool — self-contained lightweight BM25 implementation, same k1/b, explicitly NOT importing memory_interconnect to avoid circular dependency.",
+    "session_boundary_survival": "Three independent systems persist reasoning across session boundaries: (1) memory_tool.py — what was stored. (2) thought_journal_tool.py — why decisions were made. (3) exoskeleton_tool.py — what the optimal tool chains are. Together they eliminate AI amnesia.",
+    "multi_ai_plane": "openrouter_agent_tool.py agents (planner/debugger/analyzer/doc) publish to data/agents/messages/{channel}.jsonl. exoskeleton_tool.py appends cross-AI activity to data/exoskeleton/cross_ai_activity.jsonl. bb7_exo_get_recent_activity reads this log for coordination. Multiple AI instances can share the same sovereign data plane.",
+    "tool_naming_convention": "All tools prefixed bb7_. Tool source files: memory_ prefix = memory_tool.py or memory_interconnect.py (check exact name — they overlap). exo_ prefix = exoskeleton_tool.py. journal_ prefix = thought_journal_tool.py. agent_ prefix = openrouter_agent_tool.py. planner_ prefix = openrouter_planner_tool.py. fetch_/search_/download_/check_url_/extract_ prefixes = web_tool.py.",
+    "three_tier_planning": "Planning operates on three tiers: (1) bb7_planner_plan — LLM-reasoned structured plan (human-readable steps with why/acceptance/risk). (2) bb7_exo_plan — Bayesian beam-search tool chain selection (3 variants: balanced/fast/deep). (3) bb7_agent_run with agent_type=planner — autonomous agent that iterates and calls real tools. These are complementary, not competing."
+  },
+  "tool_registry": {
+    "memory_tool.py": {
+      "class": "EnhancedMemoryTool",
+      "description": "SOTA++ hierarchical persistent memory. MemGPT-style LRU working buffer + BM25 interconnect + Ebbinghaus decay scoring. Sovereign data dir: /home/daeron/Somnus-MCP/data/memory_store.json",
+      "tools": [
+        "bb7_memory_store",
+        "bb7_memory_retrieve",
+        "bb7_memory_delete",
+        "bb7_memory_list",
+        "bb7_memory_search",
+        "bb7_memory_surface_context",
+        "bb7_memory_bulk_store",
+        "bb7_memory_get_related",
+        "bb7_memory_timeline",
+        "bb7_memory_export",
+        "bb7_memory_stats",
+        "bb7_memory_insights",
+        "bb7_memory_consolidate",
+        "bb7_memory_categories"
+      ]
+    },
+    "memory_interconnect.py": {
+      "class": "MemoryInterconnectionEngine",
+      "description": "Okapi BM25 retrieval engine (k1=1.5, b=0.75, Robertson-Sparck Jones IDF). Persistent BM25 indices in data/. Provides concept network, clustering, and gap detection. Loaded as sub-engine by memory_tool.py but also exposes its own MCP tools.",
+      "tools": [
+        "bb7_memory_analyze_entry",
+        "bb7_memory_intelligent_search",
+        "bb7_memory_get_insights",
+        "bb7_memory_cluster",
+        "bb7_memory_find_gaps",
+        "bb7_memory_graph",
+        "bb7_memory_consolidate_index",
+        "bb7_memory_concept_network",
+        "bb7_memory_extract_concepts"
+      ]
+    },
+    "openrouter_agent_tool.py": {
+      "class": "OpenRouterAgentTool",
+      "description": "Distributed cognitive execution plane. Agents (planner, debugger, analyzer, doc) run via OpenRouter API, call real MCP tools, publish/subscribe through shared /home/daeron/Somnus-MCP/data/agents/ message bus, and hand off to each other. Node state persisted per-run. Default model: qwen/qwen3.5-plus-02-15. Env: OPENROUTER_API_KEY, OPENROUTER_AGENT_MODEL.",
+      "agent_types": [
+        "planner",
+        "debugger",
+        "analyzer",
+        "doc"
+      ],
+      "tools": [
+        "bb7_agent_health",
+        "bb7_agent_list",
+        "bb7_agent_capabilities",
+        "bb7_agent_nodes",
+        "bb7_agent_messages",
+        "bb7_agent_handoff",
+        "bb7_agent_call",
+        "bb7_agent_run",
+        "bb7_agent_status"
+      ]
+    },
+    "web_tool.py": {
+      "class": "WebTool",
+      "description": "Async HTTP via aiohttp. Search uses DuckDuckGo Instant Answer API (not SerpAPI). Cache stored in data/web_cache/. Session is loop-aware and recreates on loop switch. Max fetch size 10MB.",
+      "tools": [
+        "bb7_fetch_url",
+        "bb7_download_file",
+        "bb7_check_url_status",
+        "bb7_search_web",
+        "bb7_extract_links"
+      ]
+    },
+    "enhanced_web_tool.py": {
+      "class": "WebTool",
+      "description": "ENHANCED VERSION — NOT REGISTERED in mcp_server.py. Has additional features: bb7_fetch_url (with metadata analysis), bb7_search_web (multiple engines), bb7_analyze_webpage (SEO, structure, accessibility analysis), bb7_download_file (with security checks). Uses async aiohttp, follows same SOVEREIGN_DATA_DIR pattern. Exists in tree but not integrated.",
+      "tools": [
+        "bb7_fetch_url (enhanced)",
+        "bb7_search_web (enhanced)",
+        "bb7_analyze_webpage",
+        "bb7_download_file (enhanced)"
+      ],
+      "status": "not_registered"
+    },
+    "exoskeleton_tool.py": {
+      "class": "ExoskeletonTool",
+      "description": "Control-plane routing and orchestration layer. Reads golden_paths.json on init and seeds Bayesian chain_priors from it — this file is both documentation and executable routing configuration. Tool catalog built from tool_manifest.json, live-synced via attach_live_tools_provider() / sync_from_live_tools(). TF-IDF built over tool descriptions for semantic scoring. Scoring formula: 0.40×semantic + 0.20×intent_match + 0.15×composability + 0.15×reliability − 0.10×latency_penalty + momentum_bonus (cap 0.25). Session momentum: online-learned category transition matrix normalized after each tool call. Category graph: 11 categories (exoskeleton, memory, sessions, project_context, analysis, execution, web, files, visual, system, misc) with adjacency expansion. Beam search generates 3 plan variants: balanced / fast / deep. All plans checkpointed to data/exoskeleton/active_plans.json — survive process restart. CRITICAL NOTE: bb7_workspace_context_loader is hardcoded as chain preamble in _make_plans() but NOT registered in this file's get_tools() — source file TBD (tracked in unresolved_tool_references). Data dir: /home/daeron/Somnus-MCP/data/exoskeleton/",
+      "phases": {
+        "phase_1_core": [
+          "bb7_exo_bootstrap",
+          "bb7_exo_list_tool_categories",
+          "bb7_exo_category_specific_tools",
+          "bb7_exo_route",
+          "bb7_exo_plan",
+          "bb7_exo_reflect",
+          "bb7_exo_state"
+        ],
+        "phase_2_intelligence": [
+          "bb7_exo_briefing",
+          "bb7_exo_preemptive_recovery",
+          "bb7_exo_route_focused",
+          "bb7_exo_get_recent_activity"
+        ],
+        "phase_3_execution": [
+          "bb7_exo_execute_step",
+          "bb7_exo_resume_plan",
+          "bb7_exo_kpi_report"
+        ]
+      },
+      "tools": [
+        "bb7_exo_bootstrap",
+        "bb7_exo_list_tool_categories",
+        "bb7_exo_category_specific_tools",
+        "bb7_exo_route",
+        "bb7_exo_plan",
+        "bb7_exo_reflect",
+        "bb7_exo_state",
+        "bb7_exo_briefing",
+        "bb7_exo_preemptive_recovery",
+        "bb7_exo_route_focused",
+        "bb7_exo_get_recent_activity",
+        "bb7_exo_execute_step",
+        "bb7_exo_resume_plan",
+        "bb7_exo_kpi_report"
+      ]
+    },
+    "openrouter_planner_tool.py": {
+      "class": "OpenRouterPlannerTool",
+      "description": "Focused LLM plan-generation tool. NOT an agent execution plane — generates a structured JSON execution plan (summary + steps with title/why/actions/acceptance/risk + handoff_template) via OpenRouter chat completions. Complementary to openrouter_agent_tool.py (which executes tools) and exoskeleton_tool.py (which routes and orchestrates). Fallback model chain: qwen/qwen3.5-plus-02-15 → claude-3.5-sonnet → gpt-4o-mini → gemini-2.0-flash-exp:free → mimo-v2-flash:free. Hard gate on OPENROUTER_API_KEY (raises PlannerNotConfiguredError, no mock plans). Default temperature 0.2 (deterministic). Persistence: data/planner/planner_runs.jsonl (per-run telemetry) + data/planner/planner_state.json (aggregate stats). Atomic writes. Loop-aware aiohttp session. Env: OPENROUTER_API_KEY (required), OPENROUTER_PLANNER_MODEL (optional override), OPENROUTER_BASE_URL, OPENROUTER_APP_NAME, OPENROUTER_SITE_URL.",
+      "tools": [
+        "bb7_planner_health",
+        "bb7_planner_template",
+        "bb7_planner_plan"
+      ],
+      "plan_output_schema": {
+        "summary": "string",
+        "steps": "array of {id, title, why, actions: [string], acceptance: string, risk: string}",
+        "handoff_template": "string"
+      }
+    },
+    "thought_journal_tool.py": {
+      "class": "ThoughtJournalTool",
+      "description": "Structured Reasoning and Decision Provenance System. Captures the *why* behind actions, not just the actions themselves — answers 'why did we make this decision?', 'what alternatives were considered?', 'what actually happened?'. Solves AI amnesia by creating a durable reasoning trail that survives session boundaries. Two entry categories: ThoughtEntry (5 subtypes: thought/insight/hypothesis/observation/question) and DecisionEntry (status: active/validated/invalidated/superseded). Self-contained BM25 engine (k1=1.5, b=0.75) — explicitly NOT importing memory_interconnect to avoid circular dependency. 1.5x recency boost on entries from last 7 days. Conflict detection via BM25 similarity + negation-word heuristic. Reverse map (memory_key → entry_ids) enables 'why was this memory created?' queries. Thread-safe (threading.Lock). Atomic writes. Persistence: data/thought_journal.json + data/journal_index.json + data/journal_memory_index.json.",
+      "entry_types": {
+        "thought_subtypes": [
+          "thought",
+          "insight",
+          "hypothesis",
+          "observation",
+          "question"
+        ],
+        "decision_statuses": [
+          "active",
+          "validated",
+          "invalidated",
+          "superseded"
+        ]
+      },
+      "tools": [
+        "bb7_journal_record_thought",
+        "bb7_journal_capture_decision",
+        "bb7_journal_add_outcome",
+        "bb7_journal_search",
+        "bb7_journal_get_decision_trail",
+        "bb7_journal_surface_relevant",
+        "bb7_journal_detect_conflicts",
+        "bb7_journal_generate_retrospective",
+        "bb7_journal_get_reasoning_chain",
+        "bb7_journal_stats",
+        "bb7_journal_linked_entries"
+      ]
+    }
+  },
+  "unresolved_tool_references": [
+    "AUDIT SCOPE NOTE: This audit covered 7 of 14 tool files. Full tool directory also contains: auto_tool_module.py (68.5KB), enhanced_code_analysis_tool.py (75.9KB), file_tool.py (14.6KB), project_context_tool.py (25.6KB), session_manager_tool.py (66.8KB), shell_tool.py (58.0KB), visual_tool.py (48.2KB). The following unresolved tools are expected to live in those files.",
+    "bb7_capture_insight — NOT in any of 7 audited files. Likely in auto_tool_module.py or session_manager_tool.py. Referenced in: research_synthesis_workflow, memory_deep_dive_workflow, deep_memory_recall_workflow, agent_planning_workflow.",
+    "bb7_session_intelligence — NOT in any of 7 audited files. Likely in session_manager_tool.py (66.8KB). Referenced in: required_tool_workflow.",
+    "bb7_auto_session_resume — NOT in any of 7 audited files. Likely in session_manager_tool.py. Referenced in: session_bootstrap_workflow, session_cognition_bootstrap_workflow.",
+    "bb7_workspace_context_loader — NOT registered in any of 7 audited files' get_tools(). Hardcoded as chain preamble in exoskeleton_tool.py _make_plans() — pre-pended to every generated plan chain. Almost certainly registered in session_manager_tool.py or project_context_tool.py. Referenced in: session_bootstrap_workflow, multi_ai_coordination_workflow, session_cognition_bootstrap_workflow.",
+    "bb7_session_recommendations — NOT in any of 7 audited files. Likely in session_manager_tool.py. Referenced in: session_bootstrap_workflow.",
+    "bb7_analyze_code_complete, bb7_security_audit, bb7_get_code_metrics, bb7_get_project_dependencies, bb7_analyze_project_structure — referenced in debug_code_workflow, codebase_exploration_workflow, security_audit_workflow. Almost certainly in enhanced_code_analysis_tool.py (75.9KB).",
+    "bb7_run_command — referenced in debug_code_workflow, deployment_check_workflow. Likely in shell_tool.py (58.0KB).",
+    "bb7_read_file, bb7_write_file — referenced in file_modification_workflow. Likely in file_tool.py (14.6KB)."
+  ],
+  "extraction_note": {
+    "extracted_from": "golden_paths.json::_meta",
+    "extracted_at": "2026-05-27",
+    "reason": "golden_paths.json is executable routing configuration; metadata/audit prose must not enter Lisan spectral matching or chain-prior seeding.",
+    "canonical_data_dir": "/home/daeron/Somnus-MCP/data",
+    "runtime_doctrine": "Somnus-MCP is a 24/7 autonomous neural-symbolic cognition server; MCP/stdio/SSE/HTTPS are transport surfaces only."
+  },
+  "runtime_paths": {
+    "data_dir": "/home/daeron/Somnus-MCP/data",
+    "memory_store": "/home/daeron/Somnus-MCP/data/memory_store.json",
+    "agents_bus": "/home/daeron/Somnus-MCP/data/agents/messages/{channel}.jsonl",
+    "exo_active_plans": "/home/daeron/Somnus-MCP/data/exoskeleton/active_plans.json",
+    "exo_cross_ai_activity": "/home/daeron/Somnus-MCP/data/exoskeleton/cross_ai_activity.jsonl"
+  }
+}

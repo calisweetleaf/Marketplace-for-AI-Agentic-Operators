@@ -1,0 +1,13 @@
+cases:
+  - id: package_manifest_parse
+    input: plugin.toml
+    expected: parses as TOML and names package id
+  - id: registry_paths_exist
+    input: registry/*.yaml
+    expected: all canonical_path and included skill paths exist or are marked external/canonical-reference
+  - id: mcp_not_vendored
+    input: mcp/servers/sovereign-bb7.md
+    expected: states canonical reference and does not copy server code
+  - id: adapter_boundaries
+    input: adapters/*/README.md
+    expected: states canonical source vs client-specific projection

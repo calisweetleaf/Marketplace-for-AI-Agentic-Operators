@@ -1,0 +1,23 @@
+description = "Initialize the .sovereign/ directory with session_state.json and topology fingerprint"
+
+prompt = """
+Initialize the .sovereign/ session continuity directory.
+
+!{bash "${extensionPath}/scripts/ctmv3-wrap.sh" sovereign-init}
+
+.sovereign/ is the most important .xyz directory for CTMv3 purposes. Its
+presence signals that the exoskeleton system has been active here.
+
+IMPORTANT: .sovereign/ should be initialized AFTER topology artifacts are
+complete (TOPOLOGY.md, ARCHITECTURE_MAP.md). Never initialize before the
+artifacts exist — a stale anchor is worse than no anchor.
+
+Report what was created:
+- session_state.json: initialized with current agent, timestamp, open tasks
+- golden_paths.json: seeded with ctm_session_bootstrap path if not present
+- topology_fingerprint.txt: SHA-256 hash of TOPOLOGY.md + ARCHITECTURE_MAP.md
+- PROVENANCE.md: created as mirror or symlink from root PROVENANCE.md
+
+If topology artifacts do not yet exist, warn and refuse to initialize.
+Recommend running /ctmv3:activate first.
+"""

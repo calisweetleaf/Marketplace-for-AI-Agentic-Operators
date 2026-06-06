@@ -1,0 +1,15 @@
+# .grok/sandbox.toml or ~/.grok/sandbox.toml
+
+[profiles.somnus-workspace]
+extends = "workspace"
+restrict_network = false
+read_only = []
+read_write = ["/tmp"]
+deny = ["~/.ssh", "~/.aws", "~/.gnupg"]
+
+[profiles.somnus-strict]
+extends = "strict"
+restrict_network = true
+read_only = []
+read_write = ["/tmp"]
+deny = ["~/.ssh", "~/.aws", "~/.gnupg", "~/.env"]

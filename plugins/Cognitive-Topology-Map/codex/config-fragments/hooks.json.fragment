@@ -1,0 +1,15 @@
+{
+  "hooks": {
+    "SessionStart": [
+      {
+        "matcher": "",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "python3 -m ctmv3 boot --json --project-root \"$CODEX_PROJECT_DIR\" 2>/dev/null || true"
+          }
+        ]
+      }
+    ]
+  }
+}

@@ -1,0 +1,20 @@
+description = "Run full CTMv3 cold-start activation (Phase 0-5) on the current repo"
+
+prompt = """
+Run the full CTMv3 cold-start activation pass on this repo.
+
+First, confirm boot state:
+!{bash "${extensionPath}/scripts/ctmv3-wrap.sh" boot --json}
+
+Then execute the activation:
+!{bash "${extensionPath}/scripts/ctmv3-wrap.sh" activate}
+
+Report what was created:
+- Which Tier 1 artifacts were built (AGENTS.md, ARCHITECTURE_MAP.md, .sovereign/, CLAUDE.md)
+- Which .xyz directories were initialized (.github/, .claude/, .codex/, .sovereign/)
+- PROVENANCE.md initialization status
+- Any skipped steps and why
+
+If the boot signal inventory shows WARM_START, warn that activate will overwrite
+existing CTM artifacts and ask for confirmation before proceeding.
+"""

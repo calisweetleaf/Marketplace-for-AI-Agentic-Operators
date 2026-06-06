@@ -1,0 +1,88 @@
+# {{PROJECT_NAME}} Architecture Map
+
+**How to use this document:** Start at the question that matches what you are trying
+to understand. Each node answers one question and points you to the next level —
+file, line number, what to look for. This is a traversal map, not a summary.
+Follow the branches.
+
+---
+
+## ROOT: What is {{PROJECT_NAME}}?
+
+[TODO: 2-3 sentences. The most precise operational answer to "what is this system" that
+an agent needs before any navigation begins. NOT a marketing description.
+What it does, how it does it, what drives it.]
+
+**Primary entry points:**
+[TODO: List the main entry files with line anchors]
+- `[file.py]:1` — [description]
+
+**→ To understand the primary flow:** Go to BRANCH A.
+**→ To find a specific component quickly:** Go to the Quick Reference.
+
+---
+
+## BRANCH A: How does [primary operation] happen?
+
+[TODO: Replace with the actual primary operation of this codebase.]
+
+**Entry point:** `[file.py]:[line]` — `[function_name]()`
+
+[TODO: Step-by-step trace of the flow. Each step: what happens, what file/line,
+what to look for next. Use arrows for navigation.]
+
+1. [Step 1]: what happens, where (`[file.py]:[line]`)
+2. [Step 2]: what happens, where (`[file.py]:[line]`)
+3. [Step 3]: what happens, where (`[file.py]:[line]`)
+
+**→ If you want to understand [sub-topic]:** Go to BRANCH B.
+**→ If you want to understand [other sub-topic]:** Go to BRANCH C.
+
+---
+
+## BRANCH B: How does [second flow] work?
+
+[TODO: Second most important question an agent would ask.]
+
+**Entry point:** `[file.py]:[line]` — `[function_name]()`
+
+[TODO: Trace this flow.]
+
+**→ If you want to understand [related topic]:** Go to BRANCH A.
+**→ If you want to find something quickly:** Go to the Quick Reference.
+
+---
+
+## BRANCH C: How does [third flow] work?
+
+[TODO: Third navigation branch.]
+
+**Entry point:** `[file.py]:[line]` — `[function_name]()`
+
+[TODO: Trace this flow.]
+
+**→ If you want to understand [related topic]:** Go to BRANCH B.
+
+---
+
+## BRANCH D: Where is X? (Quick Reference)
+
+| Question | Go to |
+|---------|-------|
+| [TODO: Primary class or entry point] | `[file.py]:1` |
+| [TODO: Core logic] | `[file.py]:[line]` |
+| [TODO: Configuration] | `[config file]` |
+| [TODO: Tests] | `tests/` |
+| [TODO: CTM artifacts] | `TOPOLOGY.md`, `FAILURE_GRAMMAR.md` |
+| Session state | `.sovereign/session_state.json` |
+| Agent posture | `AGENTS.md` |
+| Topology fingerprint | `.sovereign/topology_fingerprint.txt` |
+
+---
+
+## ANOMALIES AND GOTCHAS
+
+[TODO: Things that look wrong but are intentional, or things that look right but
+have subtle requirements. Fill as they are discovered.]
+
+- **[TODO: Anomaly name]**: [What it looks like vs what it actually is. Why it is not a bug.]

@@ -1,0 +1,64 @@
+{
+  "dxt_version": "0.1",
+  "name": "sovereign_mcp",
+  "version": "1.0.0",
+  "description": "110 tool mcp with autonomous agents",
+  "author": {
+    "name": "daeron"
+  },
+  "server": {
+    "type": "python",
+    "entry_point": "mcp_server.py",
+    "mcp_config": {
+      "command": "python",
+      "args": [
+        "${__dirname}/mcp_server.py"
+      ],
+      "env": {
+        "PYTHONPATH": "server/lib"
+      }
+    }
+  },
+  "tools": [
+    {
+      "name": "memory_tool"
+    },
+    {
+      "name": "memory_interconnect"
+    },
+    {
+      "name": "file_tool"
+    },
+    {
+      "name": "shell_tool"
+    },
+    {
+      "name": "web_tool"
+    },
+    {
+      "name": "openrouter_planner_tool"
+    },
+    {
+      "name": "openrouter_agent_tool"
+    },
+    {
+      "name": "session_manager_tool"
+    },
+    {
+      "name": "visual_tool"
+    },
+    {
+      "name": "project_context_tool"
+    },
+    {
+      "name": "auto_tool_module"
+    },
+    {
+      "name": "exoskeleton_tool"
+    },
+    {
+      "name": "enhanced_code_analysis_tool"
+    }
+  ],
+  "license": "MIT"
+}

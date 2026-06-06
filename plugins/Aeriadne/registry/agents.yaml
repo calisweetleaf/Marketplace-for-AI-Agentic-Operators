@@ -1,0 +1,17 @@
+agent_sets:
+  - id: aeriadne-subagents
+    name: Aeriadne Subagents
+    type: agent-pack
+    status: private-v1
+    path: agents/subagents
+    mode: parallel-workstreams-no-rank-hierarchy
+    agents:
+      - prompt-architect
+      - package-cartographer
+      - compatibility-auditor
+      - registry-scribe
+      - release-sentinel
+    clients:
+      codex: prompt-reference
+      claude_code: prompt-reference
+      opencode: prompt-reference

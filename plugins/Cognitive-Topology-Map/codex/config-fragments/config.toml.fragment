@@ -1,0 +1,15 @@
+# Add these lines to ~/.codex/config.toml
+# ----------------------------------------------------------------------
+# CTMv3 plugin -- project doc size and fallback filenames
+#
+# project_doc_max_bytes: allows Codex to load larger AGENTS.md /
+# ARCHITECTURE_MAP.md files without truncation. CTMv3-activated repos
+# routinely produce topology docs in the 80-130 KB range.
+#
+# project_doc_fallback_filenames: instructs Codex to check for an
+# AGENTS.override.md first (operator override layer), then fall back
+# to the standard AGENTS.md. Do not reverse this order.
+# ----------------------------------------------------------------------
+
+project_doc_max_bytes = 131072
+project_doc_fallback_filenames = ["AGENTS.override.md", "AGENTS.md"]
