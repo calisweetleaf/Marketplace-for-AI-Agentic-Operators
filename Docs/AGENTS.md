@@ -2,7 +2,7 @@
 
 ## Purpose
 
-`Modern-ML` is not a generic code repo and not the full sovereign ML empire itself. It is the **agent-operability, onboarding, and private-marketplace staging workspace**: the place where plugins, skills, agent definitions, topology packages, MCP/server visibility cards, and registry scaffolds are organized so coding agents can enter Daeron's broader ecosystem without guessing blind.
+`Somnus-Intelligence-Stack` (the repository/marketplace `https://github.com/calisweetleaf/Aeriadne` ) is not a generic code repo and not the full sovereign ML empire itself. It is the **agent-operability, onboarding, and private-marketplace staging workspace**: the place where plugins, skills, agent definitions, topology packages, MCP/server visibility cards, and registry scaffolds are organized so coding agents can enter Daeron's broader ecosystem without guessing blind.
 
 This repo exists because the surrounding system is already large and specialized. The point here is to expose the support stack cleanly enough that future coding agents can adopt into the environment rather than flattening it into stock “vibe coding” assumptions.
 
