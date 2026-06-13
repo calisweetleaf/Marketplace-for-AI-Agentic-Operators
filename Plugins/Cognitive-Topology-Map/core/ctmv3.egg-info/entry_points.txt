@@ -1,2 +1,0 @@
-[console_scripts]
-ctmv3 = ctmv3.core.cli:main
