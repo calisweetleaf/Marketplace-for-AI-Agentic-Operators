@@ -107,7 +107,29 @@ def main() -> int:
             timeout=4,
             cwd=str(root_path) if root_path.exists() else None,
         )
-    except Exception:
+    except (FileNotFoundError, ModuleNotFoundError):
+        emit_context(json.dumps({
+            "error": "ctmv3 engine not found",
+            "fix": "pip install -e /home/daeron/Projects/Modern-ML/Plugins/Cognitive-Topology-Map/core",
+        }))
+        return 0
+    except subprocess.CalledProcessError as exc:
+        emit_context(json.dumps({
+            "error": f"ctmv3 boot failed (exit {exc.returncode})",
+            "fix": "pip install -e /home/daeron/Projects/Modern-ML/Plugins/Cognitive-Topology-Map/core",
+        }))
+        return 0
+    except subprocess.TimeoutExpired:
+        emit_context(json.dumps({
+            "error": "ctmv3 boot timed out after 4 seconds",
+            "fix": "Check ctmv3 installation; repo may be too large for 4s boot scan.",
+        }))
+        return 0
+    except Exception as exc:
+        emit_context(json.dumps({
+            "error": f"ctmv3 hook unexpected error: {type(exc).__name__}: {exc}",
+            "fix": "pip install -e /home/daeron/Projects/Modern-ML/Plugins/Cognitive-Topology-Map/core",
+        }))
         return 0
     text = (cp.stdout or "").strip()
     if not text:

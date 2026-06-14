@@ -1,0 +1,10 @@
+{
+  "_note": "Codex/Claude plugin-facing MCP projection of mcp.json. Keep this file in sync with mcp.json so local marketplace refreshes preserve the Mentat MCP server.",
+  "mcpServers": {
+    "mentat": {
+      "type": "stdio",
+      "command": "python3",
+      "args": ["${CLAUDE_PLUGIN_ROOT}/mcp_server/__main__.py"]
+    }
+  }
+}

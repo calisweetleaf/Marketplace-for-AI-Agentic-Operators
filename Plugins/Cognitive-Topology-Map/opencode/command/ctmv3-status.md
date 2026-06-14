@@ -42,15 +42,18 @@ FULLY_ACTIVATED — all Tier 1 artifacts present, session_state.json readable,
 warm_start_valid = true, last session < 30 days.
 
 ACTIVATED_STALE — Tier 1 artifacts present but session_state.json shows
-warm_start_valid = false, or last session > 30 days. Recommend /ctmv3-warm.
+warm_start_valid = false, or last session > 30 days. Run:
+python3 -m ctmv3 warm --project-root "$PWD"
 
 PARTIAL — some Tier 1 artifacts present, others missing. List what is present
-and absent. Recommend /ctmv3-activate --force to complete.
+and absent. Run: python3 -m ctmv3 activate --force --project-root "$PWD"
 
-COLD — no Tier 1 artifacts. Recommend /ctmv3-activate.
+COLD — no Tier 1 artifacts. Run:
+python3 -m ctmv3 activate --project-root "$PWD"
 
 CORRUPTED — Tier 1 artifacts present but session_state.json is malformed or
-PROVENANCE.md Session Log is empty. Recommend /ctmv3-activate --force to reseed.
+PROVENANCE.md Session Log is empty. Run:
+python3 -m ctmv3 activate --force --project-root "$PWD"
 
 ## Report back
 

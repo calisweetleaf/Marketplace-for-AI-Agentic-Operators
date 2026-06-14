@@ -65,6 +65,7 @@ SESSION_STATE_INITIAL: dict[str, Any] = {
     ],
     "topology_hash": "",
     "warm_start_valid": False,
+    "current_state": "UNKNOWN",
 }
 
 
@@ -177,6 +178,7 @@ def write_session_state(
     open_tasks: list[str],
     topology_hash: str = "",
     warm_start_valid: bool = True,
+    current_state: str = "UNKNOWN",
 ) -> None:
     """
     Update .sovereign/session_state.json with current session information.
@@ -192,6 +194,8 @@ def write_session_state(
         open_tasks: List of tasks left open for the next session.
         topology_hash: Current topology fingerprint hash.
         warm_start_valid: Whether the session state is valid for warm start.
+        current_state: Current workspace state machine state (e.g. "SESSION_ACTIVE").
+            Defaults to "UNKNOWN" when the caller does not track state transitions.
 
     Raises:
         ValueError: If last_agent or last_action is empty.
@@ -235,13 +239,15 @@ def write_session_state(
         "open_tasks": open_tasks,
         "topology_hash": topology_hash,
         "warm_start_valid": warm_start_valid,
+        "current_state": current_state,
     }
 
     _atomic_write_json(ss_path, state)
     logger.info(
-        "write_session_state: written; agent=%s action=%s",
+        "write_session_state: written; agent=%s action=%s state=%s",
         last_agent,
         last_action[:60],
+        current_state,
     )
 
 

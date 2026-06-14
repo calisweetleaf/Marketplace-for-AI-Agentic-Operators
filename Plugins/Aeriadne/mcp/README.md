@@ -2,7 +2,7 @@
 
 This is a marketplace/server catalog corner, not a vendored server bundle.
 
-Aeriadne documents which MCP/server planes a package expects, how they should be described in the registry, and which capability classes they provide. It does not copy BB7/SovereignMCP, CodeGraph, Mentat, runtime databases, auth files, or server source into the plugin package.
+Aeriadne documents which MCP/server planes a package expects, how they should be described in the registry, and which capability classes they provide. It does not copy BB7/SovereignMCP, Mentat, runtime databases, auth files, non-owned development tools, or server source into the plugin package.
 
 ## Canonical v1 server card
 
@@ -16,3 +16,6 @@ Aeriadne documents which MCP/server planes a package expects, how they should be
 ## Rule
 
 Catalog the server plane. Do not vendor it.
+
+Do not publish private indexed workspace paths, semantic archive paths, MCP logs,
+runtime databases, or stale local tool index files in marketplace-facing cards.

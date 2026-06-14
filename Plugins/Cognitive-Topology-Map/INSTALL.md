@@ -37,7 +37,7 @@ After install, verify:
 
 ```bash
 python3 -m ctmv3 version
-# Expected: ctmv3 3.0.0
+# Expected JSON with --json: {"version": "1.3.0", "protocol": "CTMv3"}
 ```
 
 ### Option B: PYTHONPATH (no install required)
@@ -219,3 +219,21 @@ zero-content artifacts as absent.
 This is normal if you are actively editing `TOPOLOGY.md` or
 `ARCHITECTURE_MAP.md`. Run `python3 -m ctmv3 fingerprint` at session close
 to re-anchor.
+
+### Preparing a public copyover
+
+Before copying staging contents into a public repository, run:
+
+```bash
+bash tests/run-all.sh
+PYTHONDONTWRITEBYTECODE=1 python3 tests/privacy_boundary_scan_smoke.py
+python3 scripts/privacy_boundary_scan.py .
+python3 scripts/validate_release_tree.py .
+```
+
+Then copy with `.releaseignore` exclusions. Do not copy `.venv/`, `.codegraph/`,
+`.mentat/`, `data/`, archives, DBs, logs, PID files, or generated filetree
+snapshots unless Daeron explicitly approves a specific artifact.
+The privacy scanner respects `.releaseignore`, checks only release-candidate
+text, and rejects unapproved local paths, external media paths, compact private
+source identifiers, and CodeGraph log/archive token shapes.

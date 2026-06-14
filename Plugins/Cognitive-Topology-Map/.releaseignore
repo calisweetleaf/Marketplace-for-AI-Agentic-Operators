@@ -1,0 +1,30 @@
+# CTMv3 release/copyover exclusion list.
+# Used by scripts/validate_release_tree.py and by human copyover planning.
+
+.git/
+.venv/
+.codegraph/
+.mentat/
+.pytest_cache/
+__pycache__/
+core/ctmv3.egg-info/
+build/
+dist/
+data/
+
+Archive.zip
+ctmv3-plugin-*.zip
+*.tar.gz
+*.zip
+*.db
+*.db-shm
+*.db-wal
+*.pid
+*.log
+*.pyc
+*.pyo
+*.tmp
+*~
+
+filetree-*.md
+*filetree*.md

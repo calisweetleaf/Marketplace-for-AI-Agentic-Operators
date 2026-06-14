@@ -1,6 +1,6 @@
 # CTMv3 Plugin — Cross-Runtime Workspace Activation System
 
-**Version**: 1.2.0
+**Version**: 1.3.0
 **Operator**: Daeron
 **Paradigm**: Workspace activation, not skill creation.
 **Runtimes**: Claude Code, Codex, opencode, Gemini CLI, Cursor.
@@ -58,7 +58,7 @@ ctmv3-plugin/
 │   │   ├── architecture_map.py
 │   │   ├── templates.py       Template loader
 │   │   └── orchestration.py   Golden-path routing layer (chain, pre-chain rules, memory tags)
-│   └── tests/                 unittest suite (125 tests)
+│   └── tests/                 unittest suite (155 tests)
 ├── docs/                      Full CTMv3 cognitive doc set + GOLDEN_PATH.md + SCHEMA_AUDIT.md + interfaces/
 ├── claude-code/               Claude Code adapter (.claude-plugin/, commands/, hooks/, agents/, skills/)
 ├── codex/                     Codex adapter (skills/ctmv3/, config-fragments/, install.sh)
@@ -81,6 +81,19 @@ Each adapter is a thin shim over `python3 -m ctmv3`. The orchestration layer
 (`core/ctmv3/core/orchestration.py`) lets any adapter chain commands as
 dominoes (boot → activate → fingerprint → architecture-map → session-close)
 and emits memory-relevance signals on stdout under a sentinel prefix.
+
+---
+
+## Release Boundary
+
+CTMv3 is staged under `/home/daeron/Projects/Modern-ML/Plugins/Cognitive-Topology-Map`
+and must not be copied into the public repo until the copy candidate passes the
+local gate in `COPYOVER_MANIFEST.md`. The gate includes the engine test suite,
+release-tree exclusion validation, and a privacy boundary scan over every
+release-candidate text file.
+
+Current release-tree evidence: `140` candidate files, `1045` ignored
+local-only/forbidden files, privacy scanner and synthetic smoke enforced.
 
 ---
 
@@ -110,29 +123,46 @@ See per-runtime install docs:
 - **Gemini CLI**: [`gemini-cli/README.md`](gemini-cli/README.md)
 - **Cursor**: [`cursor/README.md`](cursor/README.md)
 
-You can install multiple adapters side-by-side. They all delegate to the same
-engine, so commands stay consistent across runtimes.
+You can install multiple adapters side-by-side. The Python engine is canonical;
+adapter shortcut coverage differs by runtime.
 
 ---
 
 ## Cross-Runtime Command Surface
 
+Claude Code and Cursor keep the broad slash-command surface. Codex and Gemini ship
+boot/status shortcuts and route all other operations through the engine. OpenCode
+ships a status command plus a session boot plugin and subagent.
+
 | Command | Claude Code | Codex | opencode | Gemini CLI | Cursor |
 |---------|-------------|-------|----------|------------|--------|
-| Discovery scan | `/ctmv3:boot` | `$ctmv3 boot` | `/ctmv3-boot` | `ctmv3 boot` (via GEMINI.md trigger) | `/ctmv3-boot` |
-| Cold-start activation | `/ctmv3:activate` | `$ctmv3 activate` | `/ctmv3-activate` | `ctmv3 activate` | `/ctmv3-activate` |
-| Warm continue | `/ctmv3:warm` | `$ctmv3 warm` | `/ctmv3-warm` | `ctmv3 warm` | `/ctmv3-warm` |
-| Build architecture map | `/ctmv3:architecture-map` | `$ctmv3 architecture-map` | `/ctmv3-architecture-map` | `ctmv3 architecture-map` | `/ctmv3-architecture-map` |
-| Create .sovereign/ | `/ctmv3:sovereign-init` | `$ctmv3 sovereign-init` | `/ctmv3-sovereign-init` | `ctmv3 sovereign-init` | `/ctmv3-sovereign-init` |
-| Create .xyz dirs | `/ctmv3:dot-init` | `$ctmv3 dot-init` | `/ctmv3-dot-init` | `ctmv3 dot-init` | `/ctmv3-dot-init` |
-| Recompute fingerprint | `/ctmv3:fingerprint` | `$ctmv3 fingerprint` | `/ctmv3-fingerprint` | `ctmv3 fingerprint` | `/ctmv3-fingerprint` |
-| Session close | `/ctmv3:session-close` | `$ctmv3 session-close` | `/ctmv3-session-close` | `ctmv3 session-close` | `/ctmv3-session-close` |
-| Status snapshot | `/ctmv3:status` | `$ctmv3 status` | `/ctmv3-status` | `ctmv3 status` | `/ctmv3-status` |
-| Golden-path chain | `/ctmv3:chain` | `$ctmv3 chain` | `/ctmv3-chain` | `ctmv3 chain` | `/ctmv3-chain` |
+| Discovery scan | `/ctmv3:boot` | `scripts/ctmv3-boot.sh` | session plugin / engine CLI | `/ctmv3:boot` | `/ctmv3-boot` |
+| Cold-start activation | `/ctmv3:activate` | engine CLI | engine CLI | engine CLI | `/ctmv3-activate` |
+| Warm continue | `/ctmv3:warm` | engine CLI | engine CLI | engine CLI | `/ctmv3-warm` |
+| Build architecture map | `/ctmv3:architecture-map` | engine CLI | engine CLI | engine CLI | `/ctmv3-architecture-map` |
+| Create .sovereign/ | `/ctmv3:sovereign-init` | engine CLI | engine CLI | engine CLI | `/ctmv3-sovereign-init` |
+| Create .xyz dirs | `/ctmv3:dot-init` | engine CLI | engine CLI | engine CLI | `/ctmv3-dot-init` |
+| Recompute fingerprint | `/ctmv3:fingerprint` | engine CLI | engine CLI | engine CLI | `/ctmv3-fingerprint` |
+| Session close | `/ctmv3:session-close` | engine CLI | engine CLI | engine CLI | `/ctmv3-session-close` |
+| Status snapshot | `/ctmv3:status` | `scripts/ctmv3-status.sh` | `/ctmv3-status` | `/ctmv3:status` | `/ctmv3-status` |
+| Golden-path chain | `/ctmv3:chain` | engine CLI | engine CLI | engine CLI | `/ctmv3-chain` |
+| Current state | engine CLI | engine CLI | engine CLI | engine CLI | engine CLI |
+| Context blob | engine CLI | engine CLI | engine CLI | engine CLI | engine CLI |
+| Server ping | engine CLI | engine CLI | engine CLI | engine CLI | engine CLI |
+| Persistent server | engine CLI | engine CLI | engine CLI | engine CLI | engine CLI |
 
 Under the hood, every invocation is `python3 -m ctmv3 <command> --project-root "$PWD"`.
 The `chain` command walks the domino chain end-to-end with a single invocation
 (see [`docs/GOLDEN_PATH.md`](docs/GOLDEN_PATH.md)).
+
+Engine-only commands in v1.3.0:
+
+```bash
+python3 -m ctmv3 state --project-root "$PWD" --json
+python3 -m ctmv3 context --project-root "$PWD" --json
+python3 -m ctmv3 ping --json
+python3 -m ctmv3 serve --project-root "$PWD"
+```
 
 ---
 
@@ -198,6 +228,7 @@ If any of these eight outputs is missing, the activation is incomplete.
 | v3.0-plugin | 2026-05-23 | Cross-runtime plugin form (4 adapters) |
 | v3.1-plugin | 2026-05-23 | Hardening pass: orchestration layer, Cursor adapter, schema audit, MIT LICENSE, CI workflows, codebase intelligence doc, engine hardening (logging, atomic writes, streaming SHA-256, scan bounds), 125-test suite |
 | v1.2.0 | 2026-05-24 | SOTA++ Hardening Pass: Monorepo discovery, PROVENANCE.md log rotation, Python 3.12+ `datetime` compatibility, `tomllib` integration, 200+ tests, production CI matrix |
+| v1.3.0 | 2026-06-12 | Persistent server lane: `serve`, `context`, `ping`, watcher-backed context cache, plus `state` diagnostic command |
 
 ---
 

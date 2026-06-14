@@ -1,0 +1,41 @@
+{
+  "schema": "ctmv3-golden-paths-v1",
+  "project": "Aeriadne",
+  "paths": [
+    {
+      "id": "warm-entry",
+      "intent": "Enter Aeriadne for package or marketplace work",
+      "steps": [
+        "Read AGENTS.md",
+        "Read TOPOLOGY.md",
+        "Use ARCHITECTURE_MAP.md to choose the first concrete file",
+        "Read FAILURE_GRAMMAR.md before registry, adapter, MCP/server, install, or expansion edits",
+        "Check PROVENANCE.md for prior decisions"
+      ]
+    },
+    {
+      "id": "package-validation",
+      "intent": "Verify Aeriadne package health",
+      "steps": [
+        "Run python3 scripts/validate_package.py .",
+        "Run python3 -m json.tool plugin.json",
+        "Run python3 -m json.tool .codex-plugin/plugin.json",
+        "Run python3 -m json.tool .claude-plugin/plugin.json",
+        "Run python3 -m json.tool registry/aeriadne.plugin.json",
+        "Run python3 skills/constitutional-prompt-framework/scripts/validate_skill_package.py skills/constitutional-prompt-framework"
+      ]
+    },
+    {
+      "id": "native-plugin-expansion",
+      "intent": "Add a new plugin, skill, agent-pack, or MCP/server card to the private marketplace",
+      "steps": [
+        "Classify artifact type before writing",
+        "Identify canonical root and data/runtime boundary",
+        "Update registry first",
+        "Update marketplace card/index second",
+        "Update client adapters only where consumption mechanics are known",
+        "Run validation and record evidence"
+      ]
+    }
+  ]
+}

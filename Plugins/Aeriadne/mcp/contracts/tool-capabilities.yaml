@@ -10,12 +10,6 @@ capabilities:
     required_for:
       - file-aware-context
       - persistence-artifacts
-  code_intelligence:
-    canonical_server: codegraph
-    required_for:
-      - symbol-search
-      - impact-analysis
-      - call-graph
   state_machine:
     canonical_server: mentat
     required_for:

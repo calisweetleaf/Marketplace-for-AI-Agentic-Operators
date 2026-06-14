@@ -11,7 +11,7 @@ description: >
 
 # CTMv3 PLUGIN SKILL — Cross-Runtime Codebase Activation Engine
 
-**Version**: 1.2.0
+**Version**: 1.3.0
 **Date**: 2026-05-24
 **Status**: Production
 **Author/Origin**: CTMv3 Plugin — gemini-cli/ctmv3/skills/ctmv3/SKILL.md
@@ -68,7 +68,7 @@ That is the complete set of eight outputs. No more, no less.
 
 | Constraint | Value |
 |-----------|-------|
-| Engine version | 1.2.0 |
+| Engine version | 1.3.0 |
 | Python requirement | 3.10+ |
 | External dependencies | Zero (stdlib only) |
 | Idempotency | Safe to run `activate` twice — existing artifacts preserved unless `--force` |
@@ -88,7 +88,7 @@ The first three commands any agent needs:
 ```bash
 # 1. Verify the engine is installed
 python3 -m ctmv3 version --json
-# Expected: {"version": "1.2.0", "protocol": "CTMv3"}
+# Expected: {"version": "1.3.0", "protocol": "CTMv3"}
 
 # 2. Discover the boot state of any repository
 python3 -m ctmv3 boot --project-root "$PWD" --json
@@ -176,7 +176,7 @@ Task → Action → Command(s)
 [ENGINE_NOT_INSTALLED] — python3 -m ctmv3 version fails with ModuleNotFoundError
   cd /path/to/ctmv3-plugin/core && pip install -e .
   Then verify: python3 -m ctmv3 version --json
-  Expected output: {"version": "1.2.0", "protocol": "CTMv3"}
+  Expected output: {"version": "1.3.0", "protocol": "CTMv3"}
 
 [MONOREPO] — multiple subdirectories each have CTM artifacts
   Use discover_all() Python API (not a CLI command):
@@ -542,7 +542,7 @@ engine is installed and functional.
 
 | Field | Type | Description |
 |-------|------|-------------|
-| `version` | str | Engine version string (e.g., `"1.2.0"`) |
+| `version` | str | Engine version string (e.g., `"1.3.0"`) |
 | `protocol` | str | Protocol identifier (`"CTMv3"`) |
 
 **Exit codes**: `0` success, `1` engine not installed (ModuleNotFoundError)
@@ -980,7 +980,7 @@ pip install .
 
 # Verify installation
 python3 -m ctmv3 version --json
-# Expected: {"version": "1.2.0", "protocol": "CTMv3"}
+# Expected: {"version": "1.3.0", "protocol": "CTMv3"}
 ```
 
 ### Gemini CLI Adapter Installation
@@ -1029,4 +1029,4 @@ than running the CLI sequentially. See `docs/BOOT_PROTOCOL.md` Section 7.
 
 ---
 
-*End of CTMv3 Plugin SKILL.md — Version 1.2.0 — 2026-05-24*
+*End of CTMv3 Plugin SKILL.md — Version 1.3.0 — 2026-06-12*

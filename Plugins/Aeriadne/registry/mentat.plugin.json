@@ -1,0 +1,92 @@
+{
+  "id": "mentat",
+  "name": "Mentat",
+  "version": "0.3.0",
+  "status": "staged-green",
+  "type": "native-runtime-plugin",
+  "canonical_path": "/home/daeron/Projects/Modern-ML/Plugins/Mentat",
+  "public_copy_target": "/home/daeron/Repositories/Somnus-Intellligence-Stack/Plugins/Mentat",
+  "installed": true,
+  "install_evidence": {
+    "codex_plugin_id": "mentat@local",
+    "status": "installed, enabled",
+    "version": "0.3.0",
+    "marketplace_path": "/home/daeron/.claude/plugins/marketplaces/local/plugins/mentat",
+    "cache_path": "/home/daeron/.codex/plugins/cache/local/mentat/0.3.0",
+    "mcp_projection": "/home/daeron/.codex/plugins/cache/local/mentat/0.3.0/.mcp.json"
+  },
+  "owner": "Daeron",
+  "runtime_role": "Live cognitive runtime substrate for agent sessions.",
+  "committed_state": [
+    "session records",
+    "state-machine position",
+    "Q-table learning",
+    "insight bus JSONL",
+    "drift state",
+    "handoff snapshots",
+    "monitor last-run state"
+  ],
+  "surface_projection": {
+    "hooks": "Claude/Codex/Gemini hook adapters over the same state loop",
+    "commands": "Claude Code slash commands over Mentat CLI, skills, and subagents",
+    "mcp": "local introspection server inside the Mentat package",
+    "monitors": "entropy, drift, and archivist background lanes",
+    "evals": "state-machine, routing, and persistence regression harness",
+    "skills": "debrief, plan, dispatch, and reflect skill surfaces",
+    "agents": "plugin-scoped and helper prompt surfaces"
+  },
+  "clients": {
+    "claude_code": {
+      "supported": true,
+      "surface": ".claude-plugin plus hooks, commands, skills, agents"
+    },
+    "codex": {
+      "supported": true,
+      "surface": "adapters/codex hooks and config snippet"
+    },
+    "gemini": {
+      "supported": true,
+      "surface": "adapters/gemini extension and hooks"
+    }
+  },
+  "validation": {
+    "last_status": "PASS",
+    "last_run": "2026-06-13",
+    "evidence": "/home/daeron/Projects/Modern-ML/Plugins/Mentat/SUBSYSTEM_INVENTORY.md",
+    "commands": [
+      "python3 scripts/integration_smoke.py",
+      "python3 scripts/hook_schema_smoke.py",
+      "PYTHONDONTWRITEBYTECODE=1 python3 tests/command_frontmatter_lint_smoke.py",
+      "python3 scripts/command_frontmatter_lint.py .",
+      "PYTHONDONTWRITEBYTECODE=1 python3 tests/prompt_surface_review_smoke.py",
+      "python3 scripts/prompt_surface_review.py .",
+      "PYTHONDONTWRITEBYTECODE=1 python3 tests/privacy_boundary_scan_smoke.py",
+      "python3 scripts/privacy_boundary_scan.py .",
+      "bash adapters/test_universal.sh",
+      "python3 scripts/validate_release_tree.py ."
+    ],
+    "latest_summary": {
+      "integration_smoke": "58 pass / 0 fail / 0 skip",
+      "command_frontmatter": "PASS; 9 commands; scoped shell tools and argument hints checked",
+      "prompt_surfaces": "PASS; 7 agent/helper prompts plus helper index; role, tool, boundary, and output contracts checked",
+      "privacy_boundary": "PASS; release-candidate files only; smoke enforced",
+      "release_tree": "PASS; 139 candidate files; 299 ignored local-only/forbidden files after cache cleanup"
+    }
+  },
+  "copyover": {
+    "manifest": "/home/daeron/Projects/Modern-ML/Plugins/Mentat/COPYOVER_MANIFEST.md",
+    "requires_operator_review": true,
+    "release_ignore": "/home/daeron/Projects/Modern-ML/Plugins/Mentat/.releaseignore"
+  },
+  "known_gaps": [
+    "release archives should be rebuilt only after Daeron reviews the exact candidate copy list"
+  ],
+  "notes": [
+    "Mentat is not a hook pack. Hooks, commands, MCP, monitors, evals, skills, and agents are projections over the runtime substrate.",
+    "Mentat's nine slash command prompts are now covered by command-frontmatter lint.",
+    "Mentat's seven agent/helper prompt files and helper index are now covered by prompt-surface review.",
+    "Mentat's release tree validator now enforces a privacy boundary scanner and synthetic smoke test before public copyover.",
+    "Mentat's .mcp.json install-facing projection is preserved so plugin-provided MCP hydration survives marketplace refreshes.",
+    "Aeriadne catalogs Mentat but does not own Mentat's runtime state."
+  ]
+}

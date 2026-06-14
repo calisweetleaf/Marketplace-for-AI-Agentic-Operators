@@ -30,28 +30,20 @@ jobs:
 
       - name: Validate Python syntax (all engine modules)
         run: |
-          python -m py_compile core/ctmv3/core/activate.py
-          python -m py_compile core/ctmv3/core/architecture_map.py
-          python -m py_compile core/ctmv3/core/boot.py
-          python -m py_compile core/ctmv3/core/cli.py
-          python -m py_compile core/ctmv3/core/dot_init.py
-          python -m py_compile core/ctmv3/core/fingerprint.py
-          python -m py_compile core/ctmv3/core/sovereign.py
-          python -m py_compile core/ctmv3/core/templates.py
+          find core/ctmv3 -name '*.py' -print0 | xargs -0 python -m py_compile
           echo 'Syntax validation passed'
 
       - name: Run unit tests
         run: |
-          cd core
-          PYTHONPATH=. python -m pytest ctmv3/tests/ -v --tb=short 2>&1
+          PYTHONPATH=core python -m unittest discover -s core/ctmv3/tests -v
 
       - name: Verify test count did not regress
         run: |
-          COUNT=$(cd core && PYTHONPATH=. python${{ matrix.python-version }} -m unittest discover \
-                    -s ctmv3/tests -v 2>&1 | grep -c ' ok$' || true)
+          COUNT=$(PYTHONPATH=core python -m unittest discover \
+                    -s core/ctmv3/tests -v 2>&1 | grep -c ' ok$' || true)
           echo "Tests passed: $COUNT"
-          if [ "$COUNT" -lt 50 ]; then
-            echo "ERROR: Test count $COUNT is below minimum threshold of 50."
+          if [ "$COUNT" -lt 150 ]; then
+            echo "ERROR: Test count $COUNT is below minimum threshold of 150."
             exit 1
           fi
 
@@ -76,6 +68,4 @@ jobs:
 
       - name: Smoke test - install and run
         run: |
-          cd core
-          python -m ctmv3 version --json
-          python -m ctmv3 boot --project-root /tmp --json
+          bash tests/run-all.sh

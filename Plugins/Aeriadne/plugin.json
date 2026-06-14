@@ -1,11 +1,11 @@
 {
   "name": "aeriadne",
   "version": "1.0.0",
-  "description": "Aeriadne packages the Constitutional Prompt Framework as an installable skill-activated plugin and private marketplace scaffold for Codex, Claude Code, OpenCode, agent prompts, package registries, and MCP/server-plane visibility.",
+  "description": "Aeriadne packages the Constitutional Prompt Framework as an installable skill-activated plugin for Codex first, with explicit bridge docs for Claude Code, OpenCode, agent prompts, marketplace packaging, and MCP/server-plane visibility.",
   "author": {
     "name": "Daeron"
   },
-  "homepage": "file:///home/daeron/Repositories/Somnus-Intellligence-Stack/Plugins/Aeriadne",
+  "homepage": "file:///home/daeron/Projects/Modern-ML/Plugins/Aeriadne",
   "license": "UNLICENSED",
   "keywords": [
     "codex",
@@ -18,8 +18,21 @@
     "agent-constitution",
     "skill-packaging",
     "agent-marketplace",
-    "private-marketplace",
     "mcp"
   ],
-  "skills": "./skills/"
+  "skills": "./skills/",
+  "interface": {
+    "displayName": "Aeriadne",
+    "shortDescription": "Constitutional prompt framework and native plugin marketplace compiler.",
+    "longDescription": "Aeriadne packages the Constitutional Prompt Framework and private marketplace operator surfaces for auditing agent constitutions, staging plugin registries, and keeping native runtime packages represented by committed state, validation gates, copyover boundaries, and exposed client surfaces.",
+    "developerName": "Daeron",
+    "category": "Developer Tools",
+    "capabilities": [
+      "Constitution and prompt framework auditing",
+      "Private plugin marketplace registry staging",
+      "Native plugin package card validation",
+      "Codex, Claude Code, and OpenCode projection guidance"
+    ],
+    "defaultPrompt": "Use Aeriadne to harden an agent constitution, package a private marketplace entry, or audit native plugin registry cards before reviewed copyover."
+  }
 }

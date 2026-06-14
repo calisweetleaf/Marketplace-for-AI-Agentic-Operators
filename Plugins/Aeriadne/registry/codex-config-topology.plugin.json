@@ -1,0 +1,75 @@
+{
+  "id": "codex-config-topology",
+  "name": "Codex Config Topology",
+  "version": "1.0.0",
+  "status": "staged-local",
+  "type": "codex-control-plane-plugin",
+  "canonical_path": "/home/daeron/Projects/Modern-ML/Plugins/Codex-Config-Topology",
+  "legacy_source_path": "/home/daeron/Projects/Modern-ML/Plugins/old/Codex-Config-Topology",
+  "marketplace_source_path": "/home/daeron/.claude/plugins/marketplaces/local/plugins/codex-config-topology",
+  "public_copy_target": "/home/daeron/Repositories/Somnus-Intellligence-Stack/Plugins/Codex-Config-Topology",
+  "installed": false,
+  "release_ready": false,
+  "owner": "Daeron",
+  "runtime_role": "Codex control-plane topology and configuration doctrine support package.",
+  "committed_state": [
+    "Codex control-plane topology map",
+    "configuration surface doctrine",
+    "plugin, skill, hook, MCP, memory, and permission semantics",
+    "operator document-stack gotchas",
+    "runtime verification workflow"
+  ],
+  "surface_projection": {
+    "skill": "codex-config-topology skill",
+    "plugin_manifest": "schema-aligned staging plugin manifest",
+    "docs": "README and SKILL.md surfaces",
+    "validation": "plugin-creator ingestion validator and skill quick validator pass from staging"
+  },
+  "clients": {
+    "codex": {
+      "supported": true,
+      "install_state": "available in local marketplace, not installed"
+    },
+    "claude_code": {
+      "supported": true,
+      "surface": "legacy .claude-plugin manifest mirror"
+    }
+  },
+  "validation": {
+    "last_status": "PASS",
+    "last_run": "2026-06-13",
+    "evidence": "/home/daeron/Projects/Modern-ML/Plugins/Codex-Config-Topology",
+    "commands": [
+      "python3 /home/daeron/.codex/skills/.system/plugin-creator/scripts/validate_plugin.py .",
+      "python3 /home/daeron/.codex/skills/.system/skill-creator/scripts/quick_validate.py skills/codex-config-topology",
+      "python3 -m json.tool plugin.json",
+      "python3 -m json.tool .codex-plugin/plugin.json",
+      "python3 -m json.tool .claude-plugin/plugin.json",
+      "cmp -s plugin.json .codex-plugin/plugin.json",
+      "cmp -s plugin.json .claude-plugin/plugin.json"
+    ],
+    "latest_summary": {
+      "install_state": "codex-config-topology@local not installed",
+      "staging_plugin_creator_validator": "PASS",
+      "skill_quick_validate": "PASS",
+      "json_manifests": "PASS",
+      "metadata_mirrors": "PASS",
+      "local_marketplace_source": "not refreshed; still separate from staging"
+    }
+  },
+  "copyover": {
+    "manifest": "/home/daeron/Projects/Modern-ML/Plugins/Codex-Config-Topology/COPYOVER_MANIFEST.md",
+    "requires_operator_review": true,
+    "release_ignore": "/home/daeron/Projects/Modern-ML/Plugins/Codex-Config-Topology/.releaseignore"
+  },
+  "known_gaps": [
+    "codex-config-topology@local is available but not installed",
+    "local marketplace source has not been refreshed from the restored staging package",
+    "Daeron has not reviewed the copyover manifest or exact public candidate diff",
+    "decision still open whether official-codex-configuration supersedes this older control-plane package"
+  ],
+  "notes": [
+    "Aeriadne catalogs this as a staged-local control-plane package, not as an installed plugin.",
+    "Do not copy to public release or refresh the local marketplace source until Daeron reviews the staged package."
+  ]
+}

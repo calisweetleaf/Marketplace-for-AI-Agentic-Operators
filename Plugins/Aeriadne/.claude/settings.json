@@ -1,0 +1,14 @@
+{
+  "aeriadne": {
+    "entrypoint": "AGENTS.md",
+    "topology": "TOPOLOGY.md",
+    "architecture_map": "ARCHITECTURE_MAP.md",
+    "failure_grammar": "FAILURE_GRAMMAR.md",
+    "provenance": "PROVENANCE.md",
+    "status": "private-v1 validated-local not-installed"
+  },
+  "validation": {
+    "package": "python3 scripts/validate_package.py .",
+    "ctmv3_status": "python3 -m ctmv3 status --json --project-root /home/daeron/Projects/Modern-ML/Plugins/Aeriadne"
+  }
+}

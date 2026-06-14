@@ -2,17 +2,15 @@ id = "aeriadne"
 name = "Aeriadne"
 version = "1.0.0"
 status = "private-v1"
-description = "Local-first skill-activated plugin and marketplace scaffold for constitutional prompt frameworks, agent prompt packs, plugin packaging, and MCP/server catalog visibility across Codex, Claude Code, OpenCode, and Grok Build."
+description = "Local-first skill-activated plugin and marketplace scaffold for constitutional prompt frameworks, agent prompt packs, plugin packaging, and MCP/server catalog visibility across Codex, Claude Code, and OpenCode."
 owner = "Daeron"
 visibility = "private"
-source = "Plugins/Aeriadne"
-canonical_path = "/home/daeron/Repositories/Somnus-Intellligence-Stack/Plugins/Aeriadne"
+source = "Modern-ML/Plugins/Aeriadne"
 
 [compatibility]
 codex = true
 claude_code = true
 opencode = true
-grok_build = true
 public_marketplace_ready = false
 
 [package]
@@ -20,8 +18,6 @@ type = "skill-activated-plugin"
 install_mode = "local"
 canonical_registry = "registry/plugins.yaml"
 primary_skill = "constitutional-prompt-framework"
-marketplace_skill = "aeriadne-marketplace-operator"
-legacy_aliases = ["Ariadne", "cpf-plugin-ariadne", "CPF-Plugin-Ariadne"]
 
 [[skills]]
 id = "constitutional-prompt-framework"

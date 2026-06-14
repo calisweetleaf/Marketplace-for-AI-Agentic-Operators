@@ -1,0 +1,58 @@
+# Local VCS and structural analysis state
+.git/
+.codegraph/
+
+# Python caches and local tool caches
+__pycache__/
+.pytest_cache/
+.mypy_cache/
+.ruff_cache/
+*.pyc
+*.pyo
+
+# Local environments
+.venv/
+venv/
+env/
+ENV/
+
+# Secrets and local credentials
+.env
+.env.*
+auth.json
+installation_id
+
+# Runtime/session state and local databases
+.sovereign/session_state.json
+sessions/
+logs/
+tmp/
+cache/
+*.sqlite
+*.sqlite3
+*.db
+*.db-shm
+*.db-wal
+
+# Generated release/build artifacts
+*.zip
+*.tar.gz
+*.tgz
+*.tar
+build/
+dist/
+
+# Generated inventories and scratch reports
+filetree.md
+filetree-*.md
+*filetree*.md
+*.metadata.json
+
+# Backups, logs, and editor scratch files
+backup_*
+*.backup_*
+*.bak
+*.tmp
+*.log
+*.pid
+*~

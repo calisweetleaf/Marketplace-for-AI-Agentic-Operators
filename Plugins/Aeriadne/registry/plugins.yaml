@@ -4,20 +4,15 @@ plugins:
     type: skill-activated-plugin
     status: private-v1
     version: 1.0.0
-    canonical_path: /home/daeron/Repositories/Somnus-Intellligence-Stack/plugins/Aeriadne
+    canonical_path: /home/daeron/Projects/Modern-ML/Plugins/Aeriadne
     owner: Daeron
     aliases:
       - Ariadne
-      - cpf-plugin-ariadne
-      - CPF-Plugin-Ariadne
-    supersedes:
-      - legacy CPF plugin shell
       - cpf-plugin-ariadne
     clients:
       codex: supported
       claude_code: adapter-docs
       opencode: adapter-docs
-      grok_build: adapter-docs
     includes:
       skills:
         - constitutional-prompt-framework
@@ -30,12 +25,126 @@ plugins:
     validation_date: "2026-06-05"
     validation_evidence:
       package_validator: PASS
+      install_state: "aeriadne@local installed, enabled"
       json_manifests: PASS
       toml_manifest: PASS
       cpf_skill_validator: PASS
-      stale_path_scan: PASS
-      legacy_archive_scan: PASS
-      cpf_linter: previous PASS
-      cpf_score: previous 87/100 production candidate
-      cpf_static_evals: previous PASS
-      cpf_render_fixture: previous PASS
+      cpf_linter: PASS
+      cpf_score: "87/100 — production candidate"
+      cpf_static_evals: PASS
+      cpf_render_fixture: PASS
+  - id: cognitive-topology-map
+    name: Cognitive Topology Map / CTMv3
+    type: workspace-activation-plugin
+    status: staged-green
+    version: 1.3.0
+    canonical_path: /home/daeron/Projects/Modern-ML/Plugins/Cognitive-Topology-Map
+    public_copy_target: /home/daeron/Repositories/Somnus-Intellligence-Stack/Plugins/Cognitive-Topology-Map
+    owner: Daeron
+    aliases:
+      - ctmv3
+      - ctmv3-workspace-activator
+      - Cognitive-Topology-Map
+    clients:
+      codex: supported
+      claude_code: supported
+      opencode: supported
+      gemini_cli: supported
+      cursor: supported
+    committed_state:
+      - TOPOLOGY.md
+      - FAILURE_GRAMMAR.md
+      - PROVENANCE.md
+      - ARCHITECTURE_MAP.md
+      - AGENTS.md
+      - .sovereign warm-start state
+      - topology fingerprint
+      - golden-path signals
+    exposed_surfaces:
+      - stdlib Python engine under core/
+      - persistent context server lane
+      - cross-runtime adapter projections
+      - cognitive protocol docs and CI workflows
+    validation_status: validated
+    validation_date: "2026-06-13"
+    validation_evidence:
+      engine_version: "1.3.0"
+      tests_run_all: "PASS; 155 unit tests plus smoke, JSON, bash syntax, TOML command, inventory, and release hygiene checks"
+      privacy_boundary: "PASS; release-candidate files only; smoke enforced"
+      install_state: "ctmv3-workspace-activator@local installed, enabled; plugin manifest 1.3.0, engine 1.3.0"
+      release_tree_validator: "PASS; 140 candidate files; 1045 ignored local-only/forbidden files after command backfill and cache cleanup"
+      copyover_manifest: /home/daeron/Projects/Modern-ML/Plugins/Cognitive-Topology-Map/COPYOVER_MANIFEST.md
+  - id: mentat
+    name: Mentat
+    type: native-runtime-plugin
+    status: staged-green
+    version: 0.3.0
+    canonical_path: /home/daeron/Projects/Modern-ML/Plugins/Mentat
+    public_copy_target: /home/daeron/Repositories/Somnus-Intellligence-Stack/Plugins/Mentat
+    owner: Daeron
+    clients:
+      codex: supported
+      claude_code: supported
+      gemini: supported
+    committed_state:
+      - session records
+      - state-machine position
+      - Q-table learning
+      - insight bus JSONL
+      - drift state
+      - handoff snapshots
+      - monitor last-run state
+    exposed_surfaces:
+      - hook adapters
+      - slash commands
+      - MCP introspection server
+      - monitors
+      - evals
+      - skills
+      - agents and helpers
+    validation_status: validated
+    validation_date: "2026-06-13"
+    validation_evidence:
+      integration_smoke: "58 pass / 0 fail / 0 skip"
+      hook_schema_smoke: PASS
+      command_frontmatter_lint: "PASS; 9 commands; scoped shell tools and argument hints checked"
+      prompt_surface_review: "PASS; 7 agent/helper prompts plus helper index; role, tool, boundary, and output contracts checked"
+      adapter_installer_smoke: PASS
+      privacy_boundary: "PASS; release-candidate files only; smoke enforced"
+      install_state: "mentat@local installed, enabled; .mcp.json projection restored in cache"
+      release_tree_validator: "PASS; 139 candidate files; 299 ignored local-only/forbidden files after cache cleanup"
+      subsystem_inventory: /home/daeron/Projects/Modern-ML/Plugins/Mentat/SUBSYSTEM_INVENTORY.md
+      copyover_manifest: /home/daeron/Projects/Modern-ML/Plugins/Mentat/COPYOVER_MANIFEST.md
+  - id: codex-config-topology
+    name: Codex Config Topology
+    type: codex-control-plane-plugin
+    status: staged-local
+    version: 1.0.0
+    canonical_path: /home/daeron/Projects/Modern-ML/Plugins/Codex-Config-Topology
+    legacy_source_path: /home/daeron/Projects/Modern-ML/Plugins/old/Codex-Config-Topology
+    marketplace_source_path: /home/daeron/.claude/plugins/marketplaces/local/plugins/codex-config-topology
+    public_copy_target: /home/daeron/Repositories/Somnus-Intellligence-Stack/Plugins/Codex-Config-Topology
+    owner: Daeron
+    clients:
+      codex: available-not-installed
+      claude_code: legacy-manifest
+    committed_state:
+      - Codex control-plane topology map
+      - configuration surface doctrine
+      - plugin, skill, hook, MCP, memory, and permission semantics
+      - operator document-stack gotchas
+      - runtime verification workflow
+    exposed_surfaces:
+      - codex-config-topology skill
+      - Codex plugin manifest
+      - Claude/local plugin manifest mirror
+    validation_status: validated-local
+    validation_date: "2026-06-13"
+    validation_evidence:
+      codex_plugin_list: "codex-config-topology@local not installed"
+      staging_plugin_creator_validator: PASS
+      skill_quick_validate: PASS
+      json_manifests: PASS
+      metadata_mirrors: PASS
+      copyover_manifest: /home/daeron/Projects/Modern-ML/Plugins/Codex-Config-Topology/COPYOVER_MANIFEST.md
+      local_marketplace_source: not refreshed

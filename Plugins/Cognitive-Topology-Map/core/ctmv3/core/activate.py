@@ -1,7 +1,7 @@
 """
 CTMv3 Activate — Cold-Start Build Orchestrator
 ===============================================
-Provenance: CTMv3 Engine v1.1.0 — 2026-05-23
+Provenance: CTMv3 Engine v1.2.0 — 2026-05-23
 Author: Forge (activation engine builder)
 Purpose: Orchestrates the full cold-start build (Phase 0-5) as defined in
          BOOT_PROTOCOL.md Section 4 and SKILL.md Phase Protocols.

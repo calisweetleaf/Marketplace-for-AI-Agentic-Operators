@@ -2,6 +2,50 @@
 
 ---
 
+## Staging hardening - 2026-06-13 (plugin v0.3.0 source)
+
+### What changed
+
+- Reframed Mentat as an independent cognitive runtime plugin, not a hook pack or skill bundle.
+- Added Golden Path runtime doctrine mapping: committed state, validation membrane, compensation/exclusion, divergence, and terminal boundary.
+- Added `.releaseignore`, `COPYOVER_MANIFEST.md`, and `scripts/validate_release_tree.py` so public copyover can exclude local archives, `.mentat/` state, backups, caches, filetrees, logs, DBs, and scratch folders without deleting staging evidence.
+- Added `scripts/privacy_boundary_scan.py` and `tests/privacy_boundary_scan_smoke.py` so release-candidate text is checked for private source identifiers, unapproved local paths, external media paths, and CodeGraph log/archive path shapes without committing exact private identifiers.
+- Added `scripts/hook_schema_smoke.py` to prove the Codex/Claude `additionalContext` hook output includes `hookSpecificOutput.hookEventName` and suppresses unsupported-event stdout.
+- Added `scripts/command_frontmatter_lint.py` and `tests/command_frontmatter_lint_smoke.py` so the nine slash command prompts are validated for descriptions, argument hints, scoped shell permissions, and no Bash wildcards.
+- Added `scripts/prompt_surface_review.py` and `tests/prompt_surface_review_smoke.py` so the independent agent/helper prompts are validated for role, tool, boundary, and output contracts without treating them as hooks or skills.
+- Marked `mentat-a-live-cognitive-substrate-for-claude-code.html` as a preserved local site/prototype artifact: keep expanding it in staging, but exclude it from public copyover until explicitly promoted.
+- Updated `adapters/install_universal.sh` so live runtime installs also respect `.releaseignore` instead of copying staging artifacts.
+- Added a temp-HOME Codex install check to `adapters/test_universal.sh` and wired that adapter smoke into `scripts/integration_smoke.py`.
+- Added `SUBSYSTEM_INVENTORY.md` as the release-facing subsystem map.
+- Restored `monitors/monitors.json` and added monitor CLI smoke coverage for status/schedule paths.
+- Wired hook-schema, adapter-installer, monitor CLI, and release/copyover hygiene into `scripts/integration_smoke.py`.
+- Updated `AGENTS.md`, `CONTEXT.md`, `MEMORY.md`, `PLAN.md`, `README.md`, and `INSTALL.md` to use the current package-root topology rather than stale `plugin/` paths.
+
+### Public repo safety
+
+No public repo edit is implied by this entry. The reviewed copy target remains `/home/daeron/Repositories/Somnus-Intellligence-Stack/Plugins/Mentat`.
+
+### Promotion gate
+
+```bash
+python3 scripts/integration_smoke.py
+python3 scripts/hook_schema_smoke.py
+PYTHONDONTWRITEBYTECODE=1 python3 tests/command_frontmatter_lint_smoke.py
+python3 scripts/command_frontmatter_lint.py .
+PYTHONDONTWRITEBYTECODE=1 python3 tests/prompt_surface_review_smoke.py
+python3 scripts/prompt_surface_review.py .
+PYTHONDONTWRITEBYTECODE=1 python3 tests/privacy_boundary_scan_smoke.py
+python3 scripts/privacy_boundary_scan.py .
+bash adapters/test_universal.sh
+python3 scripts/validate_release_tree.py .
+```
+
+Hook-schema edits in `hooks/_lib.py` and `adapters/codex/hooks/_lib.py` are now covered by `scripts/hook_schema_smoke.py`.
+
+Latest staging validation: command lint PASS for 9 commands; prompt surface review PASS for 7 prompts plus 1 helper index; release tree validation PASS with 138 candidate files and 250 ignored local-only/forbidden files, with privacy scanner, prompt review, command lint, and their smoke tests enforced.
+
+---
+
 ## Release stamp — 2026-05-11 (plugin v0.1.0 tarball)
 
 **Tarball:** `mentat-plugin.tar.gz`
@@ -14,7 +58,7 @@
 - `hooks/hooks.json` — patched to CC-required schema: added `"description"` / `"hooks"` wrapper (11 event types, all wired).
 - `docs/` directory added inside `plugin/` — `STYLE.v2.md`, `SOTA_CHECKLIST.md`, `PROVENANCE.md`.
 - `webhooks.json` — default endpoint updated from `http://localhost:4000` to `https://localhost:8443/events`.
-- `monitors/monitors.json` — per the operator's intent, this file should be removed (CC 2.1.126 does not support that schema yet). However, the file is still present on disk at `plugin/monitors/monitors.json` and ships in this tarball. The operator should delete the file from the source tree and rebuild before the next public distribution. The file is dormant — CC will ignore or reject it, but it will not break the install.
+- Historical note: the May tarball shipped a dormant `monitors/monitors.json` against a Claude Code build that did not yet support that schema. This note is superseded by the 2026-06-13 staging hardening above, where the monitor manifest is intentionally restored for Mentat's independent monitor lane and covered by smoke tests.
 
 ### Smoke result
 

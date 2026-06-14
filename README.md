@@ -89,9 +89,13 @@ Three first-class plugins form the operational core of the stack. Each is design
  ├──────────────────┼───────────────────────────────────────┼───────────────┤
  │  [Mentat](Plugins/Mentat/)          │  Live session FSA + Q-table substrate │  Active       │
  │  [CTMv3](Plugins/Cognitive-Topology-Map/)           │  Workspace activation engine          │  Active       │
- │  [Aeriadne](Plugins/Aeriadne/)        │  CPF + private marketplace operator   │  Staged       │
+ │  [Aeriadne](Plugins/Aeriadne/)        │  CPF + private marketplace operator   │  Active       │
  └──────────────────┴───────────────────────────────────────┴───────────────┘
 ```
+
+The release plugin surface is exactly this triad. **Muaddib / Sovereign BB7**
+remains the core server plane under [`Servers/`](Servers/), not a plugin.
+Non-owned local development tools are not attached as marketplace packages.
 
 <br/>
 
@@ -214,13 +218,13 @@ An activated codebase must produce these 8 characteristics:
 
 ### 4.3. [Aeriadne — CPF + Private Marketplace Operator](Plugins/Aeriadne/)
 
-[![Codex](https://img.shields.io/badge/Codex-Staged-f59e0b?style=flat-square&labelColor=0d1117)](Plugins/Aeriadne/)
-[![Claude Code](https://img.shields.io/badge/Claude%20Code-Staged-f59e0b?style=flat-square&labelColor=0d1117)](Plugins/Aeriadne/)
-[![OpenCode](https://img.shields.io/badge/OpenCode-Staged-f59e0b?style=flat-square&labelColor=0d1117)](Plugins/Aeriadne/)
+[![Codex](https://img.shields.io/badge/Codex-Installed-28c840?style=flat-square&labelColor=0d1117)](Plugins/Aeriadne/)
+[![Claude Code](https://img.shields.io/badge/Claude%20Code-Adapter-3b82f6?style=flat-square&labelColor=0d1117)](Plugins/Aeriadne/)
+[![OpenCode](https://img.shields.io/badge/OpenCode-Adapter-06b6d4?style=flat-square&labelColor=0d1117)](Plugins/Aeriadne/)
 
 `Aeriadne` is a skill-activated plugin that serves as the packaging compiler and operator for Daeron's private local/private marketplace. It is designed to package, register, and validate workspace assets.
 
-#### Staged Skills
+#### Packaged Skills
 Aeriadne v1 packages two distinct skills:
 1. **`constitutional-prompt-framework` (CPF)**: Derives, audits, scores, and ports Operator constitutions and system prompts across runtimes.
 2. **`aeriadne-marketplace-operator`**: Compiles package cards, updates `registry/`, structures adapters, and validates release gates.

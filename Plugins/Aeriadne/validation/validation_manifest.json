@@ -1,38 +1,123 @@
 {
   "package": "aeriadne",
   "version": "1.0.0",
-  "date": "2026-06-05",
-  "workspace": "/home/daeron/Repositories/Somnus-Intellligence-Stack/plugins/Aeriadne",
+  "date": "2026-06-13",
+  "workspace": "/home/daeron/Projects/Modern-ML/Plugins/Aeriadne",
   "status": "PASS",
-  "install_performed": false,
+  "installed": true,
   "git_push_performed": false,
-  "scope": [
-    "canonical path realignment",
-    "legacy plugin archive deletion",
-    "manifest and registry cleanup",
-    "package validator hardening"
-  ],
   "commands": [
     {
       "name": "package validator",
       "command": "python3 scripts/validate_package.py .",
+      "status": "PASS"
+    },
+    {
+      "name": "privacy boundary scanner",
+      "command": "python3 scripts/privacy_boundary_scan.py .",
       "status": "PASS",
-      "output": [
-        "Aeriadne package validation: PASS",
-        "root=/home/daeron/Repositories/Somnus-Intellligence-Stack/plugins/Aeriadne",
-        "skills=aeriadne-marketplace-operator, constitutional-prompt-framework",
-        "mcp=sovereign-bb7 canonical-reference",
-        "legacy_archive=deleted"
+      "policy": "allowlisted local roots; no unapproved local paths or compact private source identifiers"
+    },
+    {
+      "name": "privacy boundary scanner smoke",
+      "command": "PYTHONDONTWRITEBYTECODE=1 python3 tests/privacy_boundary_scan_smoke.py",
+      "status": "PASS",
+      "coverage": [
+        "known package roots",
+        "human-facing boundary prose",
+        "unapproved local paths",
+        "external media paths",
+        "compact private source identifiers",
+        "stale local tool log-token shapes"
       ]
     },
     {
-      "name": "JSON manifests",
-      "command": "python3 -m json.tool plugin.json && python3 -m json.tool .codex-plugin/plugin.json && python3 -m json.tool .claude-plugin/plugin.json && python3 -m json.tool registry/aeriadne.plugin.json",
+      "name": "Codex plugin ingestion validator",
+      "command": "python3 /home/daeron/.codex/skills/.system/plugin-creator/scripts/validate_plugin.py .",
       "status": "PASS"
+    },
+    {
+      "name": "JSON manifests",
+      "command": "python3 -m json.tool plugin.json && python3 -m json.tool .codex-plugin/plugin.json && python3 -m json.tool .claude-plugin/plugin.json && python3 -m json.tool registry/aeriadne.plugin.json && python3 -m json.tool registry/cognitive-topology-map.plugin.json && python3 -m json.tool registry/mentat.plugin.json && python3 -m json.tool registry/codex-config-topology.plugin.json",
+      "status": "PASS"
+    },
+    {
+      "name": "native plugin registry cards",
+      "command": "scripts/validate_package.py checks staged-green and staged-local package cards for PASS validation, and requires release_ready=false plus known gaps for staged-local cards",
+      "status": "PASS",
+      "cards": [
+        "registry/cognitive-topology-map.plugin.json",
+        "registry/mentat.plugin.json",
+        "registry/codex-config-topology.plugin.json"
+      ]
+    },
+    {
+      "name": "copyover release membrane",
+      "command": "scripts/validate_package.py requires COPYOVER_MANIFEST.md and .releaseignore; .releaseignore must cover runtime state, caches, secrets, private indexes, generated filetrees, and .sovereign/session_state.json",
+      "status": "PASS",
+      "public_copyover_performed": false
+    },
+    {
+      "name": "releaseignore dry-run",
+      "command": "rsync -avn --exclude-from=.releaseignore ./ /tmp/aeriadne-copy-dryrun/",
+      "status": "PASS",
+      "included": [
+        ".releaseignore",
+        "COPYOVER_MANIFEST.md",
+        ".sovereign/golden_paths.json",
+        ".sovereign/topology_fingerprint.txt"
+      ],
+      "excluded": [
+        ".sovereign/session_state.json",
+        "filetree.md",
+        ".codegraph/",
+        ".env",
+        "*.db"
+      ]
+    },
+    {
+      "name": "privacy scan",
+      "command": "scripts/privacy_boundary_scan.py plus external rg spot-check for private semantic archives, raw Golden Path source paths, local media paths, and stale local tool log/archive paths",
+      "status": "PASS"
+    },
+    {
+      "name": "site prototype audit",
+      "command": "PYTHONDONTWRITEBYTECODE=1 python3 tests/site_prototype_audit_smoke.py && python3 scripts/site_prototype_audit.py .",
+      "status": "PASS",
+      "prototypes": 1,
+      "semantic_requirements": 4,
+      "policy": "preserve local spec/site artifacts; enforce semantic content markers; keep releaseignore-excluded until promoted"
+    },
+    {
+      "name": "public repo clean check",
+      "command": "git -C /home/daeron/Repositories/Somnus-Intellligence-Stack status --short",
+      "status": "PASS",
+      "output": ""
+    },
+    {
+      "name": "Codex Config Topology staging validation",
+      "command": "cd ../Codex-Config-Topology && python3 /home/daeron/.codex/skills/.system/plugin-creator/scripts/validate_plugin.py . && python3 /home/daeron/.codex/skills/.system/skill-creator/scripts/quick_validate.py skills/codex-config-topology",
+      "status": "PASS",
+      "installed": false,
+      "release_ready": false
+    },
+    {
+      "name": "MCP server cards",
+      "command": "scripts/validate_package.py requires SovereignMCP MCP card and marketplace entry",
+      "status": "PASS",
+      "cards": [
+        "mcp/servers/sovereign-bb7.md",
+        "marketplace/cards/sovereign-bb7.mcp.md"
+      ]
     },
     {
       "name": "TOML manifest",
       "command": "python3 -c \"import pathlib,tomllib; tomllib.loads(pathlib.Path('plugin.toml').read_text())\"",
+      "status": "PASS"
+    },
+    {
+      "name": "plugin metadata mirrors",
+      "command": "byte equality check across plugin.json mirrors",
       "status": "PASS"
     },
     {
@@ -41,13 +126,32 @@
       "status": "PASS"
     },
     {
-      "name": "stale Aeriadne path scan",
-      "command": "grep scan for legacy Modern-ML Aeriadne canonical-path markers excluding validator constants",
+      "name": "CPF linter",
+      "command": "python3 skills/constitutional-prompt-framework/scripts/constitution_linter.py skills/constitutional-prompt-framework/examples/example-agent-constitution.md",
       "status": "PASS"
     },
     {
-      "name": "old plugin marker scan",
-      "command": "test ! -e plugins/old",
+      "name": "CPF score",
+      "command": "python3 skills/constitutional-prompt-framework/scripts/score_constitution.py skills/constitutional-prompt-framework/examples/example-agent-constitution.md",
+      "status": "PASS",
+      "overall_score": 87,
+      "readiness": "production candidate"
+    },
+    {
+      "name": "CPF static evals",
+      "command": "python3 skills/constitutional-prompt-framework/scripts/run_static_evals.py skills/constitutional-prompt-framework/tests/eval_cases.yaml",
+      "status": "PASS",
+      "cases": 6
+    },
+    {
+      "name": "CPF render fixture",
+      "command": "python3 skills/constitutional-prompt-framework/scripts/render_constitution_from_spec.py skills/constitutional-prompt-framework/tests/fixtures/minimal_constitution_spec.json -o /tmp/aeriadne-cpf-rendered-check.md",
+      "status": "PASS",
+      "output_bytes": 3165
+    },
+    {
+      "name": "backup churn scan",
+      "command": "scan for backup_20260604_224 files",
       "status": "PASS"
     }
   ],
@@ -55,10 +159,9 @@
     "aeriadne:constitutional-prompt-framework",
     "aeriadne:aeriadne-marketplace-operator"
   ],
-  "notes": [
-    "legacy plugin archive deleted from staging tree",
-    "legacy marker descriptors were deleted from the staging tree",
-    "active CPF/private-marketplace package id is aeriadne"
+  "installed_codex_exposure": [
+    "aeriadne:constitutional-prompt-framework",
+    "aeriadne:aeriadne-marketplace-operator"
   ],
-  "next_gate": "operator approval for local install or broader marketplace restructure first"
+  "next_gate": "review Aeriadne COPYOVER_MANIFEST.md, decide whether to refresh/install staged Codex Config Topology or supersede it, then inspect exact public repo diff before any copy"
 }

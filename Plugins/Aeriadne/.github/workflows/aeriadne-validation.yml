@@ -1,0 +1,34 @@
+name: Aeriadne Validation
+
+on:
+  workflow_dispatch:
+  push:
+    paths:
+      - "plugin.json"
+      - ".codex-plugin/plugin.json"
+      - ".claude-plugin/plugin.json"
+      - "plugin.toml"
+      - "registry/**"
+      - "skills/**"
+      - "scripts/**"
+      - "tests/**"
+      - ".github/workflows/aeriadne-validation.yml"
+
+jobs:
+  validate:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
+      - name: Validate package
+        run: python3 scripts/validate_package.py .
+      - name: Validate JSON manifests
+        run: |
+          python3 -m json.tool plugin.json >/dev/null
+          python3 -m json.tool .codex-plugin/plugin.json >/dev/null
+          python3 -m json.tool .claude-plugin/plugin.json >/dev/null
+          python3 -m json.tool registry/aeriadne.plugin.json >/dev/null
+      - name: Validate CPF skill package
+        run: python3 skills/constitutional-prompt-framework/scripts/validate_skill_package.py skills/constitutional-prompt-framework

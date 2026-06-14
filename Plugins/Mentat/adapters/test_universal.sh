@@ -91,6 +91,51 @@ pass "install_universal.sh --dry-run --gemini"
     || fail "install_universal.sh --dry-run --claude"
 pass "install_universal.sh --dry-run --claude"
 
+# ---- Installer copy hygiene -----------------------------------------------
+heading "installer: temp codex copy hygiene"
+TMP_HOME="$(mktemp -d)"
+cleanup_tmp_home() { rm -rf "$TMP_HOME"; }
+trap cleanup_tmp_home EXIT
+
+HOME="$TMP_HOME" "$ADAPTERS/install_universal.sh" \
+    --plugin-root "$PLUGIN_ROOT" --codex >/dev/null \
+    || fail "install_universal.sh --plugin-root <root> --codex in temp HOME"
+
+INSTALLED="$TMP_HOME/.codex/plugins/mentat"
+[[ -d "$INSTALLED" ]] || fail "missing installed plugin root: $INSTALLED"
+
+REQUIRED_INSTALLED=(
+    ".releaseignore"
+    ".claude-plugin/plugin.json"
+    ".mcp.json"
+    "adapters/install_universal.sh"
+    "scripts/hook_schema_smoke.py"
+    "state_machine/machine.py"
+)
+for rel in "${REQUIRED_INSTALLED[@]}"; do
+    [[ -e "$INSTALLED/$rel" ]] || fail "installed copy missing: $rel"
+    pass "installed: $rel"
+done
+
+FORBIDDEN_INSTALLED=(
+    ".mentat"
+    "mentat-plugin.tar.gz"
+    "mentat-v2.zip"
+    "filetree-6-13.md"
+    "6-11-2026 Task"
+    "hooks/_lib.py.backup_hook_schema_20260603_1530"
+    "adapters/codex/hooks/_lib.py.backup_hook_schema_20260603_1530"
+)
+for rel in "${FORBIDDEN_INSTALLED[@]}"; do
+    [[ ! -e "$INSTALLED/$rel" ]] || fail "staging artifact copied: $rel"
+    pass "not copied: $rel"
+done
+
+[[ -f "$TMP_HOME/.codex/hooks.json" ]] || fail "missing rendered Codex hooks.json"
+python3 -c "import json; json.load(open(r'$TMP_HOME/.codex/hooks.json'))" \
+    || fail "rendered Codex hooks.json invalid"
+pass "rendered Codex hooks.json"
+
 # ---- Snippet line caps ----------------------------------------------------
 heading "snippet: line caps (≤ 80)"
 for snip in \

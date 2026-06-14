@@ -4,7 +4,15 @@
   "version": "1.0.0",
   "status": "private-v1",
   "type": "skill-activated-plugin",
-  "canonical_path": "/home/daeron/Repositories/Somnus-Intellligence-Stack/Plugins/Aeriadne",
+  "canonical_path": "/home/daeron/Projects/Modern-ML/Plugins/Aeriadne",
+  "installed": true,
+  "install_evidence": {
+    "codex_plugin_id": "aeriadne@local",
+    "status": "installed, enabled",
+    "version": "1.0.0",
+    "marketplace_path": "/home/daeron/.claude/plugins/marketplaces/local/plugins/aeriadne",
+    "cache_path": "/home/daeron/.codex/plugins/cache/local/aeriadne/1.0.0"
+  },
   "owner": "Daeron",
   "clients": {
     "codex": {
@@ -22,10 +30,6 @@
     "opencode": {
       "supported": true,
       "adapter": "adapters/opencode/README.md"
-    },
-    "grok_build": {
-      "supported": true,
-      "adapter": "adapters/README.md"
     }
   },
   "includes": {
@@ -40,39 +44,23 @@
       "sovereign-bb7"
     ]
   },
-  "validation": {
-    "last_status": "PASS",
-    "date": "2026-06-05",
-    "commands": [
-      "python3 scripts/validate_package.py .",
-      "python3 -m json.tool plugin.json >/dev/null",
-      "python3 -m json.tool .codex-plugin/plugin.json >/dev/null",
-      "python3 -m json.tool .claude-plugin/plugin.json >/dev/null",
-      "python3 -m json.tool registry/aeriadne.plugin.json >/dev/null",
-      "python3 -c \"import pathlib,tomllib; tomllib.loads(pathlib.Path('plugin.toml').read_text())\"",
-      "python3 skills/constitutional-prompt-framework/scripts/validate_skill_package.py skills/constitutional-prompt-framework"
-    ],
-    "evidence": {
-      "package_validator": "PASS",
-      "json_manifests": "PASS",
-      "toml_manifest": "PASS",
-      "cpf_skill_validator": "PASS",
-      "stale_path_scan": "PASS",
-      "legacy_archive_scan": "PASS"
-    }
-  },
+    "validation": {
+        "last_status": "PASS",
+        "last_run": "2026-06-13",
+        "evidence": "validation/validation_report.md plus local rerun during CTMv3 activation",
+        "commands": [
+            "python3 -m json.tool plugin.json",
+            "python3 -c \"import pathlib,tomllib; tomllib.loads(pathlib.Path('plugin.toml').read_text())\"",
+            "python3 scripts/validate_package.py .",
+            "python3 skills/constitutional-prompt-framework/scripts/validate_skill_package.py skills/constitutional-prompt-framework"
+        ]
+    },
   "aliases": [
     "Ariadne",
-    "cpf-plugin-ariadne",
-    "CPF-Plugin-Ariadne"
-  ],
-  "supersedes": [
-    "legacy CPF plugin shell",
     "cpf-plugin-ariadne"
   ],
   "notes": [
     "BB7/SovereignMCP is a canonical-reference MCP card, not vendored plugin code.",
-    "The direct CPF authoring skill remains intact outside this plugin package.",
-    "Legacy plugin marker descriptors were deleted from the staging tree so scanners cannot expose stale installables."
+    "The direct CPF authoring skill remains intact outside this plugin package."
   ]
 }

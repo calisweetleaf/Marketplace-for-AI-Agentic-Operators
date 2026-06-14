@@ -35,6 +35,13 @@ mcp_server.py                      →  gateway/dispatcher: transports, registry
 5. Advanced bridge features (trained_q + co-occurrence, when `MUADIB_ADVANCED_MODE=1`)
 ...and return a smarter answer than any single tool would produce alone.
 
+**Tool-surface note (2026-06-06):** use `runtime-tools/README.md` for the
+current active module/tool inventory. `code_analysis_tool.py` is back as the
+baseline code-analysis layer, `enhanced_code_analysis_tool.py` remains the
+canonical advanced/security-analysis layer, `enhanced_web_tool.py` is the only
+web layer, and `vscode_terminal_tool.py` now sits beside `shell_tool.py` as an
+MCP terminal-context surface.
+
 ---
 
 ## BRANCH A: How does a tool call flow?
@@ -402,3 +409,8 @@ self.session_state = {
 | Active plans | `data/exoskeleton/active_plans.json` |
 | Distillation trajectories | `data/distillation/trajectories_*.jsonl` |
 | Events log | `data/events.jsonl` |
+> 2026-06-12 topology note: the legacy `infrustructure/` source modules are
+> retired from this checkout. The current active source topology should be read
+> as `mcp_server.py` plus `tools/`, `muadib/`, transport/security wrappers, and
+> the shared `data/` plane. Mentat's 24/7 alignment doctrine is captured in
+> `docs/mentat_24_7_alignment.md`.

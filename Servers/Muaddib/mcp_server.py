@@ -24,7 +24,9 @@ Architecture:
 
 import argparse
 import asyncio
+import concurrent.futures
 import hashlib
+import importlib
 import inspect
 import json
 import logging
@@ -34,14 +36,25 @@ import re
 import shutil
 import sqlite3
 import sys
+import threading
 import time
 import traceback
-import threading
-import importlib
 import uuid
 from datetime import datetime
 from pathlib import Path
-from typing import Any, Dict, List, Optional, Callable, Union, Tuple
+from typing import Any, Callable, Dict, List, Optional, Tuple, Union
+
+
+SENSITIVE_ARG_KEY_RE = re.compile(
+    r"(api[_-]?key|token|secret|password|authorization|bearer|cookie|ssh)",
+    re.IGNORECASE,
+)
+BEARER_TEXT_RE = re.compile(r"\b(Bearer\s+)[A-Za-z0-9._~+/=-]+", re.IGNORECASE)
+API_KEY_TEXT_RE = re.compile(
+    r"\b(sk-or-[A-Za-z0-9._~+/=-]+|sk-[A-Za-z0-9._~+/=-]+)\b",
+    re.IGNORECASE,
+)
+REDACTED_VALUE = "[REDACTED]"
 
 
 class MCPServer:
@@ -87,6 +100,11 @@ class MCPServer:
         self._exo_sync_lock = threading.Lock()
         self._last_exo_sync_time = 0.0
         self._last_exo_sync_tool_count = -1
+        # Semaphore limiting ambient memory exchange daemon threads to 1 concurrent.
+        # memory_tool.store() holds _lock for ~2-3s over 9k+ entries; without this
+        # rapid-fire calls queue N daemon threads causing N*3s lock starvation on
+        # any subsequent tool call that touches the memory substrate.
+        self._ambient_exchange_sem = threading.Semaphore(1)
 
         # Server state
         self.tools = {}
@@ -94,10 +112,9 @@ class MCPServer:
         self.tool_origins: Dict[str, str] = {}
         self._tool_registry_lock = threading.RLock()
         self._proactive_memory_injected = False
-        self._ambient_memory_exchange_enabled = (
-            str(os.environ.get("SOVEREIGN_AMBIENT_MEMORY_EXCHANGE", "1")).strip().lower()
-            not in {"0", "false", "no"}
-        )
+        self._ambient_memory_exchange_enabled = str(
+            os.environ.get("SOVEREIGN_AMBIENT_MEMORY_EXCHANGE", "1")
+        ).strip().lower() not in {"0", "false", "no"}
 
         # Tool health monitoring - track silent failures and health issues
         self.tool_health = {
@@ -112,6 +129,9 @@ class MCPServer:
         # Distillation engine — initialized late after register_tools() via _late_init_distillation().
         # Set SOVEREIGN_DISTILLATION_ENABLED=1 to activate trajectory capture.
         self._distillation_engine = None
+        self._tool_usage_db_enabled = str(
+            os.environ.get("SOVEREIGN_TOOL_USAGE_DB_ENABLED", "1")
+        ).strip().lower() not in {"0", "false", "no"}
 
         self.server_info = {
             "name": "Advanced MCP Server",
@@ -298,7 +318,9 @@ class MCPServer:
             "workspace_root": str(self.workspace_root),
             "python_executable": sys.executable,
             "source_file": str(source_path),
-            "source_mtime": source_path.stat().st_mtime if source_path.exists() else None,
+            "source_mtime": source_path.stat().st_mtime
+            if source_path.exists()
+            else None,
             "source_sha256_16": self._short_file_sha256(source_path),
             "tool_manifest_mtime": (
                 manifest_path.stat().st_mtime if manifest_path.exists() else None
@@ -487,7 +509,9 @@ class MCPServer:
         This is not a server restart and not a full register_tools() rerun. It
         avoids boot side effects such as starting another autonomous cycle.
         """
-        module_name = str(params.get("module_name") or "meta_intelligence_engine").strip()
+        module_name = str(
+            params.get("module_name") or "meta_intelligence_engine"
+        ).strip()
         force_reload = bool(params.get("force_reload", True))
         if module_name not in self.REGISTRY_BOUND_REFRESH_ALLOWLIST:
             return {
@@ -507,7 +531,11 @@ class MCPServer:
             }
 
         _source_dir, import_prefix = self._resolve_tools_import_surface()
-        import_name = f"{import_prefix}.{module_name}" if import_prefix else module_name
+        import_name = (
+            module_name if "." in module_name
+            else f"{import_prefix}.{module_name}" if import_prefix
+            else module_name
+        )
 
         with self._tool_registry_lock:
             before_tools = set(self.tools.keys())
@@ -780,7 +808,9 @@ class MCPServer:
             self._distillation_db_path = None
             self._distillation_conn = None
 
-    def flush_trajectory_to_distillation(self, reason: str = "session_end") -> Optional[str]:
+    def flush_trajectory_to_distillation(
+        self, reason: str = "session_end"
+    ) -> Optional[str]:
         """
         Flush the in-memory trajectory buffer to distillation storage.
         Called at: session end, agent run completion, explicit bb7_lisan_distill call.
@@ -814,7 +844,9 @@ class MCPServer:
 
         self.logger.info(
             "Trajectory flushed to distillation: %s (%d tool calls, reason=%s)",
-            trajectory_id, len(trajectory), reason,
+            trajectory_id,
+            len(trajectory),
+            reason,
         )
         return trajectory_id
 
@@ -831,6 +863,7 @@ class MCPServer:
             return
         try:
             from tools.lisan_al_gaib import DistillationSubsystem
+
             self._distillation_engine = DistillationSubsystem(
                 data_dir=self.data_dir, logger=self.logger
             )
@@ -891,7 +924,9 @@ class MCPServer:
             return
         cognitive_journal = getattr(exo, "_cognitive_journal", None)
         if cognitive_journal is None:
-            self.logger.info("Lisan bridge: cognitive_journal not initialized (lisan offline?)")
+            self.logger.info(
+                "Lisan bridge: cognitive_journal not initialized (lisan offline?)"
+            )
             return
 
         # Wire ThoughtJournalTool
@@ -899,18 +934,38 @@ class MCPServer:
         if journal_tool is not None:
             try:
                 journal_tool.set_cognitive_journal(cognitive_journal)
-                self.logger.info("Bridge wired: ThoughtJournalTool → CognitiveJournalSubsystem")
+                self.logger.info(
+                    "Bridge wired: ThoughtJournalTool → CognitiveJournalSubsystem"
+                )
             except AttributeError:
-                pass
+                self._record_internal_failure(
+                    component="mcp_server",
+                    operation="wire_journal_lisan_bridge_thought_journal",
+                    error=AttributeError(
+                        "ThoughtJournalTool.set_cognitive_journal missing"
+                    ),
+                    context={},
+                    severity="warning",
+                )
 
         # Wire IntelligentOptimizationTool (auto_tool_module)
         auto_tool = self.tool_modules.get("auto_tool_module")
         if auto_tool is not None:
             try:
                 auto_tool.set_cognitive_journal(cognitive_journal)
-                self.logger.info("Bridge wired: IntelligentOptimizationTool → CognitiveJournalSubsystem")
+                self.logger.info(
+                    "Bridge wired: IntelligentOptimizationTool → CognitiveJournalSubsystem"
+                )
             except AttributeError:
-                pass
+                self._record_internal_failure(
+                    component="mcp_server",
+                    operation="wire_journal_lisan_bridge_auto_tool",
+                    error=AttributeError(
+                        "auto_tool_module.set_cognitive_journal missing"
+                    ),
+                    context={},
+                    severity="warning",
+                )
 
     def _start_autonomous_cycle(self) -> None:
         """Spawn the perpetual autonomous exo cycle as a daemon thread."""
@@ -958,7 +1013,9 @@ class MCPServer:
                     try:
                         exo._maybe_sync_live_tools(force=False)
                     except Exception as sync_exc:
-                        self.logger.debug("Cycle %d: Sync live tools failed: %s", cycle_n, sync_exc)
+                        self.logger.debug(
+                            "Cycle %d: Sync live tools failed: %s", cycle_n, sync_exc
+                        )
 
                     # 2. Rebuild spectral IDF if decomposer is alive
                     try:
@@ -966,13 +1023,19 @@ class MCPServer:
                         if sd is not None and hasattr(sd, "rebuild_idf"):
                             sd.rebuild_idf(exo.tool_catalog)
                     except Exception as idf_exc:
-                        self.logger.debug("Cycle %d: Rebuild IDF failed: %s", cycle_n, idf_exc)
+                        self.logger.debug(
+                            "Cycle %d: Rebuild IDF failed: %s", cycle_n, idf_exc
+                        )
 
                     # 3. Mine execution history for new golden path candidates
                     try:
                         oracle = getattr(exo, "_golden_oracle", None)
                         history_file = getattr(exo, "history_file", None)
-                        if oracle is not None and history_file is not None and history_file.exists():
+                        if (
+                            oracle is not None
+                            and history_file is not None
+                            and history_file.exists()
+                        ):
                             history: List[Dict[str, Any]] = []
                             with open(history_file, "r", encoding="utf-8") as _hf:
                                 for _line in _hf:
@@ -981,15 +1044,22 @@ class MCPServer:
                                         if row:
                                             history.append(row)
                                     except Exception as json_exc:
-                                        self.logger.debug("Cycle %d: Load history row failed: %s", cycle_n, json_exc)
+                                        self.logger.debug(
+                                            "Cycle %d: Load history row failed: %s",
+                                            cycle_n,
+                                            json_exc,
+                                        )
                             if len(history) >= 4:
                                 try:
                                     from tools.lisan_al_gaib import _MetaLearningEngine
+
                                     meta = _MetaLearningEngine(
                                         golden_path_min_occurrences=3,
                                         golden_path_min_success_rate=0.8,
                                     )
-                                    candidates = meta.discover_golden_paths(history[-200:])
+                                    candidates = meta.discover_golden_paths(
+                                        history[-200:]
+                                    )
                                     if candidates:
                                         self.logger.info(
                                             "Cycle %d: %d golden path candidate(s) discovered",
@@ -1002,7 +1072,9 @@ class MCPServer:
                                             payload={
                                                 "cycle": cycle_n,
                                                 "candidates": len(candidates),
-                                                "top_chain": candidates[0].get("chain", [])
+                                                "top_chain": candidates[0].get(
+                                                    "chain", []
+                                                )
                                                 if candidates
                                                 else [],
                                             },
@@ -1012,10 +1084,16 @@ class MCPServer:
                                         # (>= 0.9 success_rate) into golden_paths.json
                                         promoted = 0
                                         for _cand in candidates:
-                                            if float(_cand.get("success_rate", 0)) >= 0.9:
+                                            if (
+                                                float(_cand.get("success_rate", 0))
+                                                >= 0.9
+                                            ):
                                                 try:
-                                                    did_promote = oracle.promote_candidate(
-                                                        _cand, confidence_threshold=0.9
+                                                    did_promote = (
+                                                        oracle.promote_candidate(
+                                                            _cand,
+                                                            confidence_threshold=0.9,
+                                                        )
                                                     )
                                                     if did_promote:
                                                         promoted += 1
@@ -1036,22 +1114,34 @@ class MCPServer:
                                         "Cycle %d meta-learning: %s", cycle_n, _meta_err
                                     )
                     except Exception as mine_exc:
-                        self.logger.warning("Cycle %d: Mining execution history failed: %s", cycle_n, mine_exc)
+                        self.logger.warning(
+                            "Cycle %d: Mining execution history failed: %s",
+                            cycle_n,
+                            mine_exc,
+                        )
 
                 # 4. Surface relevant journal decisions into routing context file
                 # — so the next model turn has pre-computed decision history with zero latency
                 try:
-                    cognitive_journal = getattr(exo, "_cognitive_journal", None) if exo else None
-                    if cognitive_journal is not None and hasattr(cognitive_journal, "surface_relevant"):
+                    cognitive_journal = (
+                        getattr(exo, "_cognitive_journal", None) if exo else None
+                    )
+                    if cognitive_journal is not None and hasattr(
+                        cognitive_journal, "surface_relevant"
+                    ):
                         # Build recent context from last catalog tool names + cycle count
                         _recent_ctx = f"cycle {cycle_n} autonomous routing context"
                         if exo is not None and hasattr(exo, "tool_catalog"):
                             _recent_ctx += " " + " ".join(
                                 list(exo.tool_catalog.keys())[-10:]
                             )
-                        relevant = cognitive_journal.surface_relevant(_recent_ctx, max_results=5)
+                        relevant = cognitive_journal.surface_relevant(
+                            _recent_ctx, max_results=5
+                        )
                         if relevant:
-                            _ctx_path = self.data_dir / "autonomous_routing_context.json"
+                            _ctx_path = (
+                                self.data_dir / "autonomous_routing_context.json"
+                            )
                             try:
                                 _tmp = _ctx_path.with_suffix(".json.tmp")
                                 with open(_tmp, "w", encoding="utf-8") as _cf:
@@ -1065,14 +1155,28 @@ class MCPServer:
                                         indent=2,
                                     )
                                 _tmp.replace(_ctx_path)
-                            except Exception:
-                                pass
-                except Exception:
-                    pass
+                            except Exception as ctx_write_exc:
+                                self._record_internal_failure(
+                                    component="mcp_server",
+                                    operation="autonomous_routing_context_write",
+                                    error=ctx_write_exc,
+                                    context={"cycle": cycle_n},
+                                    severity="warning",
+                                )
+                except Exception as journal_surface_exc:
+                    self._record_internal_failure(
+                        component="mcp_server",
+                        operation="autonomous_journal_surface",
+                        error=journal_surface_exc,
+                        context={"cycle": cycle_n},
+                        severity="warning",
+                    )
 
                 # 5. Proactive actions from auto_tool_module
                 auto_tool = self.tool_modules.get("auto_tool_module")
-                if auto_tool is not None and hasattr(auto_tool, "_generate_proactive_actions"):
+                if auto_tool is not None and hasattr(
+                    auto_tool, "_generate_proactive_actions"
+                ):
                     try:
                         proactive = auto_tool._generate_proactive_actions()
                         if proactive:
@@ -1082,8 +1186,14 @@ class MCPServer:
                                 payload={"cycle": cycle_n, "actions": proactive[:3]},
                                 importance_hint=0.4,
                             )
-                    except Exception:
-                        pass
+                    except Exception as proactive_exc:
+                        self._record_internal_failure(
+                            component="mcp_server",
+                            operation="autonomous_proactive_actions",
+                            error=proactive_exc,
+                            context={"cycle": cycle_n},
+                            severity="warning",
+                        )
 
                 # 6. Narrative synthesis every 8 cycles (~6 minutes)
                 # — Pre-computes a session briefing so bb7_exo_briefing has zero cold-start latency.
@@ -1113,10 +1223,22 @@ class MCPServer:
                                     "Cycle %d: session briefing pre-computed",
                                     cycle_n,
                                 )
-                            except Exception:
-                                pass
-                    except Exception:
-                        pass
+                            except Exception as briefing_write_exc:
+                                self._record_internal_failure(
+                                    component="mcp_server",
+                                    operation="autonomous_precompute_briefing_write",
+                                    error=briefing_write_exc,
+                                    context={"cycle": cycle_n},
+                                    severity="warning",
+                                )
+                    except Exception as briefing_exc:
+                        self._record_internal_failure(
+                            component="mcp_server",
+                            operation="autonomous_precompute_briefing",
+                            error=briefing_exc,
+                            context={"cycle": cycle_n},
+                            severity="warning",
+                        )
 
                 # 7. Muad'Dib Neural Telemetry & Save (Phase 5)
                 # Logs substrate status every 4 cycles, auto-saves checkpoint every 16
@@ -1135,13 +1257,15 @@ class MCPServer:
                                     status.get("q_entries", 0),
                                     status.get("vocab_size_used", 0),
                                     status.get("vocab_size_max", 4096),
-                                    status.get("tokenizer_initialized", False)
+                                    status.get("tokenizer_initialized", False),
                                 )
 
                             # Save every 16 cycles
                             if cycle_n % 16 == 0 and hasattr(twin, "bb7_dt_save"):
                                 twin.bb7_dt_save()
-                                self.logger.debug("Cycle %d: Muad'Dib checkpoint saved", cycle_n)
+                                self.logger.debug(
+                                    "Cycle %d: Muad'Dib checkpoint saved", cycle_n
+                                )
 
                             # Bounded continuous self-play. This trains an
                             # isolated candidate policy/value head and writes
@@ -1196,7 +1320,9 @@ class MCPServer:
                                     update_qtable=sp_update_qtable,
                                     session_id=f"autonomous_self_play_cycle_{cycle_n}",
                                 )
-                                if not isinstance(sp_result, dict) or not sp_result.get("ok"):
+                                if not isinstance(sp_result, dict) or not sp_result.get(
+                                    "ok"
+                                ):
                                     raise RuntimeError(
                                         f"Muad'Dib self-play failed: {sp_result}"
                                     )
@@ -1209,7 +1335,9 @@ class MCPServer:
                                         "cycle": cycle_n,
                                         "interval_cycles": self_play_interval,
                                         "checkpoint": checkpoint.get("checkpoint"),
-                                        "weights_format": sp_result.get("weights_format"),
+                                        "weights_format": sp_result.get(
+                                            "weights_format"
+                                        ),
                                         "promotion_requested": sp_result.get(
                                             "promotion_requested"
                                         ),
@@ -1220,7 +1348,9 @@ class MCPServer:
                                         "max_steps": metrics.get("max_steps"),
                                         "avg_reward": metrics.get("avg_reward"),
                                         "avg_loss": metrics.get("avg_loss"),
-                                        "qtable_updated": sp_result.get("qtable_updated"),
+                                        "qtable_updated": sp_result.get(
+                                            "qtable_updated"
+                                        ),
                                     },
                                     importance_hint=0.75,
                                 )
@@ -1328,8 +1458,7 @@ class MCPServer:
                     ) from exc
             except OSError as exc:
                 raise RuntimeError(
-                    "Failed to create MCP singleton lock at "
-                    f"{lock_path}: {exc}"
+                    f"Failed to create MCP singleton lock at {lock_path}: {exc}"
                 ) from exc
 
         raise RuntimeError(
@@ -1456,7 +1585,9 @@ class MCPServer:
         )
         try:
             with open(tmp_path, "w", encoding="utf-8") as handle:
-                json.dump(self._to_jsonable(state), handle, indent=2, ensure_ascii=False)
+                json.dump(
+                    self._to_jsonable(state), handle, indent=2, ensure_ascii=False
+                )
             os.replace(tmp_path, self.codex_ingest_state_file)
         except Exception as exc:
             try:
@@ -1557,6 +1688,13 @@ class MCPServer:
                 severity="warning",
                 turn_id=turn_id,
             )
+
+        # Fast-path: nothing new to read when offset is already at EOF.
+        # Previously this fell through to a seek-and-readline loop that logged a
+        # spurious "offset not on line boundary" error on every call because JSONL
+        # files end with '}' not '\n', generating 800+ identical noise entries.
+        if safe_offset >= current_size:
+            return [], safe_offset
 
         records: List[Dict[str, Any]] = []
         with open(path, "r", encoding="utf-8") as handle:
@@ -1685,7 +1823,9 @@ class MCPServer:
                 continue
 
             result_text = str(result)
-            if result_text.startswith("Error") or result_text.startswith("Validation errors"):
+            if result_text.startswith("Error") or result_text.startswith(
+                "Validation errors"
+            ):
                 self._record_internal_failure(
                     component="mcp_server",
                     operation="bulk_promote_memories",
@@ -1748,7 +1888,12 @@ class MCPServer:
                                 ),
                                 "category": "context",
                                 "importance": 0.68,
-                                "tags": ["codex", "chat", "user", f"thread:{thread_id}"],
+                                "tags": [
+                                    "codex",
+                                    "chat",
+                                    "user",
+                                    f"thread:{thread_id}",
+                                ],
                             }
                         )
                         summary["messages"] += 1
@@ -1820,7 +1965,9 @@ class MCPServer:
             elif payload_type == "function_call":
                 tool_name = str(payload.get("name", "unknown"))
                 call_id = str(payload.get("call_id", ""))
-                decoded_arguments = self._decode_tool_arguments(payload.get("arguments"))
+                decoded_arguments = self._decode_tool_arguments(
+                    payload.get("arguments")
+                )
                 self._log_conversation_message(
                     thread_id,
                     "assistant",
@@ -1932,7 +2079,10 @@ class MCPServer:
                 elif "secs" in duration:
                     latency_ms = float(duration["secs"]) * 1000.0
                 elif "nanos" in duration:
-                    latency_ms = float(duration.get("secs", 0)) * 1000.0 + float(duration["nanos"]) / 1_000_000.0
+                    latency_ms = (
+                        float(duration.get("secs", 0)) * 1000.0
+                        + float(duration["nanos"]) / 1_000_000.0
+                    )
             elif isinstance(duration, (int, float)):
                 latency_ms = float(duration) * 1000.0
 
@@ -1950,13 +2100,18 @@ class MCPServer:
             )
             self.logger.debug(
                 "Codex→Twin overlay: %s (cat=%s, success=%s, latency=%.1fms, thread=%s)",
-                tool_name, category, success, latency_ms, thread_id,
+                tool_name,
+                category,
+                success,
+                latency_ms,
+                thread_id,
             )
         except Exception as exc:
             # Non-fatal: log and continue. Never break codex ingestion.
             self.logger.debug(
                 "Codex→Twin overlay failed for %s (non-fatal): %s",
-                tool_name, exc,
+                tool_name,
+                exc,
             )
 
     def _process_codex_history_records(
@@ -1985,7 +2140,10 @@ class MCPServer:
                 event_type="codex_history_ingested",
                 source="codex_history",
                 turn_id=turn_id,
-                payload={"records_ingested": count, "path": str(self._codex_history_path)},
+                payload={
+                    "records_ingested": count,
+                    "path": str(self._codex_history_path),
+                },
                 importance_hint=0.25,
             )
         return {"records": count}
@@ -2052,7 +2210,9 @@ class MCPServer:
                 else 1.0
             )
             score = overlap * session_boost + recency_boost
-            scored.append((score, float(ts or now), str(session_id), str(role), content))
+            scored.append(
+                (score, float(ts or now), str(session_id), str(role), content)
+            )
 
         if not scored:
             return ""
@@ -2120,7 +2280,9 @@ class MCPServer:
                             "rollout_messages": rollout_summary["messages"],
                             "rollout_tool_calls": rollout_summary["tool_calls"],
                             "rollout_tool_outputs": rollout_summary["tool_outputs"],
-                            "rollout_reasoning_items": rollout_summary["reasoning_items"],
+                            "rollout_reasoning_items": rollout_summary[
+                                "reasoning_items"
+                            ],
                             "memory_entries_stored": rollout_summary[
                                 "memory_entries_stored"
                             ],
@@ -2274,7 +2436,9 @@ class MCPServer:
                 severity="error",
             )
 
-        reason = str(last_error) if last_error is not None else "memory_tool_unavailable"
+        reason = (
+            str(last_error) if last_error is not None else "memory_tool_unavailable"
+        )
         self._append_event(
             event_type="memory_context_injected",
             source="mcp_server",
@@ -2305,7 +2469,9 @@ class MCPServer:
         tool_name: Optional[str] = None
 
         if isinstance(params, dict):
-            tool_name = params.get("name") if isinstance(params.get("name"), str) else None
+            tool_name = (
+                params.get("name") if isinstance(params.get("name"), str) else None
+            )
             if tool_name:
                 context_chunks.append(f"tool={tool_name}")
             arguments = params.get("arguments")
@@ -2413,12 +2579,12 @@ class MCPServer:
 
         now = time.time()
         normalized_tool = re.sub(r"[^a-zA-Z0-9_-]+", "_", str(tool_name or "unknown"))
-        memory_key = (
-            f"mcp_exchange::{self.session_id}::{int(now * 1000)}::{normalized_tool[:80]}"
-        )
+        memory_key = f"mcp_exchange::{self.session_id}::{int(now * 1000)}::{normalized_tool[:80]}"
         memory_context_summary = ""
         if isinstance(memory_context, dict):
-            memory_context_summary = str(memory_context.get("context_summary", ""))[:500]
+            memory_context_summary = str(memory_context.get("context_summary", ""))[
+                :500
+            ]
 
         exchange_record = {
             "ts": now,
@@ -2454,33 +2620,20 @@ class MCPServer:
             tags=tags,
         )
 
-        analyzed = False
-        memory_interconnect = self.tool_modules.get("memory_interconnect")
-        if memory_interconnect is not None and hasattr(
-            memory_interconnect, "analyze_memory_entry"
-        ):
-            try:
-                memory_interconnect.analyze_memory_entry(
-                    key=memory_key,
-                    value=memory_value,
-                    source="mcp_exchange",
-                )
-                analyzed = True
-            except Exception as analyze_exc:
-                self._record_internal_failure(
-                    component="mcp_server",
-                    operation="persist_tool_exchange_memory_analyze",
-                    error=analyze_exc,
-                    context={"tool_name": str(tool_name or ""), "memory_key": memory_key},
-                    severity="warning",
-                    turn_id=turn_id,
-                )
+        # memory_tool.store() already invokes memory_interconnect.analyze_memory_entry()
+        # internally via self.intelligence — calling it again here would run the
+        # full 6k-entry BM25 scoring loop twice, doubling lock hold time.
+        analyzed = True
 
         linked = False
         session_tool = self.tool_modules.get("session_manager_tool")
-        if session_tool is not None and hasattr(session_tool, "bb7_link_memory_to_session"):
+        if session_tool is not None and hasattr(
+            session_tool, "bb7_link_memory_to_session"
+        ):
             try:
-                link_result = session_tool.bb7_link_memory_to_session(memory_key=memory_key)
+                link_result = session_tool.bb7_link_memory_to_session(
+                    memory_key=memory_key
+                )
                 if isinstance(link_result, str) and "Linked memory key" in link_result:
                     linked = True
             except Exception as link_exc:
@@ -2488,7 +2641,10 @@ class MCPServer:
                     component="mcp_server",
                     operation="persist_tool_exchange_memory_link",
                     error=link_exc,
-                    context={"tool_name": str(tool_name or ""), "memory_key": memory_key},
+                    context={
+                        "tool_name": str(tool_name or ""),
+                        "memory_key": memory_key,
+                    },
                     severity="warning",
                     turn_id=turn_id,
                 )
@@ -2504,7 +2660,9 @@ class MCPServer:
                 "latency_ms": exchange_record["latency_ms"],
                 "analyzed": analyzed,
                 "linked_to_session": linked,
-                "store_response_summary": self._summarize_value(store_response, max_chars=300),
+                "store_response_summary": self._summarize_value(
+                    store_response, max_chars=300
+                ),
             },
             importance_hint=0.62,
         )
@@ -2531,6 +2689,10 @@ class MCPServer:
             return
 
         def _worker() -> None:
+            # Non-blocking acquire: if another exchange daemon is already running,
+            # skip this one entirely rather than queuing a blocking 2-3s lock wait.
+            if not self._ambient_exchange_sem.acquire(blocking=False):
+                return
             try:
                 self._persist_tool_exchange_memory(
                     tool_name=tool_name,
@@ -2551,6 +2713,8 @@ class MCPServer:
                     severity="error",
                     turn_id=turn_id,
                 )
+            finally:
+                self._ambient_exchange_sem.release()
 
         threading.Thread(target=_worker, daemon=True).start()
 
@@ -2570,7 +2734,9 @@ class MCPServer:
                 elif isinstance(value, (list, dict)):
                     parts.append(f"{key}={self._summarize_value(value, max_chars=160)}")
         if result_payload is not None:
-            parts.append(f"result={self._summarize_value(result_payload, max_chars=400)}")
+            parts.append(
+                f"result={self._summarize_value(result_payload, max_chars=400)}"
+            )
         return " | ".join(part for part in parts if part)[:1600]
 
     def _build_sovereign_meta(
@@ -2582,7 +2748,9 @@ class MCPServer:
         turn_id: Optional[str] = None,
     ) -> Dict[str, Any]:
         """Augment non-control-plane tool responses with lisan/exo continuity context."""
-        if not isinstance(tool_name, str) or tool_name.startswith(("bb7_exo_", "bb7_lisan_")):
+        if not isinstance(tool_name, str) or tool_name.startswith(
+            ("bb7_exo_", "bb7_lisan_")
+        ):
             return {}
 
         exo = self.tool_modules.get("exoskeleton_tool")
@@ -2599,7 +2767,9 @@ class MCPServer:
                 "tool_name": tool_name,
                 "turn_id": turn_id or "",
                 "session_id": self.session_id,
-                "argument_keys": sorted(arguments.keys()) if isinstance(arguments, dict) else [],
+                "argument_keys": sorted(arguments.keys())
+                if isinstance(arguments, dict)
+                else [],
             }
         }
 
@@ -2652,7 +2822,9 @@ class MCPServer:
         error: Optional[str] = None,
     ) -> None:
         """Update exoskeleton priors even when the client skips explicit bb7_exo_reflect."""
-        if not isinstance(tool_name, str) or tool_name.startswith(("bb7_exo_", "bb7_lisan_")):
+        if not isinstance(tool_name, str) or tool_name.startswith(
+            ("bb7_exo_", "bb7_lisan_")
+        ):
             return
         exo = self.tool_modules.get("exoskeleton_tool")
         if exo is None or not hasattr(exo, "bb7_exo_reflect"):
@@ -2699,7 +2871,7 @@ class MCPServer:
         try:
             self._distillation_conn.execute(
                 """
-                INSERT INTO trajectories (trajectory_id, timestamp, session_id, source_plane, 
+                INSERT INTO trajectories (trajectory_id, timestamp, session_id, source_plane,
                     trajectory_data, telemetry_data, quality_status)
                 VALUES (?, ?, ?, ?, ?, ?, 'unreviewed')
             """,
@@ -2736,7 +2908,7 @@ class MCPServer:
         arguments: Optional[Dict] = None,
     ) -> None:
         """Log individual tool usage to SQLite3 for RLHF training."""
-        if self._distillation_conn is None:
+        if self._distillation_conn is None or not self._tool_usage_db_enabled:
             return
 
         import json
@@ -2744,7 +2916,7 @@ class MCPServer:
         try:
             self._distillation_conn.execute(
                 """
-                INSERT INTO tool_usage (timestamp, tool_name, success, latency_seconds, 
+                INSERT INTO tool_usage (timestamp, tool_name, success, latency_seconds,
                     error_message, session_id, arguments)
                 VALUES (?, ?, ?, ?, ?, ?, ?)
             """,
@@ -2755,7 +2927,9 @@ class MCPServer:
                     latency,
                     error,
                     session_id,
-                    json.dumps(arguments) if arguments else None,
+                    json.dumps(self._prepare_tool_usage_arguments(arguments))
+                    if arguments
+                    else None,
                 ),
             )
             self._distillation_conn.commit()
@@ -2791,7 +2965,7 @@ class MCPServer:
         try:
             self._distillation_conn.execute(
                 """
-                INSERT INTO conversation_history (timestamp, session_id, role, content, 
+                INSERT INTO conversation_history (timestamp, session_id, role, content,
                     tool_calls, tool_call_id)
                 VALUES (?, ?, ?, ?, ?, ?)
             """,
@@ -2807,7 +2981,9 @@ class MCPServer:
             self._distillation_conn.commit()
             self.conversation_history.append(
                 {
-                    "timestamp": float(timestamp if timestamp is not None else time.time()),
+                    "timestamp": float(
+                        timestamp if timestamp is not None else time.time()
+                    ),
                     "session_id": session_id,
                     "role": role,
                     "content": content,
@@ -2850,7 +3026,9 @@ class MCPServer:
         tool results before telemetry, memory exchange, Q-table observation,
         or distillation/RFT capture paths.
         """
-        raw_value = str(os.environ.get("SOVEREIGN_DISPLAY_PROJECTION", "1")).strip().lower()
+        raw_value = (
+            str(os.environ.get("SOVEREIGN_DISPLAY_PROJECTION", "1")).strip().lower()
+        )
         return raw_value not in {"0", "false", "no", "off", "raw"}
 
     def _display_projection_max_chars(self) -> int:
@@ -2859,7 +3037,9 @@ class MCPServer:
                 1200,
                 min(
                     20000,
-                    int(os.environ.get("SOVEREIGN_DISPLAY_PROJECTION_MAX_CHARS", "5000")),
+                    int(
+                        os.environ.get("SOVEREIGN_DISPLAY_PROJECTION_MAX_CHARS", "5000")
+                    ),
                 ),
             )
         except (TypeError, ValueError):
@@ -2876,6 +3056,58 @@ class MCPServer:
             "raw_sha256_16": hashlib.sha256(raw_text.encode("utf-8")).hexdigest()[:16],
         }
 
+    def _redact_sensitive_for_storage(self, value: Any) -> Tuple[Any, bool]:
+        """Return JSON-safe value with secret-like fields/text redacted."""
+        if isinstance(value, dict):
+            redacted = False
+            safe: Dict[str, Any] = {}
+            for key, item in value.items():
+                key_text = str(key)
+                if SENSITIVE_ARG_KEY_RE.search(key_text):
+                    safe[key_text] = REDACTED_VALUE
+                    redacted = True
+                    continue
+                safe_item, item_redacted = self._redact_sensitive_for_storage(item)
+                safe[key_text] = safe_item
+                redacted = redacted or item_redacted
+            return safe, redacted
+        if isinstance(value, list):
+            redacted = False
+            safe_list = []
+            for item in value:
+                safe_item, item_redacted = self._redact_sensitive_for_storage(item)
+                safe_list.append(safe_item)
+                redacted = redacted or item_redacted
+            return safe_list, redacted
+        if isinstance(value, tuple):
+            safe_list, redacted = self._redact_sensitive_for_storage(list(value))
+            return safe_list, redacted
+        if isinstance(value, str):
+            text = BEARER_TEXT_RE.sub(r"\1" + REDACTED_VALUE, value)
+            text = API_KEY_TEXT_RE.sub(REDACTED_VALUE, text)
+            return text, text != value
+        try:
+            json.dumps(value, default=str)
+            return value, False
+        except TypeError:
+            return str(value), False
+
+    def _prepare_tool_usage_arguments(
+        self, arguments: Optional[Dict[str, Any]]
+    ) -> Optional[Dict[str, Any]]:
+        if not arguments:
+            return None
+        raw_fingerprint = self._display_raw_fingerprint(arguments)
+        redacted, redaction_applied = self._redact_sensitive_for_storage(arguments)
+        return {
+            "schema_version": "tool_usage_arguments_redacted_v1",
+            "redaction_applied": bool(redaction_applied),
+            "arguments_sha256_16": raw_fingerprint["raw_sha256_16"],
+            "arguments_kind": raw_fingerprint["raw_kind"],
+            "arguments_size_chars": raw_fingerprint["raw_size_chars"],
+            "arguments": redacted,
+        }
+
     def _stringify_display_scalar(self, value: Any, max_chars: int = 180) -> str:
         if isinstance(value, float):
             rendered = f"{value:.6g}"
@@ -2884,27 +3116,43 @@ class MCPServer:
         else:
             rendered = str(value)
         rendered = rendered.replace("\n", " ").strip()
-        return rendered[: max_chars - 1] + "…" if len(rendered) > max_chars else rendered
+        return (
+            rendered[: max_chars - 1] + "…" if len(rendered) > max_chars else rendered
+        )
 
     def _append_display_fact(
         self, facts: List[str], label: str, value: Any, *, max_chars: int = 180
     ) -> None:
         if value is None:
             return
-        facts.append(f"{label}={self._stringify_display_scalar(value, max_chars=max_chars)}")
+        facts.append(
+            f"{label}={self._stringify_display_scalar(value, max_chars=max_chars)}"
+        )
 
-    def _project_bootstrap_display(self, payload: Dict[str, Any]) -> Tuple[List[str], List[str], List[str]]:
+    def _project_bootstrap_display(
+        self, payload: Dict[str, Any]
+    ) -> Tuple[List[str], List[str], List[str]]:
         facts: List[str] = []
         warnings: List[str] = []
         next_actions: List[str] = []
         self._append_display_fact(facts, "indexed_tools", payload.get("indexed_tools"))
-        self._append_display_fact(facts, "category_count", payload.get("category_count"))
-        self._append_display_fact(facts, "exo_tools_registered", payload.get("exo_tools_registered"))
-        self._append_display_fact(facts, "live_provider_attached", payload.get("live_provider_attached"))
+        self._append_display_fact(
+            facts, "category_count", payload.get("category_count")
+        )
+        self._append_display_fact(
+            facts, "exo_tools_registered", payload.get("exo_tools_registered")
+        )
+        self._append_display_fact(
+            facts, "live_provider_attached", payload.get("live_provider_attached")
+        )
         manifest_refresh = payload.get("manifest_refresh")
         if isinstance(manifest_refresh, dict):
-            self._append_display_fact(facts, "manifest_reloaded", manifest_refresh.get("reloaded"))
-            self._append_display_fact(facts, "manifest_tools", manifest_refresh.get("indexed_tools"))
+            self._append_display_fact(
+                facts, "manifest_reloaded", manifest_refresh.get("reloaded")
+            )
+            self._append_display_fact(
+                facts, "manifest_tools", manifest_refresh.get("indexed_tools")
+            )
         catalog_sync = payload.get("catalog_sync")
         if isinstance(catalog_sync, dict):
             facts.append(
@@ -2915,12 +3163,20 @@ class MCPServer:
             )
         failed_health = payload.get("healthcheck_failures") or payload.get("failed")
         if failed_health:
-            warnings.append(f"health warnings present: {self._stringify_display_scalar(failed_health)}")
-        next_actions.append("Skip repeated bootstrap unless manifest/runtime drift is suspected.")
-        next_actions.append("Proceed with route/plan/execute/reflect for the actual task.")
+            warnings.append(
+                f"health warnings present: {self._stringify_display_scalar(failed_health)}"
+            )
+        next_actions.append(
+            "Skip repeated bootstrap unless manifest/runtime drift is suspected."
+        )
+        next_actions.append(
+            "Proceed with route/plan/execute/reflect for the actual task."
+        )
         return facts, warnings, next_actions
 
-    def _project_lisan_recall_display(self, payload: Dict[str, Any]) -> Tuple[List[str], List[str], List[str]]:
+    def _project_lisan_recall_display(
+        self, payload: Dict[str, Any]
+    ) -> Tuple[List[str], List[str], List[str]]:
         facts: List[str] = []
         warnings: List[str] = []
         next_actions: List[str] = []
@@ -2946,12 +3202,18 @@ class MCPServer:
         for idx, memory_line in enumerate(top_memories, start=1):
             facts.append(f"memory_{idx}={memory_line[:220]}")
         if context_blob and not top_memories:
-            facts.append(f"context_blob_summary={self._summarize_value(context_blob, max_chars=300)}")
-        next_actions.append("Use surfaced memories as routing evidence; inspect current repo state before edits.")
+            facts.append(
+                f"context_blob_summary={self._summarize_value(context_blob, max_chars=300)}"
+            )
+        next_actions.append(
+            "Use surfaced memories as routing evidence; inspect current repo state before edits."
+        )
         next_actions.append("Ask for raw recall only if exact memory text is needed.")
         return facts, warnings, next_actions
 
-    def _project_exo_briefing_display(self, payload: Dict[str, Any]) -> Tuple[List[str], List[str], List[str]]:
+    def _project_exo_briefing_display(
+        self, payload: Dict[str, Any]
+    ) -> Tuple[List[str], List[str], List[str]]:
         facts: List[str] = []
         warnings: List[str] = []
         next_actions: List[str] = []
@@ -2967,11 +3229,17 @@ class MCPServer:
             if len(facts) >= 6 and len(next_actions) >= 3:
                 break
         if not facts and narrative:
-            facts.append(f"narrative_summary={self._summarize_value(narrative, max_chars=500)}")
-        next_actions.append("Treat briefing as routing guidance, not raw execution evidence.")
+            facts.append(
+                f"narrative_summary={self._summarize_value(narrative, max_chars=500)}"
+            )
+        next_actions.append(
+            "Treat briefing as routing guidance, not raw execution evidence."
+        )
         return facts, warnings, next_actions
 
-    def _project_tool_health_display(self, payload: Dict[str, Any]) -> Tuple[List[str], List[str], List[str]]:
+    def _project_tool_health_display(
+        self, payload: Dict[str, Any]
+    ) -> Tuple[List[str], List[str], List[str]]:
         facts: List[str] = []
         warnings: List[str] = []
         next_actions: List[str] = []
@@ -2999,13 +3267,19 @@ class MCPServer:
             ):
                 self._append_display_fact(facts, label, runtime_identity.get(key))
         else:
-            warnings.append("runtime_identity missing; live source parity is not proven.")
+            warnings.append(
+                "runtime_identity missing; live source parity is not proven."
+            )
         if payload.get("status") != "healthy":
             warnings.append(f"health status is {payload.get('status')!r}")
-        next_actions.append("Use registered_tools + runtime_identity for live/source parity decisions.")
+        next_actions.append(
+            "Use registered_tools + runtime_identity for live/source parity decisions."
+        )
         return facts, warnings, next_actions
 
-    def _project_muadib_bridge_display(self, payload: Dict[str, Any]) -> Tuple[List[str], List[str], List[str]]:
+    def _project_muadib_bridge_display(
+        self, payload: Dict[str, Any]
+    ) -> Tuple[List[str], List[str], List[str]]:
         facts: List[str] = []
         warnings: List[str] = []
         next_actions: List[str] = []
@@ -3024,8 +3298,12 @@ class MCPServer:
             identity = gateway.get("runtime_identity")
             if isinstance(identity, dict):
                 self._append_display_fact(facts, "gateway_pid", identity.get("pid"))
-                self._append_display_fact(facts, "gateway_session", identity.get("session_id"))
-                self._append_display_fact(facts, "source_sha256_16", identity.get("source_sha256_16"))
+                self._append_display_fact(
+                    facts, "gateway_session", identity.get("session_id")
+                )
+                self._append_display_fact(
+                    facts, "source_sha256_16", identity.get("source_sha256_16")
+                )
         source_calls = payload.get("source_calls")
         if isinstance(source_calls, dict):
             checkpoint = (
@@ -3035,24 +3313,36 @@ class MCPServer:
                 .get("meta", {})
             )
             if isinstance(checkpoint, dict):
-                self._append_display_fact(facts, "active_checkpoint", checkpoint.get("active_checkpoint"))
-                self._append_display_fact(facts, "checkpoint_format", checkpoint.get("format"))
-                self._append_display_fact(facts, "checkpoint_bytes", checkpoint.get("bytes"))
+                self._append_display_fact(
+                    facts, "active_checkpoint", checkpoint.get("active_checkpoint")
+                )
+                self._append_display_fact(
+                    facts, "checkpoint_format", checkpoint.get("format")
+                )
+                self._append_display_fact(
+                    facts, "checkpoint_bytes", checkpoint.get("bytes")
+                )
             exo = source_calls.get("exoskeleton_state", {}).get("result", {})
             if isinstance(exo, dict):
-                self._append_display_fact(facts, "exoskeleton_indexed_tools", exo.get("indexed_tools"))
+                self._append_display_fact(
+                    facts, "exoskeleton_indexed_tools", exo.get("indexed_tools")
+                )
             advanced = (
                 source_calls.get("muadib_advanced_features", {})
                 .get("result", {})
                 .get("bridge_health", {})
             )
             if isinstance(advanced, dict):
-                self._append_display_fact(facts, "advanced_bridge_active", advanced.get("active"))
+                self._append_display_fact(
+                    facts, "advanced_bridge_active", advanced.get("active")
+                )
         recommended = payload.get("recommended_next")
         if isinstance(recommended, list):
             next_actions.extend(str(item)[:220] for item in recommended[:5])
         if not next_actions:
-            next_actions.append("Use this as a read-only one-plane snapshot, not a mutation surface.")
+            next_actions.append(
+                "Use this as a read-only one-plane snapshot, not a mutation surface."
+            )
         return facts, warnings, next_actions
 
     def _project_generic_display(
@@ -3065,18 +3355,25 @@ class MCPServer:
             for key in ("status", "success", "ok", "mode", "operation", "timestamp"):
                 if key in payload:
                     self._append_display_fact(facts, key, payload.get(key))
-            facts.append("top_level_keys=" + ", ".join(str(key) for key in list(payload.keys())[:12]))
+            facts.append(
+                "top_level_keys="
+                + ", ".join(str(key) for key in list(payload.keys())[:12])
+            )
             if len(payload) > 12:
                 facts.append(f"omitted_top_level_keys={len(payload) - 12}")
             for key in ("error", "warning", "warnings", "failed", "failures"):
                 if payload.get(key):
-                    warnings.append(f"{key}={self._stringify_display_scalar(payload.get(key), max_chars=240)}")
+                    warnings.append(
+                        f"{key}={self._stringify_display_scalar(payload.get(key), max_chars=240)}"
+                    )
             for key in ("recommended_next", "suggested_next", "next_actions"):
                 value = payload.get(key)
                 if isinstance(value, list):
                     next_actions.extend(str(item)[:220] for item in value[:5])
                 elif value:
-                    next_actions.append(self._stringify_display_scalar(value, max_chars=240))
+                    next_actions.append(
+                        self._stringify_display_scalar(value, max_chars=240)
+                    )
         elif isinstance(payload, list):
             facts.append(f"list_items={len(payload)}")
             for idx, item in enumerate(payload[:5], start=1):
@@ -3099,7 +3396,9 @@ class MCPServer:
                     if isinstance(value, bool):
                         status = "OK" if value else "FAIL"
                     else:
-                        status = self._stringify_display_scalar(value, max_chars=40).upper()
+                        status = self._stringify_display_scalar(
+                            value, max_chars=40
+                        ).upper()
                     break
 
         if tool_name == "bb7_exo_bootstrap" and isinstance(payload, dict):
@@ -3121,7 +3420,9 @@ class MCPServer:
             "",
             "Key facts:",
         ]
-        lines.extend(f"- {fact}" for fact in (facts or ["no structured key facts extracted"]))
+        lines.extend(
+            f"- {fact}" for fact in (facts or ["no structured key facts extracted"])
+        )
         if warnings:
             lines.extend(["", "Warnings:"])
             lines.extend(f"- {warning}" for warning in warnings)
@@ -3180,13 +3481,19 @@ class MCPServer:
                 1200,
                 min(
                     50000,
-                    int(os.environ.get("SOVEREIGN_FILE_SURFACE_INLINE_MAX_CHARS", "24000")),
+                    int(
+                        os.environ.get(
+                            "SOVEREIGN_FILE_SURFACE_INLINE_MAX_CHARS", "24000"
+                        )
+                    ),
                 ),
             )
         except (TypeError, ValueError):
             return 24000
 
-    def _extract_file_surface_path(self, tool_name: str, arguments: Optional[Dict[str, Any]]) -> str:
+    def _extract_file_surface_path(
+        self, tool_name: str, arguments: Optional[Dict[str, Any]]
+    ) -> str:
         arguments = arguments if isinstance(arguments, dict) else {}
         if tool_name in {"bb7_copy_file", "bb7_move_file"}:
             source = arguments.get("source", "")
@@ -3235,9 +3542,8 @@ class MCPServer:
         raw_chars = len(payload)
 
         if tool_name == "bb7_read_file":
-            if (
-                raw_chars <= self._file_surface_inline_max_chars()
-                or payload.startswith("### [TOOL VERIFICATION]:")
+            if raw_chars <= self._file_surface_inline_max_chars() or payload.startswith(
+                "### [TOOL VERIFICATION]:"
             ):
                 text = payload
                 suppressed = False
@@ -3275,7 +3581,10 @@ class MCPServer:
                     }
                 }
                 return text, projection_meta
-            operation = tool_name.replace("bb7_", "").replace("_", " ").upper() or "FILE OPERATION"
+            operation = (
+                tool_name.replace("bb7_", "").replace("_", " ").upper()
+                or "FILE OPERATION"
+            )
             success_tag = (
                 "FILE_PATCH_SUCCESS"
                 if tool_name in {"bb7_write_file", "bb7_append_file"}
@@ -3290,9 +3599,13 @@ class MCPServer:
                 "* **Liveness Check:** not_run_by_tool; run py_compile/pytest/target smoke validation when code behavior matters.",
             ]
             if tool_name == "bb7_write_file":
-                lines.extend(self._render_argument_delta_preview(arguments, mode="write"))
+                lines.extend(
+                    self._render_argument_delta_preview(arguments, mode="write")
+                )
             elif tool_name == "bb7_append_file":
-                lines.extend(self._render_argument_delta_preview(arguments, mode="append"))
+                lines.extend(
+                    self._render_argument_delta_preview(arguments, mode="append")
+                )
             text = "\n".join(lines)
             suppressed = True
 
@@ -3337,6 +3650,22 @@ class MCPServer:
             if "meta" in payload and isinstance(payload["meta"], dict):
                 meta = payload["meta"]
             is_error = is_error or bool(payload.get("isError"))
+            meta.setdefault(
+                "display_projection",
+                {
+                    "enabled": self._display_projection_enabled(),
+                    "tool_name": tool_name,
+                    "preformatted_content_passthrough": True,
+                    "projection_for_display_only": True,
+                    "raw_payload_in_content": True,
+                    "raw_preserved_before_projection": True,
+                    "not_for_qtable": True,
+                    "not_for_observations": True,
+                    "not_for_distillation": True,
+                    "not_for_rft": True,
+                    **self._display_raw_fingerprint(payload),
+                },
+            )
         else:
             # Fallback: serialize payload to text for client display.
             if isinstance(payload, (dict, list)):
@@ -3375,11 +3704,13 @@ class MCPServer:
                 and self._display_projection_enabled()
             ):
                 try:
-                    text, projection_meta = self._project_file_surface_string_for_display(
-                        payload,
-                        tool_name=tool_name,
-                        arguments=arguments,
-                        is_error=is_error,
+                    text, projection_meta = (
+                        self._project_file_surface_string_for_display(
+                            payload,
+                            tool_name=tool_name,
+                            arguments=arguments,
+                            is_error=is_error,
+                        )
                     )
                     meta.update(projection_meta)
                 except Exception as projection_error:
@@ -3398,7 +3729,9 @@ class MCPServer:
                         "- raw string fallback follows; substrate raw payload was already preserved before display formatting.\n\n"
                         + payload
                     )
-                    meta.setdefault("display_projection", {})["projection_failed"] = True
+                    meta.setdefault("display_projection", {})["projection_failed"] = (
+                        True
+                    )
             else:
                 text = str(payload)
             content_blocks = [{"type": "text", "text": text}]
@@ -3503,7 +3836,23 @@ class MCPServer:
             )
 
         future = asyncio.run_coroutine_threadsafe(coroutine_obj, loop)
-        return future.result()
+        timeout_seconds = float(
+            os.environ.get("SOVEREIGN_ASYNC_TOOL_TIMEOUT_SECONDS", "120")
+        )
+        try:
+            return future.result(timeout=timeout_seconds)
+        except concurrent.futures.TimeoutError as exc:
+            future.cancel()
+            self._record_internal_failure(
+                component="mcp_server",
+                operation="async_tool_timeout",
+                error=exc,
+                context={"timeout_seconds": timeout_seconds},
+                severity="error",
+            )
+            raise TimeoutError(
+                f"Async tool execution exceeded {timeout_seconds:.1f}s"
+            ) from exc
 
     def _invoke_tool_callable(
         self,
@@ -3718,7 +4067,9 @@ class MCPServer:
                         "Failed to delete stray temp file %s: %s", tmp_file, unlink_exc
                     )
             if cleaned > 0:
-                self.logger.info("Cleaned up %d leftover temp files from data directory", cleaned)
+                self.logger.info(
+                    "Cleaned up %d leftover temp files from data directory", cleaned
+                )
         except Exception as exc:
             self.logger.warning("Error scanning data directory for temp files: %s", exc)
 
@@ -3796,6 +4147,7 @@ class MCPServer:
         "memory_interconnect": 20,
         "file_tool": 30,
         "shell_tool": 40,
+        "vscode_terminal_tool": 42,
         "thought_journal_tool": 45,
         "enhanced_web_tool": 60,
         "openrouter_planner_tool": 70,
@@ -3804,10 +4156,11 @@ class MCPServer:
         "visual_tool": 100,
         "project_context_tool": 110,
         "auto_tool_module": 120,
+        "code_analysis_tool": 125,
         "enhanced_code_analysis_tool": 130,
         "exoskeleton_tool": 140,
     }
-    TOOL_DISCOVERY_SKIP = {"__init__", "mcp_server", "lisan_al_gaib", "web_tool"}
+    TOOL_DISCOVERY_SKIP = {"__init__", "mcp_server", "lisan_al_gaib"}
 
     def _resolve_tools_import_surface(self) -> Tuple[Path, str]:
         """Return the preferred tool source directory and import prefix."""
@@ -3821,17 +4174,33 @@ class MCPServer:
         return self.workspace_root, ""
 
     def _discover_tool_module_specs(self) -> List[Tuple[str, str]]:
-        """Discover tool modules dynamically from the tools surface."""
-        source_dir, _import_prefix = self._resolve_tools_import_surface()
+        """Discover tool modules dynamically from tools/ and infrustructure/ (Layer 2 armor)."""
+        source_dir, import_prefix = self._resolve_tools_import_surface()
         discovered: List[Tuple[str, str]] = []
+
+        # tools/ directory
         for module_path in sorted(source_dir.glob("*.py")):
             module_name = module_path.stem
             if module_name in self.TOOL_DISCOVERY_SKIP or module_name.startswith("__"):
                 continue
-            discovered.append((module_name, str(module_path)))
+            if not module_name.isidentifier():
+                continue
+            discovered.append((f"{import_prefix}.{module_name}", str(module_path)))
+
+        # infrustructure/ -- Layer 2: meta_intelligence_engine, ai_system_integration, ai_integration_core
+        infra_dir = self.workspace_root / "infrustructure"
+        if infra_dir.is_dir():
+            for module_path in sorted(infra_dir.glob("*.py")):
+                module_name = module_path.stem
+                if module_name.startswith("__") or module_name == "__init__":
+                    continue
+                if not module_name.isidentifier():
+                    continue
+                discovered.append((f"infrustructure.{module_name}", str(module_path)))
+
         discovered.sort(
             key=lambda item: (
-                self.TOOL_DISCOVERY_PRIORITY.get(item[0], 1000),
+                self.TOOL_DISCOVERY_PRIORITY.get(item[0].split(".")[-1], 1000),
                 item[0],
             )
         )
@@ -3862,7 +4231,9 @@ class MCPServer:
                 candidates.append(cls)
         if not candidates:
             return None
-        candidates.sort(key=lambda cls: (class_priority.get(cls.__name__, 999), cls.__name__))
+        candidates.sort(
+            key=lambda cls: (class_priority.get(cls.__name__, 999), cls.__name__)
+        )
         return candidates[0]
 
     def register_tools(self):
@@ -3880,7 +4251,12 @@ class MCPServer:
             for module_name, module_path in discovered_modules:
                 try:
                     self.logger.debug("Loading %s from %s...", module_name, module_path)
-                    import_name = f"{import_prefix}.{module_name}" if import_prefix else module_name
+                    # Discovery now returns fully-qualified names (tools.x or infrustructure.x)
+                    import_name = (
+                        module_name if "." in module_name
+                        else f"{import_prefix}.{module_name}" if import_prefix
+                        else module_name
+                    )
                     module = importlib.import_module(import_name)
                     tool_class = self._discover_tool_class(module_name, module)
                     if tool_class is None:
@@ -4201,7 +4577,7 @@ class MCPServer:
         Multiple agents connect simultaneously; all share one process and data plane.
         """
         from http.server import BaseHTTPRequestHandler, ThreadingHTTPServer
-        from urllib.parse import urlparse, parse_qs
+        from urllib.parse import parse_qs, urlparse
 
         server_ref = self
         _sessions: Dict[str, queue.Queue] = {}
@@ -4243,13 +4619,9 @@ class MCPServer:
                 try:
                     # Advertise the POST endpoint for this session
                     endpoint = f"/message?sessionId={session_id}"
-                    self.wfile.write(
-                        f"event: endpoint\ndata: {endpoint}\n\n".encode()
-                    )
+                    self.wfile.write(f"event: endpoint\ndata: {endpoint}\n\n".encode())
                     self.wfile.flush()
-                    server_ref.logger.info(
-                        "SSE session opened: %s", session_id
-                    )
+                    server_ref.logger.info("SSE session opened: %s", session_id)
 
                     while True:
                         try:
@@ -4311,17 +4683,17 @@ class MCPServer:
                         if response is not None:
                             q.put(response)
                     except Exception as exc:
-                        server_ref.logger.error(
-                            "SSE dispatch error: %s", exc
+                        server_ref.logger.error("SSE dispatch error: %s", exc)
+                        q.put(
+                            {
+                                "jsonrpc": "2.0",
+                                "error": {
+                                    "code": -32603,
+                                    "message": "Internal error",
+                                },
+                                "id": request.get("id"),
+                            }
                         )
-                        q.put({
-                            "jsonrpc": "2.0",
-                            "error": {
-                                "code": -32603,
-                                "message": "Internal error",
-                            },
-                            "id": request.get("id"),
-                        })
 
                 threading.Thread(target=_dispatch, daemon=True).start()
 
@@ -4333,7 +4705,8 @@ class MCPServer:
         httpd = ThreadingHTTPServer((host, port), MCPSSEHandler)
         self.logger.info(
             "MCP SSE server listening on %s:%d  (all agents share this process)",
-            host, port,
+            host,
+            port,
         )
 
         try:
@@ -4363,7 +4736,9 @@ class MCPServer:
         jsonrpc = request.get("jsonrpc", "2.0")
         method = request.get("method")
         params = request.get("params", {})
-        req_id = self._normalize_id(request.get("id"))
+        raw_id = request.get("id")
+        is_notification = raw_id is None and "id" not in request
+        req_id = self._normalize_id(raw_id)
         turn_id = self._next_turn_id()
 
         self.logger.info(f"MCP SERVER RECEIVED METHOD: '{method}'")
@@ -4417,10 +4792,15 @@ class MCPServer:
             payload={
                 "request_id": req_id,
                 "method": method,
-                "status": "error" if isinstance(response, dict) and "error" in response else "success",
+                "status": "error"
+                if isinstance(response, dict) and "error" in response
+                else "success",
             },
             importance_hint=0.2,
         )
+        # JSON-RPC notifications (no id) must not receive a response
+        if is_notification:
+            return None
         return response
 
     def handle_initialize(self, req_id: Union[str, int]) -> Dict[str, Any]:
@@ -4645,6 +5025,18 @@ class MCPServer:
             importance_hint=0.5,
         )
 
+        # ── Muad'Dib pre-execution routing ────────────────────────────
+        try:
+            exo_module = self.tool_modules.get("exoskeleton_tool")
+            if exo_module:
+                try:
+                    exo_module._maybe_score_tool_call(name, arguments, turn_id)
+                except Exception:
+                    pass
+        except Exception:
+            pass
+        # ────────────────────────────────────────────────────────────────
+
         try:
             if isinstance(name, str) and name.startswith("bb7_exo_"):
                 self._sync_exoskeleton_catalog()
@@ -4735,6 +5127,7 @@ class MCPServer:
                 result = self._invoke_tool_callable(
                     tool_function, arguments, prefer_kwargs=prefer_kwargs
                 )
+                raw_result_fingerprint = self._display_raw_fingerprint(result)
             else:
                 self._append_event(
                     event_type="tool_execution_end",
@@ -4758,20 +5151,26 @@ class MCPServer:
 
             # ── Trajectory telemetry: only fire if distillation enabled AND agent context ──
             if (
-                self._distillation_engine is not None 
-                and getattr(self, "_latest_codex_thread_id", None)  # Only capture within a known Codex thread
+                self._distillation_engine is not None
+                and getattr(
+                    self, "_latest_codex_thread_id", None
+                )  # Only capture within a known Codex thread
             ):
                 # Append to in-memory trajectory buffer, not per-call JSONL writes
                 with self._trajectory_buffer_lock:
-                    self._trajectory_buffer.append({
-                        "role": "tool_result",
-                        "tool_name": name,
-                        "arguments": arguments,
-                        "result_summary": self._summarize_value(result, max_chars=200),
-                        "latency_ms": round((time.time() - start_time) * 1000, 1),
-                        "turn_id": turn_id,
-                        "ts": time.time(),
-                    })
+                    self._trajectory_buffer.append(
+                        {
+                            "role": "tool_result",
+                            "tool_name": name,
+                            "arguments": arguments,
+                            "result_summary": self._summarize_value(
+                                result, max_chars=200
+                            ),
+                            "latency_ms": round((time.time() - start_time) * 1000, 1),
+                            "turn_id": turn_id,
+                            "ts": time.time(),
+                        }
+                    )
 
             execution_time = time.time() - start_time
             self.performance_metrics["successful_calls"] += 1
@@ -4802,9 +5201,12 @@ class MCPServer:
 
             # Normalize tool output into MCP-compliant content blocks
             payload = result
+            normalized_result_fingerprint = raw_result_fingerprint
+            normalization_steps: List[str] = []
             if isinstance(result, str):
                 try:
                     payload = json.loads(result)
+                    normalization_steps.append("json_string_parsed")
                 except json.JSONDecodeError:
                     payload = result
 
@@ -4815,6 +5217,9 @@ class MCPServer:
                 and set(payload.keys()) == {"output"}
             ):
                 payload = payload.get("output")
+                normalization_steps.append("single_output_field_flattened")
+            if normalization_steps:
+                normalized_result_fingerprint = self._display_raw_fingerprint(payload)
 
             self._append_event(
                 event_type="tool_execution_end",
@@ -4825,6 +5230,9 @@ class MCPServer:
                     "status": "success",
                     "latency_ms": round(execution_time * 1000.0, 3),
                     "result_summary": self._summarize_value(payload),
+                    "raw_callable_result": raw_result_fingerprint,
+                    "normalized_result": normalized_result_fingerprint,
+                    "normalization_steps": normalization_steps,
                     "artifacts": self._extract_artifacts(arguments, result),
                 },
                 importance_hint=0.7,
@@ -4866,6 +5274,11 @@ class MCPServer:
             )
             if sovereign_meta:
                 formatted.setdefault("meta", {})["sovereign_context"] = sovereign_meta
+            formatted.setdefault("meta", {})["raw_callable_result"] = {
+                **raw_result_fingerprint,
+                "normalization_steps": normalization_steps,
+                "normalized_result": normalized_result_fingerprint,
+            }
 
             return {"jsonrpc": "2.0", "result": formatted, "id": req_id}
 
@@ -4941,7 +5354,9 @@ class MCPServer:
                             context={
                                 "codex_thread_id": self._latest_codex_thread_id or "",
                                 "artifacts": _artifacts,
-                                "memory_context_status": _memory_context.get("status", ""),
+                                "memory_context_status": _memory_context.get(
+                                    "status", ""
+                                ),
                                 "memory_context_summary": _memory_context.get(
                                     "context_summary", ""
                                 ),
@@ -5095,7 +5510,9 @@ class MCPServer:
                     self._distillation_conn.close()
                     self.logger.info("SQLite3 distillation database connection closed")
                 except Exception as db_exc:
-                    self.logger.warning("Error closing distillation database: %s", db_exc)
+                    self.logger.warning(
+                        "Error closing distillation database: %s", db_exc
+                    )
 
             self.logger.info("MCP Server shutdown complete")
 
@@ -5116,8 +5533,8 @@ def main():
         choices=["stdio", "sse"],
         default=os.environ.get("MCP_TRANSPORT", "stdio"),
         help="Transport mode: 'stdio' (one process per client) or 'sse' "
-             "(persistent HTTP server, all clients share one process). "
-             "Default: stdio (or MCP_TRANSPORT env var).",
+        "(persistent HTTP server, all clients share one process). "
+        "Default: stdio (or MCP_TRANSPORT env var).",
     )
     parser.add_argument(
         "--port",

@@ -204,8 +204,9 @@ Assembly rules:
 
 ## HOW TO INVOKE COMMANDS
 
-This skill ships with shell wrappers in `scripts/`. Each wrapper invokes the CTMv3
-Python engine via `python3 -m ctmv3 <command>`.
+This skill ships with two shell wrappers in `scripts/`. Each wrapper invokes the CTMv3
+Python engine via `python3 -m ctmv3 <command>`. The session start hook runs boot
+automatically — these wrappers are available as manual entry points.
 
 Usage pattern:
 ```
@@ -219,24 +220,24 @@ Available wrappers:
 | Script | Command | Purpose |
 |--------|---------|---------|
 | `scripts/ctmv3-boot.sh` | `boot` | Discovery sequence -- cold vs warm branch determination |
-| `scripts/ctmv3-activate.sh` | `activate` | Full Phase 0-5 cold start activation pass |
-| `scripts/ctmv3-warm.sh` | `warm` | Warm start: provenance diff + continuation |
-| `scripts/ctmv3-architecture-map.sh` | `architecture-map` | Build or update ARCHITECTURE_MAP.md |
-| `scripts/ctmv3-sovereign-init.sh` | `sovereign-init` | Initialize .sovereign/ directory and artifacts |
-| `scripts/ctmv3-dot-init.sh` | `dot-init` | Initialize .github/, .claude/, .codex/ directories |
-| `scripts/ctmv3-session-close.sh` | `session-close` | Close session cleanly, update PROVENANCE.md |
 | `scripts/ctmv3-status.sh` | `status` | Report current boot state and signal inventory |
+
+All other engine operations run directly via the engine:
+```
+python3 -m ctmv3 <command> --project-root <path>
+```
+Commands: `activate`, `warm`, `architecture-map`, `dot-init`, `sovereign-init`, `session-close`
 
 Example invocations:
 ```bash
-# Boot check on current directory
+# Boot check on current directory (session hook does this automatically)
 bash scripts/ctmv3-boot.sh
-
-# Full activation of a specific repo
-bash scripts/ctmv3-activate.sh /path/to/repo
 
 # Check status with JSON output
 bash scripts/ctmv3-status.sh /path/to/repo --json
+
+# Full activation directly via engine
+python3 -m ctmv3 activate --json --project-root /path/to/repo
 ```
 
 ---

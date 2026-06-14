@@ -1,7 +1,7 @@
 """
 Production Module: CTMv3 Golden-Path Orchestration Layer
 =========================================================
-Source: CTMv3 Engine v1.1.0 — golden-path-architect
+Source: CTMv3 Engine v1.2.0 — golden-path-architect
 Integrated: 2026-05-23
 Lines: ~340
 Status: Production Stable
@@ -53,6 +53,8 @@ import sys
 from dataclasses import dataclass, field
 from pathlib import Path
 from typing import Dict, List, Optional
+
+from ctmv3.core.states import WorkspaceState
 
 logger = logging.getLogger(__name__)
 
@@ -154,9 +156,9 @@ class GoldenPathSignal:
 
 _CHAIN_TABLE: dict[tuple[str, str], Optional[str]] = {
     # boot branch
-    ("boot", "COLD_START"): "activate",
-    ("boot", "WARM_START"): "warm",
-    ("boot", "PARTIAL"): "activate",
+    ("boot", WorkspaceState.COLD_START): "activate",
+    ("boot", WorkspaceState.WARM_START): "warm",
+    ("boot", WorkspaceState.PARTIAL): "activate",
     ("boot", "success"): "warm",     # generic success from boot → warm path
     ("boot", "failure"): None,       # boot failed: no safe suggestion
     # activate branch
@@ -223,9 +225,9 @@ def pre_chain_rules(command: str, exit_state: str) -> Optional[str]:
 # convention: category_dimension_value. Pure function over known command/state.
 
 _MEMORY_TAG_TABLE: dict[tuple[str, str], List[str]] = {
-    ("boot", "COLD_START"): ["activation", "cold_start", "phase_0_required", "no_tier1_signals"],
-    ("boot", "WARM_START"): ["activation", "warm_start", "tier1_signals_present", "provenance_valid"],
-    ("boot", "PARTIAL"): ["activation", "partial_state", "tier1_incomplete", "archaeology_needed"],
+    ("boot", WorkspaceState.COLD_START): ["activation", "cold_start", "phase_0_required", "no_tier1_signals"],
+    ("boot", WorkspaceState.WARM_START): ["activation", "warm_start", "tier1_signals_present", "provenance_valid"],
+    ("boot", WorkspaceState.PARTIAL): ["activation", "partial_state", "tier1_incomplete", "archaeology_needed"],
     ("boot", "success"): ["activation", "boot_complete"],
     ("boot", "failure"): ["activation", "boot_failed", "diagnostic_needed"],
     ("activate", "success"): ["activation", "phase_0_5_complete", "all_artifacts_written", "repo_live"],
@@ -387,7 +389,7 @@ def _parse_exit_state(command: str, returncode: int, stdout: str, stderr: str) -
     # Command-specific exit state derivation
     if command == "boot":
         branch = stdout_data.get("branch", "")
-        if branch in ("COLD_START", "WARM_START", "PARTIAL"):
+        if branch in (WorkspaceState.COLD_START, WorkspaceState.WARM_START, WorkspaceState.PARTIAL):
             return branch, payload
         return ("success" if returncode == 0 else "failure"), payload
 

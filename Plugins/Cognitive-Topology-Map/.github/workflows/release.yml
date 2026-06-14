@@ -45,15 +45,9 @@ jobs:
 
           # Copy plugin contents, excluding build artifacts and CI config
           rsync -av \
+            --exclude-from='.releaseignore' \
             --exclude='.github/' \
-            --exclude='__pycache__/' \
-            --exclude='*.pyc' \
-            --exclude='*.pyo' \
             --exclude='.git/' \
-            --exclude='*.egg-info/' \
-            --exclude='.pytest_cache/' \
-            --exclude='dist/' \
-            --exclude='build/' \
             . "$STAGING_DIR/"
 
           # Create the zip from the staging directory's parent
@@ -89,7 +83,8 @@ jobs:
             ```bash
             unzip ctmv3-plugin-${{ steps.version.outputs.tag }}.zip
             cd ctmv3-plugin
-            bash claude-code/install.sh   # or codex, opencode, gemini-cli
+            cd core && pip install --user .
+            # Then install the runtime adapter you use; see INSTALL.md.
             ```
 
             See README.md for full installation instructions.

@@ -3,3 +3,15 @@ plugins:
     card: marketplace/cards/aeriadne.plugin.md
     status: private-v1
     clients: [codex, claude-code, opencode]
+  - id: cognitive-topology-map
+    card: marketplace/cards/cognitive-topology-map.plugin.md
+    status: staged-green
+    clients: [codex, claude-code, opencode, gemini-cli, cursor]
+  - id: mentat
+    card: marketplace/cards/mentat.plugin.md
+    status: staged-green
+    clients: [codex, claude-code, gemini]
+  - id: codex-config-topology
+    card: marketplace/cards/codex-config-topology.plugin.md
+    status: staged-local
+    clients: [codex, claude-code]

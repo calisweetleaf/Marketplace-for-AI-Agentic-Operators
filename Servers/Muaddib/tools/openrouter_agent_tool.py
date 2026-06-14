@@ -508,12 +508,8 @@ Respond with JSON only."""
         strategies = []
         if not params:
             strategies.append(("no_args", lambda: tool_callable()))
-        strategies.extend(
-            [
-                ("kwargs", lambda: tool_callable(**params)),
-                ("dict", lambda: tool_callable(params)),
-            ]
-        )
+
+        strategies.append(("kwargs", lambda: tool_callable(**params)))
 
         last_type_error: Optional[TypeError] = None
         for strategy_name, strategy in strategies:

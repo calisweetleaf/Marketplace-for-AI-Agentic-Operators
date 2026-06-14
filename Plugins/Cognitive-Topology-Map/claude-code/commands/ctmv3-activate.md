@@ -45,25 +45,20 @@ Do not proceed past this check without explicit confirmation or --force.
 
 If boot state is COLD or --force is passed:
 
-1. **Scaffold the Workspace**: Run the CTMv3 engine to lay down the raw template structure.
-   ```bash
-   python3 -m ctmv3 activate --json $ARGUMENTS
+1. Run discovery sequence (read-only): scan root-level config spine, .xyz directories,
+   AGENTS.md / CLAUDE.md if present.
+2. Invoke Phase 0 domain archaeology — read config spine files (pyproject.toml, go.mod,
+   Cargo.toml, package.json, manifest.json) to extract dependency map and entry points.
+3. Run the engine for each phase in order:
    ```
-   This will create `TOPOLOGY.md`, `FAILURE_GRAMMAR.md`, `ARCHITECTURE_MAP.md`, `AGENTS.md`, and `CLAUDE.md` filled with `{{PLACEHOLDER}}` tags.
-
-2. **Phase 0 (Domain Archaeology)**: Use your read tools to examine the config spine (`pyproject.toml`, `package.json`, etc.) and the primary source directories. Extract the dependency map, entry points, and architectural logic.
-
-3. **Phase 1-4 (Template Completion - CRITICAL STEP)**: Open each scaffolded artifact and replace every `{{KEY}}` placeholder with deep insights derived from your reading.
-   - **TOPOLOGY.md**: Fill out the 3-7 load-bearing concepts, interface map, and complexity distribution.
-   - **FAILURE_GRAMMAR.md**: Define what "wrong" looks like in this specific codebase.
-   - **ARCHITECTURE_MAP.md**: Build a navigable traversal map of the directories.
-   - **AGENTS.md** and **CLAUDE.md**: Fill in the operational posture.
-   *Do not stop until all templates are filled with real findings from the codebase.*
-
-4. **Phase 5 (Session Finalization)**: Run the session close protocol to lock in the new topology fingerprint:
-   ```bash
-   python3 -m ctmv3 session-close $ARGUMENTS
+   python3 -m ctmv3 topology --json $ARGUMENTS
+   python3 -m ctmv3 failure-grammar --json $ARGUMENTS
+   python3 -m ctmv3 architecture-map --json $ARGUMENTS
+   python3 -m ctmv3 sovereign-init --json $ARGUMENTS
+   python3 -m ctmv3 dot-init --json $ARGUMENTS
    ```
+4. After each phase, verify the expected output file was created. If a file is missing,
+   report the failure immediately — do not continue to the next phase.
 
 ## Expected artifacts
 

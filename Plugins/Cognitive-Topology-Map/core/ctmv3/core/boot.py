@@ -1,7 +1,7 @@
 """
 CTMv3 Boot Protocol — Discovery Sequence and Branch Classification
 ==================================================================
-Provenance: CTMv3 Engine v1.1.0 — 2026-05-23
+Provenance: CTMv3 Engine v1.2.0 — 2026-05-23
 Author: Forge (activation engine builder)
 Purpose: Implements BOOT_PROTOCOL.md Section 1 (signal taxonomy) and Section 2
          (discovery sequence). Returns a SignalInventory dataclass used by all

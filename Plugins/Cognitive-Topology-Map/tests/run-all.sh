@@ -67,4 +67,9 @@ echo "  Doc files:          $(find docs -type f | wc -l)"
 echo "  Adapter LOC total:  $(find claude-code codex gemini-cli opencode -type f -not -name '*.pyc' | xargs wc -l 2>/dev/null | tail -1 | awk '{print $1}')"
 echo
 
+# --- 7. Release/copyover hygiene ---
+echo "[run-all] === 7. Release/copyover hygiene ==="
+$PYTHON_BIN scripts/validate_release_tree.py .
+echo
+
 echo "[run-all] ALL CHECKS PASSED"

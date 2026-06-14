@@ -70,27 +70,27 @@ TASK TYPE → LOAD ORDER
 [COLD_START_REPO] — entering a codebase with no prior CTM artifacts
   → BOOT_PROTOCOL.md (run discovery) → TOPOLOGY.md → DOT_TOPOLOGY.md
   → Phase 0 full archaeology → build all artifacts
-  → In Claude Code: invoke /ctmv3:activate
+  → run: python3 -m ctmv3 activate --json (or use ctmv3-architect subagent)
 
 [WARM_START_REPO] — resuming a session in a CTM-encoded codebase
   → BOOT_PROTOCOL.md (run warm check) → PROVENANCE.md (check lineage + session log)
   → diff current state → continue from last logged action
-  → In Claude Code: invoke /ctmv3:warm
+  → run: python3 -m ctmv3 warm --json
 
 [BUILD_ARCHITECTURE_MAP] — producing the traversal-map artifact for a codebase
   → ARCHITECTURE_MAP_TEMPLATE.md → TOPOLOGY.md → build ARCHITECTURE_MAP.md
-  → In Claude Code: invoke /ctmv3:architecture-map
+  → run: python3 -m ctmv3 architecture-map --json
 
 [NEW_SKILL from scratch]
   → TOPOLOGY.md (anatomy) → build
 
 [ENCODE existing codebase]
   → BOOT_PROTOCOL.md → TOPOLOGY.md
-  → In Claude Code: invoke /ctmv3:activate
+  → run: python3 -m ctmv3 activate --json (or use ctmv3-architect subagent)
 
 [INTEGRATE_AGENT_ECOSYSTEM] — setting up .github/, .claude/, .codex/, .sovereign/
   → DOT_TOPOLOGY.md → BOOT_PROTOCOL.md → build ecosystem artifacts
-  → In Claude Code: invoke /ctmv3:dot-init
+  → run: python3 -m ctmv3 dot-init --json
 
 [OSINT / RE / adversarial domain]
   → TOPOLOGY.md → FAILURE_GRAMMAR.md → build
@@ -106,7 +106,7 @@ TASK TYPE → LOAD ORDER
 
 [SESSION START in encoded repo]
   → BOOT_PROTOCOL.md → warm check → if stale: PROVENANCE.md → TOPOLOGY.md
-  → In Claude Code: invoke /ctmv3:boot
+  → session start hook runs boot automatically; use /ctmv3:status to inspect
 ```
 
 **Hard rule**: Never load all sub-documents upfront. Load conditionally.
@@ -121,7 +121,7 @@ FAILURE_GRAMMAR.md loads when something smells wrong — not as a precaution but
 
 Load BOOT_PROTOCOL.md and run the discovery sequence before Phase 0.
 
-In Claude Code: run `python3 -m ctmv3 boot --json` or invoke /ctmv3:boot.
+run `python3 -m ctmv3 boot --json` (the session start hook does this automatically).
 
 The boot check answers: is this a cold entry or a warm entry?
 - Cold entry → full Phase 0-5 archaeology + artifact construction

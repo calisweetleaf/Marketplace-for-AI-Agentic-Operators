@@ -1,0 +1,55 @@
+# Local VCS and analysis state
+.git/
+.codegraph/
+
+# Python caches and local tool caches
+__pycache__/
+.pytest_cache/
+.mypy_cache/
+.ruff_cache/
+*.pyc
+*.pyo
+
+# Local environments
+.venv/
+venv/
+env/
+ENV/
+
+# Mentat runtime/session state
+.mentat/
+*.sqlite
+*.db
+*.db-shm
+*.db-wal
+
+# Generated release/build artifacts
+*.zip
+*.tar.gz
+*.tgz
+*.tar
+build/
+dist/
+
+# Local task scratch and generated inventories
+6-11-2026 Task/
+filetree-*.md
+*filetree*.md
+*.metadata.json
+# Preserved local site prototype. Keep expanding it in staging, but do not
+# include it in public copyover until Daeron promotes the linked-doc/site layer.
+mentat-a-live-cognitive-substrate-for-claude-code.html
+
+# Hook/library backups and temporary files
+*.backup_*
+*.bak
+*.tmp
+*~
+
+# Logs and process files
+*.log
+*.pid
+
+# Generated eval or report output directories
+evals/output/
+reports/

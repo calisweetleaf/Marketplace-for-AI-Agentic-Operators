@@ -1,13 +1,14 @@
 """
 CTMv3 Core Engine — Workspace Activation System
 ================================================
-Provenance: CTMv3 Engine v1.2.0 — 2026-05-24
+Provenance: CTMv3 Engine v1.3.0 — 2026-06-12
 Author: Forge (activation engine builder)
 Purpose: Python activation engine for CTMv3 plugin. Entry point for all host
          adapter integrations (Claude Code, Codex, opencode, Gemini CLI).
 
 This package implements the BOOT_PROTOCOL.md state machine, artifact scaffolding,
-fingerprint management, and session close protocol described in the CTMv3 source docs.
+fingerprint management, session close protocol, and the persistent server described
+in the CTMv3 source docs.
 
 Public API surface:
     boot.discover()          -- run discovery sequence, return SignalInventory
@@ -18,19 +19,18 @@ Public API surface:
     sovereign.init()         -- scaffold .sovereign/ directory
     sovereign.write_session_state()  -- update session_state.json
     sovereign.update_session_log()   -- append to PROVENANCE.md Session Log
+    server.CTMv3Server       -- persistent HTTP server (serve, context, ping commands)
+    watcher.ProjectRegistry  -- in-memory project state cache with background polling
 
-Changes in v1.1.0:
-    - Structured logging added to all core modules (stdlib logging).
-    - Atomic file writes throughout (write to .tmp then os.replace).
-    - Input validation at all public boundaries.
-    - SHA-256 computation is now streaming (8 KiB chunks).
-    - boot.discover() enforces MAX_SCAN_DEPTH and MAX_FILE_COUNT bounds.
-    - Fixed status-logic bug in _scaffold_protected and _write_if_absent.
-    - _detect_language falls back to "unknown" instead of returning a TODO string.
-    - sovereign.write_session_state / update_session_log validate agent/action args.
+Changes in v1.3.0:
+    - Added persistent server: `ctmv3 serve` starts CTMv3Server on port 7430.
+    - Added `ctmv3 context`: queries server if up, else runs inline discovery.
+    - Added `ctmv3 ping`: checks if server is reachable.
+    - Added watcher.py: ProjectState + ProjectRegistry with mtime-based drift detection.
+    - Added server.py: CTMv3Server with HTTP endpoints for agent context consumption.
 """
 
-__version__ = "1.2.0"
+__version__ = "1.3.0"
 __ctmv3_protocol__ = "3.0"
 
 from pathlib import Path

@@ -1,0 +1,34 @@
+{
+  "monitors": [
+    {
+      "name": "entropy-watcher",
+      "description": "Flags stale EXECUTING sessions that have chained many tool calls without returning to reflection.",
+      "command": "python3",
+      "args": [
+        "${CLAUDE_PLUGIN_ROOT}/monitors/entropy_watcher.py"
+      ],
+      "interval": 60,
+      "enabled": true
+    },
+    {
+      "name": "drift-watcher",
+      "description": "Flags sessions that remain in DRIFTING until an explicit prompt or scope update resolves the deferred-topic hit.",
+      "command": "python3",
+      "args": [
+        "${CLAUDE_PLUGIN_ROOT}/monitors/drift_watcher.py"
+      ],
+      "interval": 60,
+      "enabled": true
+    },
+    {
+      "name": "archivist",
+      "description": "Rotates stale insights, handoffs, and session records, then vacuums low-confidence Q-table rows.",
+      "command": "python3",
+      "args": [
+        "${CLAUDE_PLUGIN_ROOT}/monitors/archivist.py"
+      ],
+      "interval": 86400,
+      "enabled": true
+    }
+  ]
+}

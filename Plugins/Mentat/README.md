@@ -1,9 +1,14 @@
-# Mentat — live cognitive substrate for Claude Code
+# Mentat - live cognitive substrate for agent runtimes
 
-A Claude Code plugin that runs alongside a session and watches it the way
-Muad'Dib watches a tool plane: explicit state machine, TD-learning Q-table
-over `(state, tool)` pairs, structured insight bus, persistence across
-compaction. The mirror, inside Claude Code, of the bb7 exoskeleton.
+Mentat is an independent runtime plugin that runs alongside an agent session
+and watches it the way Muad'Dib watches a tool plane: explicit state machine,
+TD-learning Q-table over `(state, tool)` pairs, structured insight bus,
+persistence across compaction, and host adapters for Claude Code, Codex, and
+Gemini-style runtimes.
+
+Mentat is not a hook pack or skill pack. Hooks, MCP tools, commands, monitors,
+adapters, skills, and agent prompts are surfaces over the same substrate. The
+plugin's center is the committed state loop.
 
 The user opens a session. Mentat decides the session is in PLANNING. The
 user reads three files. Mentat watches and steps the FSA into EXPLORING. The
@@ -16,13 +21,40 @@ in via additionalContext on its very first turn.
 
 That's the shape. Below is what's in the box.
 
+## Runtime doctrine
+
+Mentat follows the Modern-ML plugin-runtime doctrine:
+
+- committed state ledger: deterministic FSA, session record, Q-table, insight bus, handoff snapshots;
+- validation membrane: hook event classifiers, JSON schemas, smoke tests, release-tree checks;
+- compensation/exclusion ledger: handoff recovery, uninstall/reset paths, `.releaseignore`, `COPYOVER_MANIFEST.md`;
+- divergence process: `.mentat/scope.md`, drift detector, monitors, insight events;
+- terminal boundary: no public copyover, installer pivot, archive rebuild, or runtime-state promotion without validation and operator review.
+
+The public repo copyover target is `/home/daeron/Repositories/Somnus-Intellligence-Stack/Plugins/Mentat`, but active hardening happens in this staging tree first.
+Current subsystem status is tracked in `SUBSYSTEM_INVENTORY.md`.
+The release gate includes `scripts/privacy_boundary_scan.py`, which respects
+`.releaseignore` and rejects private source identifiers, unapproved local paths,
+external media paths, and CodeGraph log/archive path shapes from the public
+copy candidate.
+It also includes `scripts/command_frontmatter_lint.py`, which keeps the slash
+command prompt surface scoped and metadata-complete before release.
+`scripts/prompt_surface_review.py` separately checks the independent
+agent/helper prompts for role declaration, tool posture, boundary language, and
+output contracts; those prompts are not treated as hooks or skills.
+The root HTML artifact `mentat-a-live-cognitive-substrate-for-claude-code.html`
+is preserved as a local site/prototype page for the future linked-doc layer. It
+is intentionally excluded from public copyover until Daeron promotes that site
+surface.
+
 ## Layout
 
 ```
 mentat/
 ├── .claude-plugin/
 │   └── plugin.json
-├── mcp.json                       (rename to .mcp.json on install — see below)
+├── mcp.json                       non-dot MCP source/fallback
+├── .mcp.json                      install-facing MCP projection for plugin runtimes
 ├── hooks/
 │   ├── _lib.py                    shared helpers (state, classify, decision JSON)
 │   ├── hooks.json                 wires every event to its script
@@ -188,6 +220,8 @@ so high-value-but-rarely-visited tools still get exploration weight.
 
 ## What Mentat does not try to do
 
+- It does not reduce itself to hooks, skills, commands, or MCP tools. Those are
+  projections over the runtime substrate.
 - It does not replace `serena` or any LSP-driven semantic-code-intel plugin.
 - It does not replace `ralph-loop`'s explicit loop orchestration. Ralph
   forces a hard plan-execute-verify cycle; Mentat tracks the cycle as it
@@ -207,3 +241,19 @@ MIT (matches the user's OSS-friendly stance for this kind of tooling).
 This is a private lab tool. The README assumes you (Daeron) are the operator.
 Treat anything that says "the user" or "the operator" as you. Drop the
 public-distribution framing if and when you want to ship.
+
+## Release/copyover hygiene
+
+Before copying this staging package into the public repo, run:
+
+```bash
+python3 scripts/integration_smoke.py
+python3 scripts/hook_schema_smoke.py
+bash adapters/test_universal.sh
+python3 scripts/validate_release_tree.py .
+```
+
+Generated archives, `.mentat/` runtime state, caches, DBs, backup hook files,
+filetree snapshots, logs, and task scratch are excluded by `.releaseignore`.
+The universal installer also respects `.releaseignore`; the adapter smoke proves
+that path in a temporary Codex HOME.

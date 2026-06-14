@@ -1,0 +1,73 @@
+{
+  "schema_version": 1,
+  "purpose": "Track staging-local site/page prototypes that should be preserved for future linked-doc surfaces without entering public copyover until promoted.",
+  "prototypes": [
+    {
+      "id": "mentat-live-cognitive-substrate",
+      "title": "Mentat — A Live Cognitive Substrate For Claude Code",
+      "owner_package": "mentat",
+      "source_path": "/home/daeron/Projects/Modern-ML/Plugins/Mentat/mentat-a-live-cognitive-substrate-for-claude-code.html",
+      "releaseignore_path": "/home/daeron/Projects/Modern-ML/Plugins/Mentat/.releaseignore",
+      "promotion_status": "staging-local",
+      "local_only": true,
+      "public_copyover": false,
+      "preserve": true,
+      "future_surface": "linked-doc/site-page",
+      "semantic_requirements": [
+        {
+          "id": "mentat-state-machine-substrate",
+          "description": "The page must retain Mentat's live state-machine substrate description.",
+          "mode": "all",
+          "terms": [
+            "live state machine",
+            "eight states",
+            "transition table",
+            "state_machine/machine.py",
+            "FSA"
+          ]
+        },
+        {
+          "id": "mentat-learning-loop",
+          "description": "The page must retain the TD/Q-table learning loop description.",
+          "mode": "all",
+          "terms": [
+            "TD-learning Q-table",
+            "(state, tool)",
+            "reward",
+            "Thompson",
+            "state_machine/q_table.py"
+          ]
+        },
+        {
+          "id": "mentat-insight-drift-hooks",
+          "description": "The page must retain the insight bus, drift, and hook lifecycle description.",
+          "mode": "all",
+          "terms": [
+            "structured insight bus",
+            "scope-drift detector",
+            "hook-driven transitions",
+            "DRIFTING guard",
+            "~/.mentat/insights"
+          ]
+        },
+        {
+          "id": "mentat-runtime-projection",
+          "description": "The page must retain package/runtime projection markers.",
+          "mode": "all",
+          "terms": [
+            ".mcp.json",
+            "MCP server",
+            "hooks.json",
+            "mentat-debrief",
+            "state_machine/insights.py"
+          ]
+        }
+      ],
+      "notes": [
+        "Do not delete during cleanup.",
+        "Keep expanding in staging as the linked-doc/site layer evolves.",
+        "Exclude from public copyover until Daeron explicitly promotes the site surface."
+      ]
+    }
+  ]
+}

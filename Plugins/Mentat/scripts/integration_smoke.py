@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-"""Mentat v0.2 integration smoke test.
+"""Mentat integration smoke test.
 
 Runs every subsystem's local smoke in sequence, then a tiny end-to-end check
 that exercises the FSA, Q-table, insight bus, drift detection, webhook
@@ -17,7 +17,7 @@ Exit codes:
 Usage:
     python3 scripts/integration_smoke.py
     python3 scripts/integration_smoke.py --verbose
-    python3 scripts/integration_smoke.py --skip webhook,evals
+    python3 scripts/integration_smoke.py --skip webhook,evals,hook-schema,commands,prompts,release
 """
 from __future__ import annotations
 
@@ -97,6 +97,41 @@ def run_compile_check(*paths: str) -> list[CheckResult]:
             out.append(CheckResult(name=f"compile:{rel}", status="fail",
                                    detail=str(e)))
     return out
+
+
+def run_shell_smoke(name: str, command: list[str], env_extra: dict | None = None,
+                    timeout: int = 30) -> CheckResult:
+    """Run a shell smoke script as a subprocess. Pass = exit 0."""
+    env = os.environ.copy()
+    if env_extra:
+        env.update(env_extra)
+    start = time.time()
+    try:
+        proc = subprocess.run(
+            command,
+            cwd=PLUGIN_ROOT,
+            env=env,
+            capture_output=True,
+            text=True,
+            timeout=timeout,
+        )
+        duration_ms = (time.time() - start) * 1000.0
+        output = (proc.stdout + proc.stderr).strip()
+        detail = output.splitlines()[-1] if output else "ok"
+        if proc.returncode == 0:
+            return CheckResult(name=name, status="pass", duration_ms=duration_ms,
+                               detail=detail)
+        return CheckResult(name=name, status="fail", duration_ms=duration_ms,
+                           detail=f"exit {proc.returncode}",
+                           extra={"stderr": output[-1500:]})
+    except subprocess.TimeoutExpired:
+        return CheckResult(name=name, status="fail",
+                           duration_ms=(time.time() - start) * 1000.0,
+                           detail=f"timeout after {timeout}s")
+    except Exception as e:
+        return CheckResult(name=name, status="fail",
+                           duration_ms=(time.time() - start) * 1000.0,
+                           detail=f"harness error: {e}")
 
 
 def end_to_end_fsa() -> CheckResult:
@@ -227,6 +262,10 @@ def hooks_compile() -> list[CheckResult]:
     )
 
 
+def hook_schema_smoke() -> CheckResult:
+    return run_python_smoke(PLUGIN_ROOT / "scripts" / "hook_schema_smoke.py", timeout=20)
+
+
 def webhook_smoke() -> list[CheckResult]:
     out: list[CheckResult] = []
     smoke = PLUGIN_ROOT / "webhook_engine" / "test_smoke.py"
@@ -296,6 +335,21 @@ def monitors_smoke() -> list[CheckResult]:
         "monitors/drift_watcher.py",
         "monitors/archivist.py",
     ))
+    with tempfile.TemporaryDirectory(prefix="mentat-monitor-cli-") as td:
+        env = {"MENTAT_HOME": td, "CLAUDE_PLUGIN_ROOT": str(PLUGIN_ROOT)}
+        out.append(run_shell_smoke(
+            "bin/mentat-monitors status --json",
+            [sys.executable, str(PLUGIN_ROOT / "bin" / "mentat-monitors"), "status", "--json"],
+            env_extra=env,
+            timeout=20,
+        ))
+        out.append(run_shell_smoke(
+            "bin/mentat-monitors schedule --format cron",
+            [sys.executable, str(PLUGIN_ROOT / "bin" / "mentat-monitors"),
+             "schedule", "--format", "cron"],
+            env_extra=env,
+            timeout=20,
+        ))
     return out
 
 
@@ -312,7 +366,62 @@ def adapters_smoke() -> list[CheckResult]:
         "adapters/gemini/hooks/after_tool.py",
         "adapters/gemini/hooks/pre_compress.py",
     ))
+    tester = PLUGIN_ROOT / "adapters" / "test_universal.sh"
+    if tester.exists():
+        out.append(run_shell_smoke("adapters/test_universal.sh",
+                                   ["bash", str(tester)], timeout=40))
+    else:
+        out.append(CheckResult(name="adapters/test_universal.sh", status="skip",
+                               detail="missing"))
     return out
+
+
+def release_tree_smoke() -> CheckResult:
+    validator = PLUGIN_ROOT / "scripts" / "validate_release_tree.py"
+    if not validator.exists():
+        return CheckResult(name="release:validate_tree", status="skip",
+                           detail="scripts/validate_release_tree.py missing")
+    start = time.time()
+    try:
+        proc = subprocess.run(
+            [sys.executable, str(validator), str(PLUGIN_ROOT)],
+            capture_output=True, text=True, timeout=20,
+        )
+        duration_ms = (time.time() - start) * 1000.0
+        if proc.returncode == 0:
+            detail = proc.stdout.strip().splitlines()[0] if proc.stdout.strip() else "ok"
+            return CheckResult(name="release:validate_tree", status="pass",
+                               duration_ms=duration_ms, detail=detail)
+        return CheckResult(name="release:validate_tree", status="fail",
+                           duration_ms=duration_ms,
+                           detail=f"exit {proc.returncode}",
+                           extra={"stderr": (proc.stdout + proc.stderr)[-1500:]})
+    except subprocess.TimeoutExpired:
+        return CheckResult(name="release:validate_tree", status="fail",
+                           duration_ms=(time.time() - start) * 1000.0,
+                           detail="timeout after 20s")
+    except Exception as e:
+        return CheckResult(name="release:validate_tree", status="fail",
+                           duration_ms=(time.time() - start) * 1000.0,
+                            detail=f"harness error: {e}")
+
+
+def commands_smoke() -> list[CheckResult]:
+    return [
+        run_python_smoke(PLUGIN_ROOT / "tests" / "command_frontmatter_lint_smoke.py", timeout=20),
+        run_python_smoke(PLUGIN_ROOT / "scripts" / "command_frontmatter_lint.py", timeout=20),
+    ]
+
+
+def prompts_smoke() -> list[CheckResult]:
+    return [
+        run_python_smoke(PLUGIN_ROOT / "tests" / "prompt_surface_review_smoke.py", timeout=20),
+        run_shell_smoke(
+            "scripts/prompt_surface_review.py .",
+            [sys.executable, str(PLUGIN_ROOT / "scripts" / "prompt_surface_review.py"), str(PLUGIN_ROOT)],
+            timeout=20,
+        ),
+    ]
 
 
 def render_table(results: list[CheckResult], verbose: bool = False) -> str:
@@ -335,7 +444,7 @@ def main() -> int:
     p.add_argument("--verbose", action="store_true")
     p.add_argument("--skip", default="",
                    help="comma-separated subsystems to skip "
-                        "(webhook,evals,debrief,monitors,adapters)")
+                        "(webhook,evals,hook-schema,debrief,monitors,adapters,commands,prompts,release)")
     args = p.parse_args()
     skip = {s.strip() for s in args.skip.split(",") if s.strip()}
 
@@ -353,6 +462,8 @@ def main() -> int:
 
     # 2. hooks compile
     results.extend(hooks_compile())
+    if "hook-schema" not in skip:
+        results.append(hook_schema_smoke())
 
     # 3. core MCP server compile
     results.extend(run_compile_check("mcp_server/__main__.py"))
@@ -375,6 +486,12 @@ def main() -> int:
         results.extend(monitors_smoke())
     if "adapters" not in skip:
         results.extend(adapters_smoke())
+    if "commands" not in skip:
+        results.extend(commands_smoke())
+    if "prompts" not in skip:
+        results.extend(prompts_smoke())
+    if "release" not in skip:
+        results.append(release_tree_smoke())
 
     # 7. report
     print(render_table(results, verbose=args.verbose))

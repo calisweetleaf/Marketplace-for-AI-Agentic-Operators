@@ -1299,7 +1299,7 @@ class TestCLISubcommands(unittest.TestCase):
         output = json.loads(buf.getvalue())
         self.assertIn("version", output)
         self.assertEqual(output["version"], __version__)
-        self.assertEqual(output["version"], "1.2.0")
+        self.assertEqual(output["version"], "1.3.0")
 
     def test_cmd_status_cold(self) -> None:
         """Status on an empty directory must report COLD_START branch."""

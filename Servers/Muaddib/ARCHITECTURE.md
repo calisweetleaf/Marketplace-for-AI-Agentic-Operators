@@ -18,6 +18,7 @@ Somnus-MCP is not a passive MCP tool rack and not a coding-agent harness. MCP JS
 5. **Source/schema truth vs live runtime truth**: source edits and `tool_manifest.json` can be validated without a restart; the already-running process reports live truth through BB7/SovereignMCP. If it does not hot-reload, live parity is pending operator lifecycle.
 6. **Gateway thinness**: changes to `mcp_server.py` should be gateway-level only unless proven otherwise. Do not move neural/control-plane ownership into the gateway merely because a transport/display issue is visible there.
 7. **Display projection is not substrate truth**: cleaned Markdown summaries are emitted only at the final MCP `content` seam. Raw dict/list payloads remain the inputs for trajectory buffers, tool usage logs, event-spine summaries, ambient memory exchange, sovereign metadata, auto-reflect, Q-table observations, and RFT/distillation. `SOVEREIGN_DISPLAY_PROJECTION=raw` is the escape hatch for canonical raw JSON display.
+8. **Runtime-tool documentation is centralized**: `runtime-tools/README.md` is the current single entrypoint for active module/tool inventory. Keep this architecture document focused on layer boundaries and invariants, not a duplicated per-tool catalog.
 
 ## 2. Layer Model
 
@@ -61,6 +62,14 @@ These files are public surfaces over persistent cognition, not ordinary stateles
 | `tools/memory_tool.py` | Working-memory LRU, persistent long-term memory, BM25/Ebbinghaus surfacing, context resurrection support. |
 | `tools/memory_interconnect.py` | BM25 concept graph, memory relationships, clustering, consolidation, knowledge-gap detection. |
 | `tools/session_manager_tool.py` | Cognitive session state, event/insight capture, workflow records, cross-session pattern and intelligence layer. |
+
+2026-06-06 tool-surface alignment: `tools/code_analysis_tool.py` is restored
+as the baseline code-analysis surface and intentionally loads before
+`tools/enhanced_code_analysis_tool.py`, leaving enhanced analysis canonical for
+the duplicate `bb7_security_audit`. `tools/enhanced_web_tool.py` is the only
+web module. `tools/shell_tool.py` and `tools/vscode_terminal_tool.py` are both
+active MCP terminal surfaces. Retired scratch copies do not belong in `tools/`
+because dynamic discovery treats valid `*.py` modules as registry candidates.
 
 Every substantial integration must preserve these modules as shared substrate over `/home/daeron/Somnus-MCP/data`. Creating a local `./data` island or instantiating duplicate continuity modules is architectural drift.
 
@@ -170,3 +179,9 @@ Use the existing BB7/SovereignMCP plane for live truth:
 For current-source live parity, `ping_server` and `bb7_tool_health_report` include `runtime_identity` with process/session/source-control fingerprints. `bb7_tool_health_report` also includes deterministic `registered_tools`; use it as the registry proof for post-reload gates, with `unused_tools` retained only as backward-compatible session-behavior evidence. Do not treat an old healthy stdio child as current-source merely because it shares the canonical data root.
 
 Do not instantiate a parallel `MCPServer()` or start/stop/restart the server as part of validation.
+> 2026-06-12 architecture note: legacy `infrustructure/` modules are retired
+> from the active checkout after eager external model loading was traced to MCP
+> startup discovery. The live architecture should be treated as the gateway,
+> `tools/`, Muad'Dib, transport/security wrappers, hooks, and shared `data/`
+> plane, with Mentat documented as a persistent companion layer in
+> `docs/mentat_24_7_alignment.md`.

@@ -476,6 +476,7 @@ class DigitalTwinBackbone:
         latency_ms: float,
         chain_length: int = 1,
         error: Optional[str] = None,
+        metadata_extra: Optional[Dict[str, Any]] = None,
     ) -> Dict[str, Any]:
         """
         Record one tool-call observation and TD-update the Q-table.
@@ -503,19 +504,23 @@ class DigitalTwinBackbone:
                 reward=reward,
                 next_state=next_state,
             )
+            metadata = {
+                "session_id": session_id,
+                "category": category,
+                "success": bool(success),
+                "latency_ms": float(latency_ms),
+                "chain_length": int(chain_length),
+                "error": error,
+            }
+            if metadata_extra:
+                metadata.update(metadata_extra)
+
             self._buffer.record(
                 state=state,
                 action=tool_name,
                 reward=reward,
                 next_state=next_state,
-                metadata={
-                    "session_id": session_id,
-                    "category": category,
-                    "success": bool(success),
-                    "latency_ms": float(latency_ms),
-                    "chain_length": int(chain_length),
-                    "error": error,
-                },
+                metadata=metadata,
             )
 
             self._maybe_autosave()
@@ -1053,6 +1058,7 @@ class DigitalTwinTool:
         self._self_play_head: Optional[Any] = None
         self._self_play_lock = threading.RLock()
         self._self_play_meta_file = self.self_play_dir / "checkpoint_meta.json"
+        self._last_self_play_side_effects: Dict[str, Any] = {}
         self._self_play_config: Optional[Any] = (
             SelfPlayConfig.from_substrate(self.config)
             if _SELF_PLAY_AVAILABLE and SelfPlayConfig is not None
@@ -1298,6 +1304,28 @@ class DigitalTwinTool:
                 "safetensors_available": _SAFETENSORS_AVAILABLE,
                 "self_play_available": _SELF_PLAY_AVAILABLE,
                 "self_play_head_initialized": self._self_play_head is not None,
+                "self_play_side_effect_gates": self._self_play_opt_in_snapshot(
+                    requested_promote=False,
+                    requested_update_qtable=False,
+                ),
+                "last_self_play_side_effects": self._last_self_play_side_effects,
+                "data_plane": {
+                    "data_dir": str(self.backbone.data_dir),
+                    "twin_dir": str(self.backbone.twin_dir),
+                    "qtable_file": str(self.backbone.qtable_file),
+                    "observations_file": str(self.backbone.obs_file),
+                    "vocab_file": str(self._vocab_file),
+                    "self_play_dir": str(self.self_play_dir),
+                    "data_root_env": "SOVEREIGN_DATA_DIR"
+                    if os.getenv("SOVEREIGN_DATA_DIR")
+                    else (
+                        "MCP_DATA_DIR"
+                        if os.getenv("MCP_DATA_DIR")
+                        else "repo_root/data"
+                    ),
+                    "qtable_exists": self.backbone.qtable_file.exists(),
+                    "observations_exists": self.backbone.obs_file.exists(),
+                },
                 "self_play_checkpoint_meta": self._read_json_file(
                     self._self_play_meta_file
                 ),
@@ -1757,6 +1785,59 @@ class DigitalTwinTool:
     def _self_play_active_locked(self) -> bool:
         return bool(self._self_play_lock_snapshot().get("active_locked", False))
 
+    def _self_play_opt_in_snapshot(
+        self,
+        requested_promote: bool,
+        requested_update_qtable: bool,
+        lock_snapshot: Optional[Dict[str, Any]] = None,
+    ) -> Dict[str, Any]:
+        """
+        Resolve self-play side-effect gates from call intent, environment, and
+        the active-head lock.
+
+        Candidate training/archive is safe by default. Mutating the real
+        Q-table or promoting the active self-play head requires both an
+        explicit call argument and an explicit environment opt-in.
+        """
+        lock_snapshot = lock_snapshot or self._self_play_lock_snapshot()
+        active_locked = bool(lock_snapshot.get("active_locked", False))
+        promote_env_value = os.getenv("MUADIB_SELF_PLAY_PROMOTE")
+        qtable_env_value = os.getenv("MUADIB_SELF_PLAY_UPDATE_QTABLE")
+        promote_env_enabled = self._parse_env_bool(promote_env_value, False)
+        qtable_env_enabled = self._parse_env_bool(qtable_env_value, False)
+        promote_requested = bool(requested_promote)
+        qtable_requested = bool(requested_update_qtable)
+        hard_rejected_reasons: List[str] = []
+        rejected_reasons: List[str] = []
+
+        if promote_requested and not promote_env_enabled:
+            reason = "promotion_requested_without_MUADIB_SELF_PLAY_PROMOTE=1"
+            rejected_reasons.append(reason)
+            hard_rejected_reasons.append(reason)
+        if qtable_requested and not qtable_env_enabled:
+            reason = "qtable_update_requested_without_MUADIB_SELF_PLAY_UPDATE_QTABLE=1"
+            rejected_reasons.append(reason)
+            hard_rejected_reasons.append(reason)
+        if promote_requested and promote_env_enabled and active_locked:
+            rejected_reasons.append("promotion_blocked_by_active_lock")
+
+        return {
+            "promote_requested": promote_requested,
+            "promote_env_enabled": promote_env_enabled,
+            "promote_effective": promote_requested
+            and promote_env_enabled
+            and not active_locked,
+            "promote_env_var": "MUADIB_SELF_PLAY_PROMOTE",
+            "qtable_update_requested": qtable_requested,
+            "qtable_update_env_enabled": qtable_env_enabled,
+            "qtable_update_effective": qtable_requested and qtable_env_enabled,
+            "qtable_update_env_var": "MUADIB_SELF_PLAY_UPDATE_QTABLE",
+            "active_locked": active_locked,
+            "lock_snapshot": lock_snapshot,
+            "rejected_reasons": rejected_reasons,
+            "hard_rejected_reasons": hard_rejected_reasons,
+        }
+
     def _get_self_play_head(self) -> Optional[Any]:
         """Lazily instantiate and load the isolated self-play policy/value head."""
         if not _TORCH_AVAILABLE:
@@ -2063,9 +2144,37 @@ class DigitalTwinTool:
         max_steps = max(2, min(int(config.max_seq_len), int(max_steps)))
         lr = float(learning_rate if learning_rate is not None else 3e-4)
         requested_promote = bool(promote)
+        requested_update_qtable = bool(update_qtable)
         lock_snapshot = self._self_play_lock_snapshot()
-        active_locked = bool(lock_snapshot.get("active_locked", False))
-        effective_promote = requested_promote and not active_locked
+        opt_in = self._self_play_opt_in_snapshot(
+            requested_promote=requested_promote,
+            requested_update_qtable=requested_update_qtable,
+            lock_snapshot=lock_snapshot,
+        )
+        active_locked = bool(opt_in.get("active_locked", False))
+        effective_promote = bool(opt_in.get("promote_effective", False))
+        effective_update_qtable = bool(opt_in.get("qtable_update_effective", False))
+        hard_rejected = list(opt_in.get("hard_rejected_reasons", []))
+        if hard_rejected:
+            self._last_self_play_side_effects = {
+                "timestamp": time.time(),
+                "session_id": session_id,
+                "ok": False,
+                "reason": "self_play_side_effect_env_gate_rejected",
+                "opt_in": opt_in,
+            }
+            self.logger.warning(
+                "digital_twin: rejected self-play side-effect request session=%s reasons=%s",
+                session_id,
+                hard_rejected,
+            )
+            return {
+                "ok": False,
+                "surface": "bb7_dt_self_play",
+                "error": "self-play side-effect request rejected by environment gate",
+                "side_effects_applied": False,
+                "opt_in": opt_in,
+            }
 
         with self._self_play_lock:
             base_head = self._get_self_play_head()
@@ -2079,6 +2188,7 @@ class DigitalTwinTool:
         losses: List[float] = []
         rewards: List[float] = []
         example_sequences: List[List[str]] = []
+        synthetic_observations: List[Dict[str, Any]] = []
 
         for episode_idx in range(episodes):
             sequence = [rng.choice(tools) for _ in range(max_steps)]
@@ -2112,16 +2222,22 @@ class DigitalTwinTool:
             optimizer.step()
             losses.append(float(loss.detach().cpu().item()))
 
-            if update_qtable:
+            if effective_update_qtable:
                 for step_idx, item in enumerate(sequence, start=1):
-                    self.backbone.observe(
-                        session_id=session_id,
-                        tool_name=item["name"],
-                        category=item.get("category", "misc"),
-                        success=reward >= 0.0,
-                        latency_ms=0.0,
-                        chain_length=step_idx,
-                        error=None if reward >= 0.0 else "synthetic_self_play_negative_reward",
+                    synthetic_observations.append(
+                        {
+                            "session_id": session_id,
+                            "tool_name": item["name"],
+                            "category": item.get("category", "misc"),
+                            "success": reward >= 0.0,
+                            "latency_ms": 0.0,
+                            "chain_length": step_idx,
+                            "error": None
+                            if reward >= 0.0
+                            else "synthetic_self_play_negative_reward",
+                            "episode_index": episode_idx,
+                            "synthetic_reward": reward,
+                        }
                     )
 
         candidate.eval()
@@ -2136,15 +2252,23 @@ class DigitalTwinTool:
             "min_loss": min(losses) if losses else 0.0,
             "max_loss": max(losses) if losses else 0.0,
             "tool_count": len(tools),
-            "update_qtable": bool(update_qtable),
+            "update_qtable": effective_update_qtable,
+            "qtable_update_requested": requested_update_qtable,
+            "qtable_update_env_enabled": bool(
+                opt_in.get("qtable_update_env_enabled", False)
+            ),
+            "qtable_update_effective": effective_update_qtable,
             "training_mode": (
                 "candidate_copy_atomic_safetensors_promote"
                 if effective_promote
                 else "candidate_copy_atomic_safetensors_archive_locked_active"
             ),
             "promotion_requested": requested_promote,
+            "promotion_env_enabled": bool(opt_in.get("promote_env_enabled", False)),
+            "promotion_effective": effective_promote,
             "active_locked": active_locked,
             "lock_source": lock_snapshot.get("lock_source"),
+            "opt_in": opt_in,
         }
         checkpoint = self._save_self_play_checkpoint(
             candidate,
@@ -2154,9 +2278,84 @@ class DigitalTwinTool:
             active_locked=active_locked,
         )
 
+        qtable_commit = {
+            "requested": requested_update_qtable,
+            "env_enabled": bool(opt_in.get("qtable_update_env_enabled", False)),
+            "effective": effective_update_qtable,
+            "pending_observations": len(synthetic_observations),
+            "committed": 0,
+            "failed": 0,
+            "errors": [],
+            "ok": True,
+        }
+        if effective_update_qtable:
+            checkpoint_sha = checkpoint.get("sha256")
+            for observation in synthetic_observations:
+                result = self.backbone.observe(
+                    session_id=str(observation["session_id"]),
+                    tool_name=str(observation["tool_name"]),
+                    category=str(observation["category"]),
+                    success=bool(observation["success"]),
+                    latency_ms=float(observation["latency_ms"]),
+                    chain_length=int(observation["chain_length"]),
+                    error=observation.get("error"),
+                    metadata_extra={
+                        "synthetic_self_play": True,
+                        "checkpoint_sha256": checkpoint_sha,
+                        "checkpoint": checkpoint.get("checkpoint"),
+                        "opt_in_source": {
+                            "qtable_update_env_var": "MUADIB_SELF_PLAY_UPDATE_QTABLE",
+                            "qtable_update_env_enabled": True,
+                        },
+                        "episode_index": int(observation["episode_index"]),
+                        "synthetic_reward": float(observation["synthetic_reward"]),
+                    },
+                )
+                if result.get("ok"):
+                    qtable_commit["committed"] += 1
+                else:
+                    qtable_commit["failed"] += 1
+                    if len(qtable_commit["errors"]) < 10:
+                        qtable_commit["errors"].append(result.get("error"))
+            qtable_commit["ok"] = qtable_commit["failed"] == 0
+            if not qtable_commit["ok"]:
+                self.logger.error(
+                    "digital_twin: self-play Q-table commit had failures session=%s committed=%s failed=%s",
+                    session_id,
+                    qtable_commit["committed"],
+                    qtable_commit["failed"],
+                )
+
         if effective_promote:
             with self._self_play_lock:
                 self._self_play_head = candidate
+
+        self._last_self_play_side_effects = {
+            "timestamp": time.time(),
+            "session_id": session_id,
+            "ok": bool(qtable_commit["ok"]),
+            "opt_in": opt_in,
+            "checkpoint_sha256": checkpoint.get("sha256"),
+            "promotion_requested": requested_promote,
+            "promotion_effective": effective_promote,
+            "qtable_commit": qtable_commit,
+        }
+        if not qtable_commit["ok"]:
+            return {
+                "ok": False,
+                "surface": "bb7_dt_self_play",
+                "error": "self-play Q-table commit failed after checkpoint save",
+                "weights_format": "safetensors",
+                "promotion_requested": requested_promote,
+                "promoted": effective_promote,
+                "active_locked": active_locked,
+                "lock_source": lock_snapshot.get("lock_source"),
+                "locked_checkpoint": lock_snapshot.get("locked_checkpoint"),
+                "checkpoint": checkpoint,
+                "metrics": metrics,
+                "qtable_commit": qtable_commit,
+                "opt_in": opt_in,
+            }
 
         return {
             "ok": True,
@@ -2170,7 +2369,9 @@ class DigitalTwinTool:
             "checkpoint": checkpoint,
             "metrics": metrics,
             "example_sequences": example_sequences,
-            "qtable_updated": bool(update_qtable),
+            "qtable_updated": effective_update_qtable,
+            "qtable_commit": qtable_commit,
+            "opt_in": opt_in,
             "note": (
                 "Self-play trained a candidate policy/value head and saved real "
                 "tensor weights as safetensors. JSON metadata is only a ledger."

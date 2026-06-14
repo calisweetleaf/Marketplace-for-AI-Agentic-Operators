@@ -21,7 +21,7 @@ scaffolds the full agent-operable structure: topology docs, session state,
 | `architecture_map.py` | Scaffold ARCHITECTURE_MAP.md from template |
 | `activate.py` | Full Phase 0-5 cold-start orchestrator |
 | `templates.py` | Template loader/renderer from `templates/` dir |
-| `tests/test_engine.py` | 50 unittest tests covering all modules |
+| `tests/test_engine.py` | 155 unittest tests covering all modules |
 
 ## CLI Quick Reference
 
@@ -31,6 +31,10 @@ python -m ctmv3 activate --project-root /path/to/repo
 python -m ctmv3 activate --project-root /path/to/repo --force
 python -m ctmv3 warm --project-root /path/to/repo
 python -m ctmv3 status --project-root /path/to/repo --json
+python -m ctmv3 state --project-root /path/to/repo --json
+python -m ctmv3 context --project-root /path/to/repo --json
+python -m ctmv3 ping --json
+python -m ctmv3 serve --project-root /path/to/repo
 python -m ctmv3 fingerprint --project-root /path/to/repo
 python -m ctmv3 session-close --agent "Claude Code" --action "did X" --project-root /path/to/repo
 python -m ctmv3 dot-init --target all --project-root /path/to/repo
@@ -79,7 +83,7 @@ branch = inventory["branch"]  # "COLD_START" | "WARM_START" | "PARTIAL"
 python3 -m unittest discover /agent/workspace/ctmv3-plugin/core/tests/ -v
 ```
 
-50 tests, stdlib unittest only, no external dependencies.
+155 tests, stdlib unittest only, no external dependencies.
 
 ## Templates
 

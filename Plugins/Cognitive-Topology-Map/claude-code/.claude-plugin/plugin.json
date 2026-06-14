@@ -1,7 +1,7 @@
 {
   "name": "ctmv3-workspace-activator",
   "description": "CTMv3 workspace activation system — bootstraps a repo into a living, agent-operable environment by producing .sovereign/, AGENTS.md, ARCHITECTURE_MAP.md, TOPOLOGY.md, and the full .xyz directory ecosystem.",
-  "version": "1.0.0",
+  "version": "1.3.0",
   "author": {
     "name": "Daeron"
   },

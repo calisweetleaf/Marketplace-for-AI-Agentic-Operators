@@ -101,15 +101,26 @@ ensure_dir() {
 }
 copy_tree() {
     local src="$1" dst="$2"
+    local releaseignore="$src/.releaseignore"
+    local -a exclude_args=(--exclude='__pycache__' --exclude='.git')
+    local -a tar_exclude_args=(--exclude='__pycache__' --exclude='.git')
+    if [[ -f "$releaseignore" ]]; then
+        exclude_args+=(--exclude-from="$releaseignore")
+        tar_exclude_args+=(--exclude-from="$releaseignore")
+    fi
     ensure_dir "$dst"
     if [[ $DRY_RUN -eq 1 ]]; then
-        echo "  [dry-run] cp -r $src/ -> $dst/"
+        if [[ -f "$releaseignore" ]]; then
+            echo "  [dry-run] cp -r $src/ -> $dst/ (respect .releaseignore)"
+        else
+            echo "  [dry-run] cp -r $src/ -> $dst/"
+        fi
     else
         # rsync if available (preserves perms + skips unchanged), tar fallback
         if command -v rsync >/dev/null 2>&1; then
-            rsync -a --exclude='__pycache__' --exclude='.git' "$src"/ "$dst"/
+            rsync -a "${exclude_args[@]}" "$src"/ "$dst"/
         else
-            (cd "$src" && tar cf - --exclude='__pycache__' --exclude='.git' .) | (cd "$dst" && tar xf -)
+            (cd "$src" && tar cf - "${tar_exclude_args[@]}" .) | (cd "$dst" && tar xf -)
         fi
     fi
 }

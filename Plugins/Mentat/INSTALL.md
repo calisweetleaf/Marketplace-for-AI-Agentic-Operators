@@ -24,6 +24,10 @@ claude plugin marketplace add file://$HOME/.claude/plugins/mentat
 claude --plugin-dir $HOME/.claude/plugins/mentat
 ```
 
+Mentat installs as a runtime plugin package. The hooks, MCP server, CLI,
+skills, monitors, evals, and adapters are surfaces over the same committed
+state substrate; do not install only one surface and call it the whole plugin.
+
 ## First-run smoke test
 
 ```bash
@@ -78,6 +82,40 @@ you want both, list both in `.claude.json`:
 The Mentat MCP server is read-mostly (introspection of its own state); bb7 is
 write-heavy (real tool execution). They don't compete.
 
+## Staging copyover check
+
+Before rebuilding archives or copying into
+`/home/daeron/Repositories/Somnus-Intellligence-Stack/Plugins/Mentat`, run:
+
+```bash
+python3 scripts/integration_smoke.py
+python3 scripts/hook_schema_smoke.py
+PYTHONDONTWRITEBYTECODE=1 python3 tests/command_frontmatter_lint_smoke.py
+python3 scripts/command_frontmatter_lint.py .
+PYTHONDONTWRITEBYTECODE=1 python3 tests/prompt_surface_review_smoke.py
+python3 scripts/prompt_surface_review.py .
+PYTHONDONTWRITEBYTECODE=1 python3 tests/privacy_boundary_scan_smoke.py
+python3 scripts/privacy_boundary_scan.py .
+bash adapters/test_universal.sh
+python3 scripts/validate_release_tree.py .
+```
+
+The validator allows local-only artifacts to remain in staging only when
+covered by `.releaseignore`. The universal installer uses the same
+`.releaseignore` membrane when copying the live plugin tree into runtime
+install paths. The privacy scanner uses that membrane too, so ignored staging
+evidence can remain local while release-candidate text is checked for private
+source identifiers and unapproved local paths.
+The command-frontmatter lint checks all slash command prompt files for
+descriptions, argument hints, scoped `allowed-tools`, and forbidden Bash
+wildcards.
+The prompt-surface review checks `agents/*.md` and `helpers/*.md` for role,
+tool, boundary, and output contracts while preserving their independent
+operator-prompt role.
+
+Review `SUBSYSTEM_INVENTORY.md` before copyover for the current status of
+adapters, evals, webhooks, monitors, commands, agents, helpers, and debrief.
+
 ## Codex parallel
 
 Codex CLI uses `[mcp_servers.mentat]` in `~/.codex/config.toml` instead of
@@ -91,11 +129,10 @@ startup_timeout_sec = 5
 tool_timeout_sec = 10
 ```
 
-Codex hooks are a different shape (6 events vs Claude Code's 25) but the
-state-machine reconstruction logic in `state_machine/` is runtime-agnostic —
-porting Mentat's hook layer to Codex is a 200-line job (one entry script per
-Codex hook event reading the same SQLite + JSONL files). Marked as a v0.2
-target.
+Codex hooks are a different shape (6 events vs Claude Code's 25), but the
+state-machine reconstruction logic in `state_machine/` is runtime-agnostic.
+The current Codex projection lives under `adapters/codex/` and reads the same
+SQLite + JSONL state model instead of forking the substrate.
 
 ## Uninstall
 
@@ -181,6 +218,7 @@ Full notes in `adapters/gemini/README.md`.
 
 ```bash
 ./adapters/test_universal.sh
-# Compiles every hook script, validates every JSON file, and runs
-# install_universal.sh --dry-run for each runtime — no disk writes.
+# Compiles every hook script, validates every JSON file, runs dry-runs for
+# each runtime, then installs into a temporary Codex HOME to prove staging
+# artifacts are not copied.
 ```

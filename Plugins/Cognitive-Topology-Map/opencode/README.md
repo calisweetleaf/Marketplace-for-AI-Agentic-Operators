@@ -1,12 +1,12 @@
 # CTMv3 opencode Adapter
 
 The CTMv3 opencode adapter wires the CTMv3 workspace activation engine into opencode
-as a subagent, a set of slash commands, and a session-start plugin.
+as a subagent, one read-only status command, and a session-start plugin.
 
 CTMv3 is a codebase activation and workspace onboarding system. It is not a skill maker.
 Its purpose is to enter a repo, install the full agent-operability structure, and make the
 codebase living for ongoing agent work. The adapter provides an opencode-native interface
-to the Python engine at `/agent/workspace/ctmv3-plugin/core/`.
+to the Python engine in `../core/`.
 
 ---
 
@@ -34,93 +34,14 @@ bash /path/to/ctmv3-plugin/opencode/install.sh global
 
 The installer copies:
 - `agent/ctmv3-architect.md` to `<target>/agents/`
-- `command/ctmv3-*.md` to `<target>/commands/`
+- `command/ctmv3-status.md` to `<target>/commands/`
 - `plugin/ctmv3.ts` to `<target>/plugins/`
 
 ---
 
-## Commands
+## Command Surface
 
-All commands are invoked from the opencode TUI with a leading `/`.
-
-### `/ctmv3-boot`
-
-Runs the BOOT_PROTOCOL.md discovery sequence. Determines whether the current repo is
-COLD, WARM, or PARTIAL in under 60 seconds. Read-only. Always the first step for any
-repo entry task.
-
-```
-/ctmv3-boot
-/ctmv3-boot --project-root /path/to/repo
-```
-
-### `/ctmv3-activate`
-
-Full workspace activation. Runs Phase 0-5 cold-start: domain archaeology, topology
-construction, failure grammar, architecture map, sovereign init, and ecosystem directory
-setup.
-
-WARNING: Creates or overwrites multiple artifact files. If Tier 1 CTMv3 artifacts
-already exist (AGENTS.md, ARCHITECTURE_MAP.md, .sovereign/), the command halts and asks
-for confirmation unless `--force` is passed.
-
-```
-/ctmv3-activate
-/ctmv3-activate --force
-```
-
-### `/ctmv3-warm`
-
-Warm session resume. Reads PROVENANCE.md, validates topology currency, and runs targeted
-archaeology on drifted areas only. Does not rebuild from scratch.
-
-Use at the start of any work session in an already-activated repo.
-
-```
-/ctmv3-warm
-/ctmv3-warm --force-full
-```
-
-### `/ctmv3-architecture-map`
-
-Build or rebuild ARCHITECTURE_MAP.md — the traversal map that answers "where is X"
-without requiring a guide. Requires TOPOLOGY.md to exist first.
-
-```
-/ctmv3-architecture-map
-/ctmv3-architecture-map --force
-```
-
-### `/ctmv3-sovereign-init`
-
-Initialize or reinitialize `.sovereign/` — the session continuity anchor. Creates
-session_state.json, topology_fingerprint.txt, and golden_paths.json.
-
-```
-/ctmv3-sovereign-init
-/ctmv3-sovereign-init --force
-```
-
-### `/ctmv3-dot-init`
-
-Initialize the agent ecosystem directories: `.claude/`, `.codex/`, and optionally
-`.github/`. Skips any directory that already exists unless `--force` is passed.
-
-```
-/ctmv3-dot-init
-/ctmv3-dot-init --force
-```
-
-### `/ctmv3-session-close`
-
-Close the current work session cleanly. Updates PROVENANCE.md Session Log and syncs
-`.sovereign/session_state.json`. Requires `--agent` and `--action` parameters.
-
-```
-/ctmv3-session-close --agent ctmv3-architect --action "topology draft committed"
-```
-
-If parameters are omitted, the command prompts for them before proceeding.
+All OpenCode slash commands are invoked from the TUI with a leading `/`.
 
 ### `/ctmv3-status`
 
@@ -130,6 +51,16 @@ recommended next command. Read-only.
 ```
 /ctmv3-status
 ```
+
+The session plugin performs boot discovery automatically on session creation when the
+engine is installed. All other CTMv3 operations stay on the canonical engine CLI:
+
+```bash
+python3 -m ctmv3 <command> --project-root "$PWD"
+```
+
+Supported engine commands include `boot`, `activate`, `warm`, `architecture-map`,
+`dot-init`, `sovereign-init`, `session-close`, `state`, `context`, `ping`, and `serve`.
 
 ---
 
@@ -199,16 +130,16 @@ will silently do nothing. The commands still work without the plugin.
 
 ## Troubleshooting
 
-**"ctmv3-architect is not available"** — Verify the `.opencode/agents/` directory exists
+**"ctmv3-architect is not available"** - Verify the `.opencode/agents/` directory exists
 and `ctmv3-architect.md` is in it. Check that opencode was restarted after installation.
 
-**Commands not appearing in `/` autocomplete** — Verify `.opencode/commands/` contains the
-`ctmv3-*.md` files. opencode loads commands at startup; restart after installing.
+**Commands not appearing in `/` autocomplete** - Verify `.opencode/commands/` contains
+`ctmv3-status.md`. opencode loads commands at startup; restart after installing.
 
-**`python3 -m ctmv3` not found** — Install the Python engine:
-see `/agent/workspace/ctmv3-plugin/core/` for source. The adapter shells out to the engine
+**`python3 -m ctmv3` not found** - Install the Python engine from the sibling `core/`
+directory in this plugin checkout. The adapter shells out to the engine
 for all discovery and artifact generation.
 
-**Plugin not running on session start** — Verify `ctmv3.ts` is in `.opencode/plugins/`.
+**Plugin not running on session start** - Verify `ctmv3.ts` is in `.opencode/plugins/`.
 Check that your opencode version loads TypeScript plugins from the plugins directory. If
 Bun is not available, the plugin may need to be transpiled to JavaScript first.

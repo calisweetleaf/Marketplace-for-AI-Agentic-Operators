@@ -31,18 +31,19 @@ a codebase into a living, agent-operable repo — not merely a skill maker.
 
 ## Available Commands
 
-Run all commands via: `python3 -m ctmv3 <subcommand> --project-root "$PWD"`
+CTMv3 exposes two slash commands. All other operations are invoked directly via the
+engine (natural language phrases below tell Gemini what to run).
 
-| Subcommand           | What it does                                                                  | Shell invocation                                                          |
-|----------------------|-------------------------------------------------------------------------------|---------------------------------------------------------------------------|
-| `boot`               | Discovery sequence: detect cold/warm/partial entry state, return signal inventory | `python3 -m ctmv3 boot --json --project-root "$PWD"`                 |
-| `activate`           | Full Phase 0-5 cold-start activation pass on the repo                        | `python3 -m ctmv3 activate --project-root "$PWD"`                        |
-| `warm`               | Warm-start check: diff current state against last session, log delta         | `python3 -m ctmv3 warm --project-root "$PWD"`                            |
-| `architecture-map`   | Build or update ARCHITECTURE_MAP.md traversal artifact from TOPOLOGY.md      | `python3 -m ctmv3 architecture-map --project-root "$PWD"`               |
-| `sovereign-init`     | Initialize `.sovereign/` directory with session_state.json and fingerprint   | `python3 -m ctmv3 sovereign-init --project-root "$PWD"`                 |
-| `dot-init`           | Create `.claude/`, `.codex/`, `.github/` scaffolds and seed their contents   | `python3 -m ctmv3 dot-init --project-root "$PWD"`                       |
-| `session-close`      | Close the session cleanly: update PROVENANCE.md log, flush session state     | `python3 -m ctmv3 session-close --project-root "$PWD"`                  |
-| `status`             | Print current workspace activation status and open tasks                     | `python3 -m ctmv3 status --project-root "$PWD"`                         |
+| Slash command   | What it does                                                              | Shell invocation                                               |
+|-----------------|---------------------------------------------------------------------------|----------------------------------------------------------------|
+| `/ctmv3:boot`   | Discovery sequence: detect cold/warm/partial entry state                  | `python3 -m ctmv3 boot --json --project-root "$PWD"`          |
+| `/ctmv3:status` | Print current workspace activation status and open tasks                  | `python3 -m ctmv3 status --project-root "$PWD"`               |
+
+All other engine operations run directly:
+```bash
+python3 -m ctmv3 <subcommand> --project-root "$PWD"
+```
+Subcommands: `activate`, `warm`, `architecture-map`, `dot-init`, `sovereign-init`, `session-close`
 
 For the generic wrapper that forwards any subcommand:
 
@@ -344,26 +345,21 @@ specific repo. AGENTS.md lives at project root, not inside `.codex/`.
 
 ## Trigger Phrases for CTMv3 Commands
 
-Since Gemini CLI extension commands use TOML slash-command format, the following
-trigger phrases invoke the matching CTMv3 operation via the `/ctmv3:*` commands:
+Slash commands available: `/ctmv3:boot` and `/ctmv3:status`.
+All other operations are invoked via natural language — Gemini runs the engine directly.
 
-| Slash command              | What fires                            |
-|----------------------------|---------------------------------------|
-| `/ctmv3:boot`              | Boot discovery, print signal inventory |
-| `/ctmv3:activate`          | Full cold-start activation pass        |
-| `/ctmv3:warm`              | Warm-start diff and continue check     |
-| `/ctmv3:architecture-map`  | Build/update ARCHITECTURE_MAP.md       |
-| `/ctmv3:sovereign-init`    | Initialize `.sovereign/` directory     |
-| `/ctmv3:dot-init`          | Create `.claude/`, `.codex/`, `.github/` scaffolds |
-| `/ctmv3:session-close`     | Close session cleanly                  |
-| `/ctmv3:status`            | Print activation status                |
+| Slash command   | What fires                             |
+|-----------------|----------------------------------------|
+| `/ctmv3:boot`   | Boot discovery, print signal inventory |
+| `/ctmv3:status` | Print activation status                |
 
-You can also invoke directly without slash commands by asking:
-- "run ctmv3 boot" — triggers `python3 -m ctmv3 boot --json --project-root "$PWD"`
-- "activate this repo with ctmv3" — triggers full Phase 0-5
-- "what is the ctmv3 status" — triggers `python3 -m ctmv3 status --project-root "$PWD"`
-- "close the ctmv3 session" — triggers session-close protocol
-- "run ctmv3 warm check" — triggers warm-start diff
+Natural language trigger phrases (no slash command needed):
+- "run ctmv3 boot" — `python3 -m ctmv3 boot --json --project-root "$PWD"`
+- "activate this repo with ctmv3" — `python3 -m ctmv3 activate --project-root "$PWD"`
+- "what is the ctmv3 status" — `python3 -m ctmv3 status --project-root "$PWD"`
+- "close the ctmv3 session" — `python3 -m ctmv3 session-close --project-root "$PWD"`
+- "run ctmv3 warm check" — `python3 -m ctmv3 warm --project-root "$PWD"`
+- "build architecture map" — `python3 -m ctmv3 architecture-map --project-root "$PWD"`
 
 ---
 

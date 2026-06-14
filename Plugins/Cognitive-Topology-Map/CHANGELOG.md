@@ -1,5 +1,23 @@
 # CHANGELOG
 
+## v1.3.0 — 2026-06-12
+
+Persistent server and context-cache lane.
+
+### Added
+- `ctmv3 serve` starts a stdlib HTTP server on the local loopback interface.
+- `ctmv3 context` returns a compact agent context blob, querying the server when available and falling back to inline discovery.
+- `ctmv3 ping` checks local server availability.
+- `ctmv3 state` reports the persisted `.sovereign/session_state.json` `current_state` field.
+- `core/ctmv3/core/server.py` and `core/ctmv3/core/watcher.py` provide the server and mtime-backed project state cache.
+- `.releaseignore`, `COPYOVER_MANIFEST.md`, and `scripts/validate_release_tree.py` define staging-to-public copyover hygiene.
+- `scripts/privacy_boundary_scan.py` and `tests/privacy_boundary_scan_smoke.py` enforce the private-source boundary over release-candidate text without committing exact private identifiers.
+
+### Fixed
+- Updated stale validation/docs that still expected engine version `1.2.0`.
+- Added a release/copyover gate so local artifacts such as `.codegraph/`, `.venv/`, `.mentat/`, archives, logs, DBs, PID files, and `data/` do not enter the release candidate set.
+- Wired the privacy boundary scan into `scripts/validate_release_tree.py`; latest clean-tree result is `140` candidate files and `1045` ignored local-only/forbidden files.
+
 ## v1.2.0 — 2026-05-24
 
 SOTA++ Production Hardening Pass. Full engine maturity upgrade targeting monorepo support, robust parsing, logging, and comprehensive test coverage.

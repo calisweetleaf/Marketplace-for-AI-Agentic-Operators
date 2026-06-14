@@ -1,14 +1,14 @@
 # Aeriadne
 
-Type: Plugin  
-Status: Private v1 / staged  
-Version: 1.0.0  
-Clients: Codex, Claude Code, OpenCode, Grok Build  
-Canonical path: `/home/daeron/Repositories/Somnus-Intellligence-Stack/plugins/Aeriadne`
+Type: Plugin
+Status: Private v1 / staged, installed locally
+Version: 1.0.0
+Clients: Codex, Claude Code, OpenCode
+Canonical path: `/home/daeron/Projects/Modern-ML/Plugins/Aeriadne`
 
 ## What it does
 
-Aeriadne packages the Constitutional Prompt Framework as a skill-activated plugin and adds the private marketplace scaffold for plugin manifests, skills, agent prompts, adapters, registry records, marketplace cards, and MCP/server cards.
+Aeriadne packages the Constitutional Prompt Framework as a skill-activated plugin and adds a private marketplace scaffold for plugin manifests, skills, agent prompts, adapters, and MCP/server cards.
 
 ## Includes
 
@@ -17,20 +17,15 @@ Aeriadne packages the Constitutional Prompt Framework as a skill-activated plugi
 - Aeriadne subagent prompt pack
 - `sovereign-bb7` MCP/server reference card
 - Registry and marketplace card skeleton
-- Codex, Claude Code, OpenCode, and Grok Build adapter docs
+- Codex, Claude Code, and OpenCode adapter docs
 
-## Expected Codex exposure after install
+## Codex exposure
 
 ```text
 aeriadne:constitutional-prompt-framework
 aeriadne:aeriadne-marketplace-operator
 ```
 
-## Supersedes
-
-- Legacy `cpf-plugin-ariadne` / `CPF-Plugin-Ariadne`
-- Legacy `legacy CPF plugin shell`
-
 ## Boundary
 
-Not installed in this staging pass. BB7/SovereignMCP is referenced as canonical server plane, not vendored. Legacy plugin descriptors were deleted and must not be restored as active installables.
+Installed locally as `aeriadne@local` after marketplace refresh. BB7/SovereignMCP is referenced as canonical server plane, not vendored. Public copyover remains blocked on Daeron review.

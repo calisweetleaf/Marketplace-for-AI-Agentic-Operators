@@ -17,6 +17,19 @@
 
 set -euo pipefail
 
+# -----------------------------------------------------------------------
+# Helper: verify source exists, then copy; exit clearly on any failure
+# -----------------------------------------------------------------------
+safe_cp() {
+    local src="$1"
+    local dest="$2"
+    if [ ! -e "$src" ]; then
+        echo "ERROR: source file not found: $src" >&2
+        exit 1
+    fi
+    cp "$src" "$dest" || { echo "ERROR: failed to copy $src to $dest" >&2; exit 1; }
+}
+
 SCOPE="${1:-project}"
 
 if [ "$SCOPE" = "global" ]; then
@@ -28,41 +41,75 @@ fi
 SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 CURSOR_SRC="${SCRIPT_DIR}/.cursor"
 
+# -----------------------------------------------------------------------
+# Global-scope confirmation prompt
+# -----------------------------------------------------------------------
+if [ "$SCOPE" = "global" ]; then
+    echo "Installing to ~/.cursor/ — continue? [y/N]"
+    read -r _confirm
+    case "$_confirm" in
+        [yY]|[yY][eE][sS]) ;;
+        *)
+            echo "Aborted."
+            exit 0
+            ;;
+    esac
+fi
+
 echo "Installing CTMv3 Cursor adapter to: $TARGET (scope: $SCOPE)"
 
 # -----------------------------------------------------------------------
 # Create target directories
 # -----------------------------------------------------------------------
-mkdir -p "$TARGET/rules"
-mkdir -p "$TARGET/commands"
-mkdir -p "$TARGET/scripts/ctmv3"
+mkdir -p "$TARGET/rules" \
+    || { echo "ERROR: failed to create $TARGET/rules" >&2; exit 1; }
+mkdir -p "$TARGET/commands" \
+    || { echo "ERROR: failed to create $TARGET/commands" >&2; exit 1; }
+mkdir -p "$TARGET/scripts/ctmv3" \
+    || { echo "ERROR: failed to create $TARGET/scripts/ctmv3" >&2; exit 1; }
 
 # -----------------------------------------------------------------------
 # Install Cursor Rule
 # -----------------------------------------------------------------------
 echo "  -> rules/ctmv3.mdc"
-cp "$CURSOR_SRC/rules/ctmv3.mdc" "$TARGET/rules/"
+safe_cp "$CURSOR_SRC/rules/ctmv3.mdc" "$TARGET/rules/"
 
 # -----------------------------------------------------------------------
 # Install Cursor Commands
 # -----------------------------------------------------------------------
 echo "  -> commands/ctmv3-*.md"
+_found_commands=0
 for cmd_file in "$CURSOR_SRC/commands"/ctmv3-*.md; do
+    # Guard against a literal glob string when no files match
+    [ -e "$cmd_file" ] || { echo "ERROR: no ctmv3-*.md command files found in $CURSOR_SRC/commands/" >&2; exit 1; }
     filename="$(basename "$cmd_file")"
     echo "     $filename"
-    cp "$cmd_file" "$TARGET/commands/"
+    safe_cp "$cmd_file" "$TARGET/commands/"
+    _found_commands=$(( _found_commands + 1 ))
 done
+if [ "$_found_commands" -eq 0 ]; then
+    echo "ERROR: no ctmv3-*.md command files found in $CURSOR_SRC/commands/" >&2
+    exit 1
+fi
 
 # -----------------------------------------------------------------------
 # Install bash wrappers
 # -----------------------------------------------------------------------
 echo "  -> scripts/ctmv3/"
+_found_scripts=0
 for script_file in "$SCRIPT_DIR/scripts"/ctmv3-*.sh; do
+    [ -e "$script_file" ] || { echo "ERROR: no ctmv3-*.sh script files found in $SCRIPT_DIR/scripts/" >&2; exit 1; }
     filename="$(basename "$script_file")"
     echo "     $filename"
-    cp "$script_file" "$TARGET/scripts/ctmv3/"
-    chmod +x "$TARGET/scripts/ctmv3/$filename"
+    safe_cp "$script_file" "$TARGET/scripts/ctmv3/"
+    chmod +x "$TARGET/scripts/ctmv3/$filename" \
+        || { echo "ERROR: failed to chmod +x $TARGET/scripts/ctmv3/$filename" >&2; exit 1; }
+    _found_scripts=$(( _found_scripts + 1 ))
 done
+if [ "$_found_scripts" -eq 0 ]; then
+    echo "ERROR: no ctmv3-*.sh script files found in $SCRIPT_DIR/scripts/" >&2
+    exit 1
+fi
 
 echo ""
 echo "Installation complete."

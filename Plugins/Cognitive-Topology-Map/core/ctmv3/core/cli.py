@@ -1,7 +1,7 @@
 """
 CTMv3 CLI — Command-Line Entry Point
 =====================================
-Provenance: CTMv3 Engine v1.1.0 — 2026-05-23
+Provenance: CTMv3 Engine v1.3.0 — 2026-06-12
 Author: Forge (activation engine builder)
 Purpose: python -m ctmv3 <command> [args] entry point. Every host adapter
          (Claude Code, Codex, opencode, Gemini CLI, Cursor) shells out to this CLI.
@@ -32,8 +32,12 @@ Subcommands:
   fingerprint          -- recompute topology_fingerprint.txt
   session-close        -- update PROVENANCE Session Log and session_state.json
   status               -- print current CTMv3 state
+  state                -- print current_state from session_state.json
   version              -- print version
   chain                -- walk the golden-path domino chain from an initial command
+  serve                -- start the persistent CTMv3 server (watches projects, serves context)
+  context              -- get compact agent context (queries server if up, else inline)
+  ping                 -- check if the CTMv3 server is running
 """
 
 from __future__ import annotations
@@ -60,6 +64,7 @@ from ctmv3.core.orchestration import (
     memory_surface_tags,
     chain as orchestration_chain,
 )
+from ctmv3.core.server import DEFAULT_PORT
 
 
 # ---------------------------------------------------------------------------
@@ -115,6 +120,64 @@ def _maybe_emit_signal(
 
 
 # ---------------------------------------------------------------------------
+# Server auto-start (called by cmd_boot as a side effect)
+# ---------------------------------------------------------------------------
+
+
+def _spawn_server_if_down(port: int = DEFAULT_PORT) -> None:
+    """
+    Start the CTMv3 server as a detached daemon if not already running.
+    Called as a side effect of every `ctmv3 boot` invocation.
+    The server outlives this process via start_new_session=True.
+    Failures are silently swallowed — boot continues regardless.
+    """
+    import urllib.error
+    import urllib.request
+
+    try:
+        urllib.request.urlopen(f"http://127.0.0.1:{port}/health", timeout=0.5)
+        return  # already up
+    except (urllib.error.URLError, OSError):
+        pass
+
+    import subprocess as _sp
+    cmd = [
+        sys.executable, "-m", "ctmv3", "serve",
+        "--scan-root", str(Path.home()),
+        "--port", str(port),
+        "--no-golden-path",
+    ]
+    try:
+        _sp.Popen(
+            cmd,
+            stdout=_sp.DEVNULL,
+            stderr=_sp.DEVNULL,
+            stdin=_sp.DEVNULL,
+            start_new_session=True,
+        )
+    except Exception:
+        pass
+
+
+def _register_with_server(root: Path, port: int = DEFAULT_PORT) -> None:
+    """Register project with the server after boot. Fire-and-forget."""
+    import urllib.error
+    import urllib.request
+
+    try:
+        body = json.dumps({"path": str(root)}).encode()
+        req = urllib.request.Request(
+            f"http://127.0.0.1:{port}/projects/register",
+            data=body,
+            headers={"Content-Type": "application/json"},
+            method="POST",
+        )
+        urllib.request.urlopen(req, timeout=1)
+    except Exception:
+        pass
+
+
+# ---------------------------------------------------------------------------
 # Subcommand implementations
 # ---------------------------------------------------------------------------
 
@@ -123,6 +186,11 @@ def cmd_boot(args: argparse.Namespace) -> None:
     root = Path(args.project_root).resolve()
     if not root.exists():
         _fail(f"Project root does not exist: {root}", exit_code=1)
+
+    # Side effect: ensure the server is running in the background.
+    # This is what makes CTMv3 ambient — whoever calls boot first starts the server.
+    _spawn_server_if_down()
+    _register_with_server(root)
 
     inv = boot_module.discover(root)
 
@@ -142,7 +210,7 @@ def cmd_boot(args: argparse.Namespace) -> None:
     _maybe_emit_signal(
         args,
         "boot",
-        inv.branch,  # COLD_START | WARM_START | PARTIAL
+        inv.branch,
         inv.to_dict(),
     )
 
@@ -484,6 +552,27 @@ def cmd_status(args: argparse.Namespace) -> None:
     _maybe_emit_signal(args, "status", "success", status)
 
 
+def cmd_state(args: argparse.Namespace) -> None:
+    """
+    Print the current_state field from .sovereign/session_state.json.
+
+    Reads the persisted state machine position written by write_session_state().
+    If the file does not exist or is malformed, reports "UNKNOWN" without error.
+    Exit code is always 0 — this is a read-only diagnostic.
+    """
+    root = Path(args.project_root).resolve()
+
+    state = sov_module.read_session_state(root)
+    current_state: str = state.get("current_state", "UNKNOWN") or "UNKNOWN"
+
+    if args.json:
+        _emit_json({"current_state": current_state})
+    else:
+        _emit_human(current_state)
+
+    # state is a read-only diagnostic; it does not participate in the golden-path chain
+
+
 def cmd_version(args: argparse.Namespace) -> None:
     result = {"version": __version__, "protocol": "CTMv3"}
     if args.json:
@@ -522,6 +611,136 @@ def cmd_chain(args: argparse.Namespace) -> None:
     # Output the JSON array of all signals
     output = [s.to_dict() for s in signals]
     _emit_json(output)
+
+
+# ---------------------------------------------------------------------------
+# Server subcommands: serve, context, ping
+# ---------------------------------------------------------------------------
+
+
+def cmd_serve(args: argparse.Namespace) -> None:
+    """
+    Start the CTMv3 persistent server.
+
+    Watches registered projects for topology drift, refreshes state automatically,
+    and serves compact context blobs over HTTP so agents can query state without
+    running the full chain themselves.
+    """
+    from ctmv3.core.server import CTMv3Server
+
+    port: int = getattr(args, "port", DEFAULT_PORT) or DEFAULT_PORT
+    poll: float = float(getattr(args, "poll_interval", 5) or 5)
+    watch_paths: list[str] = getattr(args, "watch", []) or []
+    scan_root: Optional[str] = getattr(args, "scan_root", None)
+
+    server = CTMv3Server(port=port, poll_interval=poll)
+
+    # Register explicitly passed --watch paths
+    for raw_path in watch_paths:
+        p = Path(raw_path).resolve()
+        if p.exists():
+            server.register_project(p)
+            _emit_human(f"Watching: {p}")
+        else:
+            _emit_human(f"WARNING: --watch path does not exist, skipping: {raw_path}")
+
+    # Auto-discover under --scan-root
+    if scan_root:
+        root = Path(scan_root).resolve()
+        if root.exists():
+            n = server.scan_and_register(root)
+            _emit_human(f"Discovered and registered {n} project(s) under {root}")
+        else:
+            _emit_human(f"WARNING: --scan-root does not exist: {scan_root}")
+
+    # Register --project-root (current directory by default, same as other commands)
+    project_root = Path(args.project_root).resolve()
+    if project_root.exists():
+        inv = boot_module.discover(project_root)
+        if inv.tier1_signals:
+            server.register_project(project_root)
+            _emit_human(f"Watching: {project_root}")
+
+    server.start(block=True)
+
+
+def cmd_context(args: argparse.Namespace) -> None:
+    """
+    Get compact agent context for the current project.
+
+    Tries the local CTMv3 server first (fast path). Falls back to inline
+    discovery if the server is not running (e.g., standalone invocation).
+
+    Output is always JSON to stdout so agents can parse it reliably.
+    """
+    import urllib.request
+    import urllib.error
+
+    root = Path(args.project_root).resolve()
+    port: int = getattr(args, "port", DEFAULT_PORT) or DEFAULT_PORT
+    name = root.name
+
+    # Fast path: query the server
+    url = f"http://127.0.0.1:{port}/projects/{name}/context"
+    try:
+        with urllib.request.urlopen(url, timeout=2) as resp:
+            data = json.loads(resp.read())
+            _emit_json(data)
+            return
+    except (urllib.error.URLError, OSError):
+        pass  # server not running, fall through
+
+    # Inline fallback: compute context directly (no subprocess)
+    from ctmv3.core.watcher import ProjectState
+    ps = ProjectState(path=root, name=name)
+    ps.refresh()
+    ctx = ps.to_context()
+
+    if args.json:
+        _emit_json(ctx)
+    else:
+        _emit_human(f"Project:   {ctx['project']}")
+        _emit_human(f"Branch:    {ctx['branch']}")
+        _emit_human(f"State:     {ctx['current_state']}")
+        _emit_human(f"Suggested: ctmv3 {ctx['suggested_command']}")
+        _emit_human(f"Drift:     {ctx['drift_detected']}")
+        _emit_human(f"Last agent: {ctx['last_agent'] or 'none'}")
+        if ctx["open_tasks"]:
+            _emit_human("Open tasks:")
+            for task in ctx["open_tasks"]:
+                _emit_human(f"  - {task}")
+        _emit_json(ctx)  # always emit JSON too so agents can parse
+
+
+def cmd_ping(args: argparse.Namespace) -> None:
+    """
+    Check if the CTMv3 server is running on the given port.
+
+    Exit 0 if reachable, exit 3 if not running.
+    """
+    import urllib.request
+    import urllib.error
+
+    port: int = getattr(args, "port", DEFAULT_PORT) or DEFAULT_PORT
+    url = f"http://127.0.0.1:{port}/health"
+
+    try:
+        with urllib.request.urlopen(url, timeout=2) as resp:
+            data = json.loads(resp.read())
+            if args.json:
+                _emit_json({"running": True, "port": port, **data})
+            else:
+                _emit_human(f"CTMv3 server is running on port {port}")
+                _emit_human(f"  Version:  {data.get('version', '?')}")
+                _emit_human(f"  Projects: {data.get('projects', 0)} watched")
+            sys.exit(0)
+    except (urllib.error.URLError, OSError):
+        if args.json:
+            _emit_json({"running": False, "port": port})
+        else:
+            _emit_human(f"CTMv3 server is NOT running on port {port}")
+            _emit_human(f"  Start with: ctmv3 serve")
+        sys.exit(3)
 
 
 # ---------------------------------------------------------------------------
@@ -716,6 +935,17 @@ def build_parser() -> argparse.ArgumentParser:
     _add_common_args(p_status)
     p_status.set_defaults(func=cmd_status)
 
+    # state (read current_state from session_state.json)
+    p_state = subparsers.add_parser(
+        "state",
+        help=(
+            "Print the current_state field from .sovereign/session_state.json. "
+            "Returns 'UNKNOWN' if the file is absent or the field is missing."
+        ),
+    )
+    _add_common_args(p_state)
+    p_state.set_defaults(func=cmd_state)
+
     # version
     p_ver = subparsers.add_parser(
         "version",
@@ -745,6 +975,77 @@ def build_parser() -> argparse.ArgumentParser:
         ),
     )
     p_chain.set_defaults(func=cmd_chain)
+
+    # serve
+    p_serve = subparsers.add_parser(
+        "serve",
+        help=(
+            "Start the persistent CTMv3 server. Watches projects for topology drift "
+            "and serves compact context blobs over HTTP so agents skip the chain."
+        ),
+    )
+    _add_common_args(p_serve)
+    p_serve.add_argument(
+        "--port",
+        type=int,
+        default=DEFAULT_PORT,
+        metavar="PORT",
+        help=f"HTTP port to listen on (default: {DEFAULT_PORT})",
+    )
+    p_serve.add_argument(
+        "--watch",
+        action="append",
+        default=[],
+        metavar="PATH",
+        help="Project path to watch. Repeatable: --watch /path/a --watch /path/b",
+    )
+    p_serve.add_argument(
+        "--scan-root",
+        default=None,
+        metavar="PATH",
+        help="Auto-discover all CTM-activated projects under this directory",
+    )
+    p_serve.add_argument(
+        "--poll-interval",
+        type=float,
+        default=5.0,
+        metavar="SECONDS",
+        help="File-drift poll interval in seconds (default: 5.0)",
+    )
+    p_serve.set_defaults(func=cmd_serve)
+
+    # context
+    p_ctx = subparsers.add_parser(
+        "context",
+        help=(
+            "Get compact agent context for the current project. "
+            "Queries the server if running, else runs inline. Always outputs JSON."
+        ),
+    )
+    _add_common_args(p_ctx)
+    p_ctx.add_argument(
+        "--port",
+        type=int,
+        default=DEFAULT_PORT,
+        metavar="PORT",
+        help=f"CTMv3 server port to query (default: {DEFAULT_PORT})",
+    )
+    p_ctx.set_defaults(func=cmd_context)
+
+    # ping
+    p_ping = subparsers.add_parser(
+        "ping",
+        help="Check if the CTMv3 server is running. Exit 0=up, 3=not running.",
+    )
+    _add_common_args(p_ping)
+    p_ping.add_argument(
+        "--port",
+        type=int,
+        default=DEFAULT_PORT,
+        metavar="PORT",
+        help=f"CTMv3 server port to check (default: {DEFAULT_PORT})",
+    )
+    p_ping.set_defaults(func=cmd_ping)
 
     return parser
 

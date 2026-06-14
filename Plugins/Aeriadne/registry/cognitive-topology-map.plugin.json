@@ -1,0 +1,96 @@
+{
+  "id": "cognitive-topology-map",
+  "name": "Cognitive Topology Map / CTMv3",
+  "version": "1.3.0",
+  "status": "staged-green",
+  "type": "workspace-activation-plugin",
+  "canonical_path": "/home/daeron/Projects/Modern-ML/Plugins/Cognitive-Topology-Map",
+  "public_copy_target": "/home/daeron/Repositories/Somnus-Intellligence-Stack/Plugins/Cognitive-Topology-Map",
+  "installed": true,
+  "install_evidence": {
+    "codex_plugin_id": "ctmv3-workspace-activator@local",
+    "status": "installed, enabled",
+    "version": "1.3.0",
+    "engine_version": "1.3.0",
+    "marketplace_path": "/home/daeron/.claude/plugins/marketplaces/local/plugins/ctmv3-workspace-activator",
+    "cache_path": "/home/daeron/.codex/plugins/cache/local/ctmv3-workspace-activator/1.3.0"
+  },
+  "owner": "Daeron",
+  "aliases": [
+    "ctmv3",
+    "ctmv3-workspace-activator",
+    "Cognitive-Topology-Map"
+  ],
+  "runtime_role": "Cross-runtime workspace activation system that makes codebases agent-operable.",
+  "committed_state": [
+    "TOPOLOGY.md",
+    "FAILURE_GRAMMAR.md",
+    "PROVENANCE.md",
+    "ARCHITECTURE_MAP.md",
+    "AGENTS.md",
+    ".sovereign warm-start state",
+    "topology fingerprint",
+    "golden-path signals"
+  ],
+  "surface_projection": {
+    "engine": "stdlib Python activation engine under core/",
+    "server": "persistent context server commands: serve, context, ping",
+    "adapters": "Claude Code, Codex, opencode, Gemini CLI, and Cursor projections",
+    "docs": "cognitive protocol documents, schema audit, interfaces, examples",
+    "ci": "validation, schema, release, and topology enforcement workflows"
+  },
+  "clients": {
+    "claude_code": {
+      "supported": true,
+      "surface": "claude-code adapter"
+    },
+    "codex": {
+      "supported": true,
+      "surface": "codex adapter"
+    },
+    "opencode": {
+      "supported": true,
+      "surface": "opencode adapter"
+    },
+    "gemini": {
+      "supported": true,
+      "surface": "gemini-cli adapter"
+    },
+    "cursor": {
+      "supported": true,
+      "surface": "cursor adapter"
+    }
+  },
+  "validation": {
+    "last_status": "PASS",
+    "last_run": "2026-06-13",
+    "evidence": "/home/daeron/Projects/Modern-ML/Plugins/Cognitive-Topology-Map/COPYOVER_MANIFEST.md",
+    "commands": [
+      "bash tests/run-all.sh",
+      "PYTHONDONTWRITEBYTECODE=1 python3 tests/privacy_boundary_scan_smoke.py",
+      "python3 scripts/privacy_boundary_scan.py .",
+      "python3 scripts/validate_release_tree.py ."
+    ],
+    "latest_summary": {
+      "engine_version": "1.3.0",
+      "tests_run_all": "PASS; 155 unit tests plus smoke, JSON, bash syntax, TOML command, inventory, and release hygiene checks",
+      "privacy_boundary": "PASS; release-candidate files only; smoke enforced",
+      "release_tree": "PASS; 140 candidate files; 1045 ignored local-only/forbidden files after command backfill and cache cleanup"
+    }
+  },
+  "copyover": {
+    "manifest": "/home/daeron/Projects/Modern-ML/Plugins/Cognitive-Topology-Map/COPYOVER_MANIFEST.md",
+    "requires_operator_review": true,
+    "release_ignore": "/home/daeron/Projects/Modern-ML/Plugins/Cognitive-Topology-Map/.releaseignore"
+  },
+  "known_gaps": [
+    "public copyover still requires Daeron review of the exact candidate diff",
+    "existing public users must keep stable paths unless a migration note is included"
+  ],
+  "notes": [
+    "CTMv3 is not a skill maker. It is a codebase activation system whose durable output is the activated workspace.",
+    "CTMv3's release tree validator now enforces a privacy boundary scanner and synthetic smoke test before public copyover.",
+    "The installed Codex plugin manifest and CTMv3 engine are aligned at 1.3.0.",
+    "Aeriadne catalogs CTMv3 but does not own CTMv3's activation state."
+  ]
+}

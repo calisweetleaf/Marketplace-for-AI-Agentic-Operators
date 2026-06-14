@@ -8,6 +8,7 @@ WRITE_TOOL_NAMES = {
     "Write",
     "Edit",
     "MultiEdit",
+    "NotebookEdit",
     "Bash",
     "apply_patch",
     "exec_command",

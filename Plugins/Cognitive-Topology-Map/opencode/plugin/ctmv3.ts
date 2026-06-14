@@ -28,8 +28,8 @@ export const CTMv3Plugin: Plugin = async ({ worktree, $ }) => {
         // be blocked.
         await $`python3 -m ctmv3 boot --json --project-root ${worktree} 2>/dev/null`
       } catch {
-        // ctmv3 not installed or discovery failed — proceed silently.
-        // The user can install the engine and run /ctmv3-boot manually.
+        // ctmv3 not installed or discovery failed. Proceed silently.
+        // The user can install the engine and run boot from the engine CLI.
       }
     },
   }
