@@ -15,7 +15,7 @@
 [![Skills](https://img.shields.io/badge/Skills-6%2B-764ba2?style=flat-square&labelColor=0d1117)](Skills/)
 [![Runtimes](https://img.shields.io/badge/Runtimes-5-06b6d4?style=flat-square&labelColor=0d1117)](Adapters/)
 [![Status](https://img.shields.io/badge/Status-Private%20v1-28c840?style=flat-square&labelColor=0d1117)](#)
-[![License](https://img.shields.io/badge/License-Internal%20%2F%20SSS-484f58?style=flat-square&labelColor=0d1117)](#license)
+[![License](https://img.shields.io/badge/License-MIT%20%2F%20SSS-484f58?style=flat-square&labelColor=0d1117)](#license)
 
 </div>
 
