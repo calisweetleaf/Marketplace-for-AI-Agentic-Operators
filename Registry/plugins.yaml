@@ -1,20 +1,42 @@
-# Aeriadne Plugin Registry - Private v1
+# Aeriadne / Somnus Intelligence Stack Plugin Registry - Private v1
 #
-# This file catalogs all installable plugin packages in the Somnus-Intelligence-Stack.
-# Every entry must have a unique ID and a canonical source path.
+# This file catalogs the public release plugin triad. It intentionally separates
+# installable package payload versions from release posture, and it intentionally
+# excludes server-plane artifacts such as Muadib.
+
+schema_version: "2026-06-24.public"
+registry_scope: public_release_plugin_triad
+release_status: private-v1
+
+policy:
+  version_axis: package_version
+  status_axis: release_status
+  plugin_triad:
+    - aeriadne
+    - ctmv3
+    - mentat
+  server_plane_rule: "Muadib / Sovereign BB7 is a server-plane release surface under Servers/, not a plugin."
+  public_release_rule: "This registry describes the public release triad only; it is not a mirror of the full private lab."
 
 plugins:
   - id: aeriadne
     name: Aeriadne
-    version: 1.0.0
+    package_version: "1.0.0"
+    release_status: private-v1
     type: skill-activated-plugin
-    status: private-v1
     source: Plugins/Aeriadne
-    description: "The marketplace operator and CPF skill package."
+    description: "CPF and private marketplace/operator package."
     compatibility:
       codex: true
       claude_code: true
       opencode: true
+      gemini_cli: false
+      cursor: false
+    version_evidence:
+      public_manifest: Plugins/Aeriadne/plugin.json
+      public_codex_manifest: Plugins/Aeriadne/.codex-plugin/plugin.json
+      public_claude_manifest: Plugins/Aeriadne/.claude-plugin/plugin.json
+      package_card: Plugins/Aeriadne/registry/aeriadne.plugin.json
     includes:
       skills:
         - constitutional-prompt-framework
@@ -22,26 +44,49 @@ plugins:
 
   - id: ctmv3
     name: Cognitive-Topology-Map
-    version: 3.0.0
-    type: activation-package
-    status: alpha
+    package_version: "1.3.0"
+    release_status: active
+    type: workspace-activation-plugin
     source: Plugins/Cognitive-Topology-Map
     description: "Workspace activation and codebase topology engine."
     compatibility:
       codex: true
       claude_code: true
       opencode: true
+      gemini_cli: true
+      cursor: true
+    version_evidence:
+      public_manifest: Plugins/Cognitive-Topology-Map/core/pyproject.toml
+      public_claude_manifest: Plugins/Cognitive-Topology-Map/claude-code/.claude-plugin/plugin.json
+      package_card: Plugins/Aeriadne/registry/cognitive-topology-map.plugin.json
     includes:
       skills:
         - ctmv3
 
   - id: mentat
     name: Mentat
-    version: 2.0.0
-    type: runtime-substrate
-    status: operational
+    package_version: "0.3.0"
+    release_status: active
+    type: runtime-substrate-plugin
     source: Plugins/Mentat
-    description: "Live session instrumentation and runtime substrate."
+    description: "Live session instrumentation, FSA/Q-table substrate, hooks, skills, and MCP introspection surfaces."
     compatibility:
       codex: true
       claude_code: true
+      opencode: false
+      gemini_cli: true
+      cursor: false
+    version_evidence:
+      public_manifest: Plugins/Mentat/.claude-plugin/plugin.json
+      public_mcp_config: Plugins/Mentat/mcp.json
+      package_card: Plugins/Aeriadne/registry/mentat.plugin.json
+
+explicit_non_entries:
+  - id: muadib
+    reason: "Server-plane release surface under Servers/Muaddib, not a plugin package."
+  - id: somnus-mcp-raw
+    reason: "Private active server root; public release receives only curated server-plane artifacts."
+  - id: codex-substrate
+    reason: "Local Codex knowledge substrate, not part of the public release plugin triad."
+  - id: codex-config-topology
+    reason: "Staged-local control-plane candidate, not part of the active public release plugin triad."
